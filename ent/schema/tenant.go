@@ -16,10 +16,11 @@ type Tenant struct {
 // Fields of the Tenant.
 func (Tenant) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("id"),
+		field.Int64("id").Immutable(),
 		field.Int64("owner_id"),
 		field.String("name"),
-		field.Time("created_at").Default(time.Now),
+		field.Time("created_at").Immutable().Default(time.Now),
+		field.Time("updated_at").Default(time.Now),
 	}
 }
 

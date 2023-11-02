@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // MemberCreate is the builder for creating a Member entity.
@@ -33,6 +34,12 @@ func (mc *MemberCreate) SetNillableDeletedAt(t *time.Time) *MemberCreate {
 	if t != nil {
 		mc.SetDeletedAt(*t)
 	}
+	return mc
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (mc *MemberCreate) SetIdentityID(u uuid.UUID) *MemberCreate {
+	mc.mutation.SetIdentityID(u)
 	return mc
 }
 
@@ -111,6 +118,9 @@ func (mc *MemberCreate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (mc *MemberCreate) check() error {
+	if _, ok := mc.mutation.IdentityID(); !ok {
+		return &ValidationError{Name: "identity_id", err: errors.New(`ent: missing required field "Member.identity_id"`)}
+	}
 	if _, ok := mc.mutation.TenantID(); !ok {
 		return &ValidationError{Name: "tenant_id", err: errors.New(`ent: missing required field "Member.tenant_id"`)}
 	}
@@ -150,6 +160,10 @@ func (mc *MemberCreate) createSpec() (*Member, *sqlgraph.CreateSpec) {
 	if value, ok := mc.mutation.DeletedAt(); ok {
 		_spec.SetField(member.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
+	}
+	if value, ok := mc.mutation.IdentityID(); ok {
+		_spec.SetField(member.FieldIdentityID, field.TypeUUID, value)
+		_node.IdentityID = value
 	}
 	if value, ok := mc.mutation.TenantID(); ok {
 		_spec.SetField(member.FieldTenantID, field.TypeInt64, value)
@@ -230,6 +244,18 @@ func (u *MemberUpsert) UpdateDeletedAt() *MemberUpsert {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (u *MemberUpsert) ClearDeletedAt() *MemberUpsert {
 	u.SetNull(member.FieldDeletedAt)
+	return u
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (u *MemberUpsert) SetIdentityID(v uuid.UUID) *MemberUpsert {
+	u.Set(member.FieldIdentityID, v)
+	return u
+}
+
+// UpdateIdentityID sets the "identity_id" field to the value that was provided on create.
+func (u *MemberUpsert) UpdateIdentityID() *MemberUpsert {
+	u.SetExcluded(member.FieldIdentityID)
 	return u
 }
 
@@ -339,6 +365,20 @@ func (u *MemberUpsertOne) UpdateDeletedAt() *MemberUpsertOne {
 func (u *MemberUpsertOne) ClearDeletedAt() *MemberUpsertOne {
 	return u.Update(func(s *MemberUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (u *MemberUpsertOne) SetIdentityID(v uuid.UUID) *MemberUpsertOne {
+	return u.Update(func(s *MemberUpsert) {
+		s.SetIdentityID(v)
+	})
+}
+
+// UpdateIdentityID sets the "identity_id" field to the value that was provided on create.
+func (u *MemberUpsertOne) UpdateIdentityID() *MemberUpsertOne {
+	return u.Update(func(s *MemberUpsert) {
+		s.UpdateIdentityID()
 	})
 }
 
@@ -620,6 +660,20 @@ func (u *MemberUpsertBulk) UpdateDeletedAt() *MemberUpsertBulk {
 func (u *MemberUpsertBulk) ClearDeletedAt() *MemberUpsertBulk {
 	return u.Update(func(s *MemberUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (u *MemberUpsertBulk) SetIdentityID(v uuid.UUID) *MemberUpsertBulk {
+	return u.Update(func(s *MemberUpsert) {
+		s.SetIdentityID(v)
+	})
+}
+
+// UpdateIdentityID sets the "identity_id" field to the value that was provided on create.
+func (u *MemberUpsertBulk) UpdateIdentityID() *MemberUpsertBulk {
+	return u.Update(func(s *MemberUpsert) {
+		s.UpdateIdentityID()
 	})
 }
 

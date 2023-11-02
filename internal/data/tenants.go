@@ -17,6 +17,7 @@ type TenantDto struct {
 
 type TenantsListFilter struct {
 	OwnerId  int64
+	MemberId string
 	ParentId int64
 }
 

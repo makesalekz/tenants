@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // MemberUpdate is the builder for updating Member entities.
@@ -46,6 +47,12 @@ func (mu *MemberUpdate) SetNillableDeletedAt(t *time.Time) *MemberUpdate {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (mu *MemberUpdate) ClearDeletedAt() *MemberUpdate {
 	mu.mutation.ClearDeletedAt()
+	return mu
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (mu *MemberUpdate) SetIdentityID(u uuid.UUID) *MemberUpdate {
+	mu.mutation.SetIdentityID(u)
 	return mu
 }
 
@@ -142,6 +149,9 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if mu.mutation.DeletedAtCleared() {
 		_spec.ClearField(member.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := mu.mutation.IdentityID(); ok {
+		_spec.SetField(member.FieldIdentityID, field.TypeUUID, value)
+	}
 	if value, ok := mu.mutation.TenantID(); ok {
 		_spec.SetField(member.FieldTenantID, field.TypeInt64, value)
 	}
@@ -196,6 +206,12 @@ func (muo *MemberUpdateOne) SetNillableDeletedAt(t *time.Time) *MemberUpdateOne 
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (muo *MemberUpdateOne) ClearDeletedAt() *MemberUpdateOne {
 	muo.mutation.ClearDeletedAt()
+	return muo
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (muo *MemberUpdateOne) SetIdentityID(u uuid.UUID) *MemberUpdateOne {
+	muo.mutation.SetIdentityID(u)
 	return muo
 }
 
@@ -321,6 +337,9 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	}
 	if muo.mutation.DeletedAtCleared() {
 		_spec.ClearField(member.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := muo.mutation.IdentityID(); ok {
+		_spec.SetField(member.FieldIdentityID, field.TypeUUID, value)
 	}
 	if value, ok := muo.mutation.TenantID(); ok {
 		_spec.SetField(member.FieldTenantID, field.TypeInt64, value)

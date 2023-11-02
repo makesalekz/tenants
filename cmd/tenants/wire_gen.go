@@ -9,11 +9,11 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"teams/internal/biz"
-	"teams/internal/conf"
-	"teams/internal/data"
-	"teams/internal/server"
-	"teams/internal/service"
+	"tenants/internal/biz"
+	"tenants/internal/conf"
+	"tenants/internal/data"
+	"tenants/internal/server"
+	"tenants/internal/service"
 )
 
 import (
@@ -36,8 +36,8 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	if err != nil {
 		return nil, nil, err
 	}
-	teamsRepo := data.NewTeamsRepo(dataData)
-	teamsUsecase, err := biz.NewTeamsUsecase(logger, config, jwtProcessor, teamsRepo)
+	tenantsRepo := data.NewTenantsRepo(dataData)
+	tenantsUsecase, err := biz.NewTenantsUsecase(logger, config, jwtProcessor, tenantsRepo)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -48,15 +48,15 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	membersRepo := data.NewMembersRepo(dataData)
-	membersUsecase, err := biz.NewMembersUsecase(logger, jwtProcessor, dialer, teamsRepo, membersRepo)
+	membersUsecase, err := biz.NewMembersUsecase(logger, jwtProcessor, dialer, tenantsRepo, membersRepo)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	teamsService := service.NewTeamsService(teamsUsecase, membersUsecase)
+	tenantsService := service.NewTenantsService(tenantsUsecase, membersUsecase)
 	membersService := service.NewMembersService(membersUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, logger, jwtProcessor, teamsService, membersService)
-	httpServer := server.NewHTTPServer(bootstrap, logger, jwtProcessor, teamsService, membersService)
+	grpcServer := server.NewGRPCServer(bootstrap, logger, jwtProcessor, tenantsService, membersService)
+	httpServer := server.NewHTTPServer(bootstrap, logger, jwtProcessor, tenantsService, membersService)
 	app := newApp(logger, config, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

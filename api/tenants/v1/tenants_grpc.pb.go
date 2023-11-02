@@ -19,12 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Tenants_CreateTenant_FullMethodName  = "/api.tenants.v1.tenants/CreateTenant"
-	Tenants_UpdateTenant_FullMethodName  = "/api.tenants.v1.tenants/UpdateTenant"
-	Tenants_DeleteTenant_FullMethodName  = "/api.tenants.v1.tenants/DeleteTenant"
-	Tenants_GetTenant_FullMethodName     = "/api.tenants.v1.tenants/GetTenant"
-	Tenants_GetTenantTree_FullMethodName = "/api.tenants.v1.tenants/GetTenantTree"
-	Tenants_Listtenants_FullMethodName   = "/api.tenants.v1.tenants/Listtenants"
+	Tenants_CreateTenant_FullMethodName = "/api.tenants.v1.tenants/CreateTenant"
+	Tenants_UpdateTenant_FullMethodName = "/api.tenants.v1.tenants/UpdateTenant"
+	Tenants_DeleteTenant_FullMethodName = "/api.tenants.v1.tenants/DeleteTenant"
+	Tenants_GetTenant_FullMethodName    = "/api.tenants.v1.tenants/GetTenant"
+	Tenants_ListTenants_FullMethodName  = "/api.tenants.v1.tenants/ListTenants"
 )
 
 // TenantsClient is the client API for Tenants service.
@@ -35,8 +34,7 @@ type TenantsClient interface {
 	UpdateTenant(ctx context.Context, in *UpdateTenantRequest, opts ...grpc.CallOption) (*TenantReply, error)
 	DeleteTenant(ctx context.Context, in *TenantRequest, opts ...grpc.CallOption) (*EmptyReply, error)
 	GetTenant(ctx context.Context, in *TenantRequest, opts ...grpc.CallOption) (*TenantReply, error)
-	GetTenantTree(ctx context.Context, in *TenantRequest, opts ...grpc.CallOption) (*TenantReply, error)
-	Listtenants(ctx context.Context, in *ListTenantsRequest, opts ...grpc.CallOption) (*ListTenantsReply, error)
+	ListTenants(ctx context.Context, in *ListTenantsRequest, opts ...grpc.CallOption) (*ListTenantsReply, error)
 }
 
 type tenantsClient struct {
@@ -83,18 +81,9 @@ func (c *tenantsClient) GetTenant(ctx context.Context, in *TenantRequest, opts .
 	return out, nil
 }
 
-func (c *tenantsClient) GetTenantTree(ctx context.Context, in *TenantRequest, opts ...grpc.CallOption) (*TenantReply, error) {
-	out := new(TenantReply)
-	err := c.cc.Invoke(ctx, Tenants_GetTenantTree_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *tenantsClient) Listtenants(ctx context.Context, in *ListTenantsRequest, opts ...grpc.CallOption) (*ListTenantsReply, error) {
+func (c *tenantsClient) ListTenants(ctx context.Context, in *ListTenantsRequest, opts ...grpc.CallOption) (*ListTenantsReply, error) {
 	out := new(ListTenantsReply)
-	err := c.cc.Invoke(ctx, Tenants_Listtenants_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Tenants_ListTenants_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +98,7 @@ type TenantsServer interface {
 	UpdateTenant(context.Context, *UpdateTenantRequest) (*TenantReply, error)
 	DeleteTenant(context.Context, *TenantRequest) (*EmptyReply, error)
 	GetTenant(context.Context, *TenantRequest) (*TenantReply, error)
-	GetTenantTree(context.Context, *TenantRequest) (*TenantReply, error)
-	Listtenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error)
+	ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error)
 	mustEmbedUnimplementedTenantsServer()
 }
 
@@ -130,11 +118,8 @@ func (UnimplementedTenantsServer) DeleteTenant(context.Context, *TenantRequest) 
 func (UnimplementedTenantsServer) GetTenant(context.Context, *TenantRequest) (*TenantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTenant not implemented")
 }
-func (UnimplementedTenantsServer) GetTenantTree(context.Context, *TenantRequest) (*TenantReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTenantTree not implemented")
-}
-func (UnimplementedTenantsServer) Listtenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Listtenants not implemented")
+func (UnimplementedTenantsServer) ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTenants not implemented")
 }
 func (UnimplementedTenantsServer) mustEmbedUnimplementedTenantsServer() {}
 
@@ -221,38 +206,20 @@ func _Tenants_GetTenant_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Tenants_GetTenantTree_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TenantRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TenantsServer).GetTenantTree(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Tenants_GetTenantTree_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantsServer).GetTenantTree(ctx, req.(*TenantRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Tenants_Listtenants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Tenants_ListTenants_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListTenantsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TenantsServer).Listtenants(ctx, in)
+		return srv.(TenantsServer).ListTenants(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Tenants_Listtenants_FullMethodName,
+		FullMethod: Tenants_ListTenants_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantsServer).Listtenants(ctx, req.(*ListTenantsRequest))
+		return srv.(TenantsServer).ListTenants(ctx, req.(*ListTenantsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -281,12 +248,8 @@ var Tenants_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Tenants_GetTenant_Handler,
 		},
 		{
-			MethodName: "GetTenantTree",
-			Handler:    _Tenants_GetTenantTree_Handler,
-		},
-		{
-			MethodName: "Listtenants",
-			Handler:    _Tenants_Listtenants_Handler,
+			MethodName: "ListTenants",
+			Handler:    _Tenants_ListTenants_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,6 +58,11 @@ func IDLTE(id int64) predicate.Member {
 // DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
 func DeletedAt(v time.Time) predicate.Member {
 	return predicate.Member(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// IdentityID applies equality check predicate on the "identity_id" field. It's identical to IdentityIDEQ.
+func IdentityID(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldEQ(FieldIdentityID, v))
 }
 
 // TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
@@ -122,6 +128,46 @@ func DeletedAtIsNil() predicate.Member {
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.Member {
 	return predicate.Member(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// IdentityIDEQ applies the EQ predicate on the "identity_id" field.
+func IdentityIDEQ(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldEQ(FieldIdentityID, v))
+}
+
+// IdentityIDNEQ applies the NEQ predicate on the "identity_id" field.
+func IdentityIDNEQ(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldNEQ(FieldIdentityID, v))
+}
+
+// IdentityIDIn applies the In predicate on the "identity_id" field.
+func IdentityIDIn(vs ...uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldIn(FieldIdentityID, vs...))
+}
+
+// IdentityIDNotIn applies the NotIn predicate on the "identity_id" field.
+func IdentityIDNotIn(vs ...uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldNotIn(FieldIdentityID, vs...))
+}
+
+// IdentityIDGT applies the GT predicate on the "identity_id" field.
+func IdentityIDGT(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldGT(FieldIdentityID, v))
+}
+
+// IdentityIDGTE applies the GTE predicate on the "identity_id" field.
+func IdentityIDGTE(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldGTE(FieldIdentityID, v))
+}
+
+// IdentityIDLT applies the LT predicate on the "identity_id" field.
+func IdentityIDLT(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldLT(FieldIdentityID, v))
+}
+
+// IdentityIDLTE applies the LTE predicate on the "identity_id" field.
+func IdentityIDLTE(v uuid.UUID) predicate.Member {
+	return predicate.Member(sql.FieldLTE(FieldIdentityID, v))
 }
 
 // TenantIDEQ applies the EQ predicate on the "tenant_id" field.

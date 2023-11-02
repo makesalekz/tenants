@@ -28,7 +28,7 @@ paths:
         post:
             tags:
                 - Tenants
-            operationId: Tenants_Listtenants
+            operationId: Tenants_ListTenants
             requestBody:
                 content:
                     application/json:
@@ -171,24 +171,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.tenants.v1.DeleteMemberReply'
-    /v1/tenants/{tenantId}/tree:
-        get:
-            tags:
-                - Tenants
-            operationId: Tenants_GetTenantTree
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
 components:
     schemas:
         api.iam.v1.UserShort:
@@ -326,8 +308,6 @@ components:
             properties:
                 tenant:
                     $ref: '#/components/schemas/api.tenants.v1.Tenant'
-                memberId:
-                    type: string
         api.tenants.v1.UpdateTenantRequest:
             type: object
             properties:

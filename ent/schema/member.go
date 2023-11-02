@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // Member holds the schema definition for the Member entity.
@@ -17,9 +18,10 @@ type Member struct {
 // Fields of the Member.
 func (Member) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("tenant_id"),
-		field.Int64("user_id"),
-		field.Time("created_at").Default(time.Now),
+		field.UUID("identity_id", uuid.New()).Immutable(),
+		field.Int64("tenant_id").Immutable(),
+		field.Int64("user_id").Immutable(),
+		field.Time("created_at").Immutable().Default(time.Now),
 	}
 }
 

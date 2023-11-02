@@ -77,6 +77,8 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 		paginate = &v1.PaginateRequest{}
 	}
 
+	// TODO: check permissions to get all tenants
+
 	tenants, err := uc.repo.ListTenants(ctx, filter, paginate)
 	if err != nil {
 		return nil, err

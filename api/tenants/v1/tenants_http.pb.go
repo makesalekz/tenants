@@ -22,16 +22,14 @@ const _ = http.SupportPackageIsVersion1
 const OperationTenantsCreateTenant = "/api.tenants.v1.tenants/CreateTenant"
 const OperationTenantsDeleteTenant = "/api.tenants.v1.tenants/DeleteTenant"
 const OperationTenantsGetTenant = "/api.tenants.v1.tenants/GetTenant"
-const OperationTenantsGetTenantTree = "/api.tenants.v1.tenants/GetTenantTree"
-const OperationTenantsListtenants = "/api.tenants.v1.tenants/Listtenants"
+const OperationTenantsListTenants = "/api.tenants.v1.tenants/ListTenants"
 const OperationTenantsUpdateTenant = "/api.tenants.v1.tenants/UpdateTenant"
 
 type TenantsHTTPServer interface {
 	CreateTenant(context.Context, *CreateTenantRequest) (*TenantReply, error)
 	DeleteTenant(context.Context, *TenantRequest) (*EmptyReply, error)
 	GetTenant(context.Context, *TenantRequest) (*TenantReply, error)
-	GetTenantTree(context.Context, *TenantRequest) (*TenantReply, error)
-	Listtenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error)
+	ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error)
 	UpdateTenant(context.Context, *UpdateTenantRequest) (*TenantReply, error)
 }
 
@@ -41,8 +39,7 @@ func RegisterTenantsHTTPServer(s *http.Server, srv TenantsHTTPServer) {
 	r.PUT("/v1/tenants/{tenantId}", _Tenants_UpdateTenant0_HTTP_Handler(srv))
 	r.DELETE("/v1/tenants/{tenantId}", _Tenants_DeleteTenant0_HTTP_Handler(srv))
 	r.GET("/v1/tenants/{tenantId}", _Tenants_GetTenant0_HTTP_Handler(srv))
-	r.GET("/v1/tenants/{tenantId}/tree", _Tenants_GetTenantTree0_HTTP_Handler(srv))
-	r.POST("/v1/tenants/list", _Tenants_Listtenants0_HTTP_Handler(srv))
+	r.POST("/v1/tenants/list", _Tenants_ListTenants0_HTTP_Handler(srv))
 }
 
 func _Tenants_CreateTenant0_HTTP_Handler(srv TenantsHTTPServer) func(ctx http.Context) error {
@@ -136,29 +133,7 @@ func _Tenants_GetTenant0_HTTP_Handler(srv TenantsHTTPServer) func(ctx http.Conte
 	}
 }
 
-func _Tenants_GetTenantTree0_HTTP_Handler(srv TenantsHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in TenantRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationTenantsGetTenantTree)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetTenantTree(ctx, req.(*TenantRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*TenantReply)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _Tenants_Listtenants0_HTTP_Handler(srv TenantsHTTPServer) func(ctx http.Context) error {
+func _Tenants_ListTenants0_HTTP_Handler(srv TenantsHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in ListTenantsRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -167,9 +142,9 @@ func _Tenants_Listtenants0_HTTP_Handler(srv TenantsHTTPServer) func(ctx http.Con
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationTenantsListtenants)
+		http.SetOperation(ctx, OperationTenantsListTenants)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Listtenants(ctx, req.(*ListTenantsRequest))
+			return srv.ListTenants(ctx, req.(*ListTenantsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -184,8 +159,7 @@ type TenantsHTTPClient interface {
 	CreateTenant(ctx context.Context, req *CreateTenantRequest, opts ...http.CallOption) (rsp *TenantReply, err error)
 	DeleteTenant(ctx context.Context, req *TenantRequest, opts ...http.CallOption) (rsp *EmptyReply, err error)
 	GetTenant(ctx context.Context, req *TenantRequest, opts ...http.CallOption) (rsp *TenantReply, err error)
-	GetTenantTree(ctx context.Context, req *TenantRequest, opts ...http.CallOption) (rsp *TenantReply, err error)
-	Listtenants(ctx context.Context, req *ListTenantsRequest, opts ...http.CallOption) (rsp *ListTenantsReply, err error)
+	ListTenants(ctx context.Context, req *ListTenantsRequest, opts ...http.CallOption) (rsp *ListTenantsReply, err error)
 	UpdateTenant(ctx context.Context, req *UpdateTenantRequest, opts ...http.CallOption) (rsp *TenantReply, err error)
 }
 
@@ -236,24 +210,11 @@ func (c *TenantsHTTPClientImpl) GetTenant(ctx context.Context, in *TenantRequest
 	return &out, err
 }
 
-func (c *TenantsHTTPClientImpl) GetTenantTree(ctx context.Context, in *TenantRequest, opts ...http.CallOption) (*TenantReply, error) {
-	var out TenantReply
-	pattern := "/v1/tenants/{tenantId}/tree"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationTenantsGetTenantTree))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, err
-}
-
-func (c *TenantsHTTPClientImpl) Listtenants(ctx context.Context, in *ListTenantsRequest, opts ...http.CallOption) (*ListTenantsReply, error) {
+func (c *TenantsHTTPClientImpl) ListTenants(ctx context.Context, in *ListTenantsRequest, opts ...http.CallOption) (*ListTenantsReply, error) {
 	var out ListTenantsReply
 	pattern := "/v1/tenants/list"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationTenantsListtenants))
+	opts = append(opts, http.Operation(OperationTenantsListTenants))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

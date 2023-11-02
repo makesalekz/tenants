@@ -48,64 +48,64 @@ func NewMembersUsecase(
 	}, nil
 }
 
-func (uc *MembersUsecase) CreateMembers(ctx context.Context, teamId int64, usersIds []int64) ([]*ent.Member, error) {
+func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
 	ownerId, ok := uc.jwt.GetUserIdFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
 
-	team, err := uc.tenantsRepo.GetTenant(ctx, teamId)
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: check permissions
-	if team.OwnerID != ownerId {
+	if tenant.OwnerID != ownerId {
 		return nil, v1.ErrorForbidden("only owner can add members")
 	}
 
-	return uc.membersRepo.CreateMembers(ctx, teamId, usersIds)
+	return uc.membersRepo.CreateMembers(ctx, tenantId, usersIds)
 }
 
-func (uc *MembersUsecase) DeleteMember(ctx context.Context, teamId, userId int64) error {
+func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId, userId int64) error {
 	ownerId, ok := uc.jwt.GetUserIdFromContext(ctx)
 	if !ok {
 		return v1.ErrorUnauthorized("jwt token is missing")
 	}
 
-	team, err := uc.tenantsRepo.GetTenant(ctx, teamId)
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
 	if err != nil {
 		return err
 	}
 
 	// TODO: check permissions
-	if team.OwnerID != ownerId {
+	if tenant.OwnerID != ownerId {
 		return v1.ErrorForbidden("only owner can remove members")
 	}
 
-	return uc.membersRepo.DeleteMember(ctx, teamId, userId)
+	return uc.membersRepo.DeleteMember(ctx, tenantId, userId)
 }
 
-func (uc *MembersUsecase) GetMembers(ctx context.Context, teamId int64, usersIds []int64) ([]*ent.Member, error) {
-	return uc.membersRepo.GetMembers(ctx, teamId, usersIds)
+func (uc *MembersUsecase) GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
+	return uc.membersRepo.GetMembers(ctx, tenantId, usersIds)
 }
 
-func (uc *MembersUsecase) GetMember(ctx context.Context, teamId, userId int64) (*ent.Member, error) {
-	return uc.membersRepo.GetMember(ctx, teamId, userId)
+func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
+	return uc.membersRepo.GetMember(ctx, tenantId, userId)
 }
 
-func (uc *MembersUsecase) GetOwnMember(ctx context.Context, teamId int64) (*ent.Member, error) {
+func (uc *MembersUsecase) GetOwnMember(ctx context.Context, tenantId int64) (*ent.Member, error) {
 	userId, ok := uc.jwt.GetUserIdFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
 
-	return uc.membersRepo.GetMember(ctx, teamId, userId)
+	return uc.membersRepo.GetMember(ctx, tenantId, userId)
 }
 
 func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersListFilter, paginate *v1.PaginateRequest) (*MembersList, error) {
 	if filter.TenantId == 0 {
-		return nil, v1.ErrorInvalidRequest("teamId is required")
+		return nil, v1.ErrorInvalidRequest("tenantId is required")
 	}
 
 	if paginate == nil {

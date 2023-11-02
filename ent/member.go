@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 // Member is the model entity for the Member schema.
@@ -19,6 +20,8 @@ type Member struct {
 	ID int64 `json:"id,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// IdentityID holds the value of the "identity_id" field.
+	IdentityID uuid.UUID `json:"identity_id,omitempty"`
 	// TenantID holds the value of the "tenant_id" field.
 	TenantID int64 `json:"tenant_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -37,6 +40,8 @@ func (*Member) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case member.FieldDeletedAt, member.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case member.FieldIdentityID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -64,6 +69,12 @@ func (m *Member) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.DeletedAt = new(time.Time)
 				*m.DeletedAt = value.Time
+			}
+		case member.FieldIdentityID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field identity_id", values[i])
+			} else if value != nil {
+				m.IdentityID = *value
 			}
 		case member.FieldTenantID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -123,6 +134,9 @@ func (m *Member) String() string {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("identity_id=")
+	builder.WriteString(fmt.Sprintf("%v", m.IdentityID))
 	builder.WriteString(", ")
 	builder.WriteString("tenant_id=")
 	builder.WriteString(fmt.Sprintf("%v", m.TenantID))

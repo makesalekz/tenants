@@ -16,6 +16,8 @@ const (
 	FieldID = "id"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldIdentityID holds the string denoting the identity_id field in the database.
+	FieldIdentityID = "identity_id"
 	// FieldTenantID holds the string denoting the tenant_id field in the database.
 	FieldTenantID = "tenant_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
@@ -30,6 +32,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDeletedAt,
+	FieldIdentityID,
 	FieldTenantID,
 	FieldUserID,
 	FieldCreatedAt,
@@ -68,6 +71,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByIdentityID orders the results by the identity_id field.
+func ByIdentityID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIdentityID, opts...).ToFunc()
 }
 
 // ByTenantID orders the results by the tenant_id field.

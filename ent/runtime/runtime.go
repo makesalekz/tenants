@@ -21,7 +21,7 @@ func init() {
 	memberFields := schema.Member{}.Fields()
 	_ = memberFields
 	// memberDescCreatedAt is the schema descriptor for created_at field.
-	memberDescCreatedAt := memberFields[2].Descriptor()
+	memberDescCreatedAt := memberFields[3].Descriptor()
 	// member.DefaultCreatedAt holds the default value on creation for the created_at field.
 	member.DefaultCreatedAt = memberDescCreatedAt.Default.(func() time.Time)
 	tenantMixin := schema.Tenant{}.Mixin()

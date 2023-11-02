@@ -32,12 +32,7 @@ service tenants {
 			get: "/v1/tenants/{tenantId}"
 		};
 	};
-	rpc GetTenantTree (TenantRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			get: "/v1/tenants/{tenantId}/tree"
-		};
-	};
-	rpc Listtenants (ListTenantsRequest) returns (ListTenantsReply) {
+	rpc ListTenants (ListTenantsRequest) returns (ListTenantsReply) {
 		option (google.api.http) = {
 		  post: "/v1/tenants/list"
 		  body: "*"
@@ -60,13 +55,13 @@ message TenantRequest {
 
 message TenantReply {
 	Tenant tenant = 1;
-	optional int64 memberId = 2;
 }
 
 message ListTenantsRequest {
 	int64 ownerId = 1;
     PaginateRequest paginate = 3;
 }
+
 message ListTenantsReply {
 	repeated Tenant tenants = 1;
 	PaginateReply paginate = 2;

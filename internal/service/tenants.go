@@ -24,12 +24,12 @@ func NewTenantsService(tu *biz.TenantsUsecase, mu *biz.MembersUsecase) *TenantsS
 	}
 }
 
-func replyTenant(team *ent.Tenant) *v1.Tenant {
+func replyTenant(tenant *ent.Tenant) *v1.Tenant {
 	result := v1.Tenant{
-		Id:        team.ID,
-		OwnerId:   team.OwnerID,
-		Name:      team.Name,
-		CreatedAt: team.CreatedAt.Format(time.RFC3339),
+		Id:        tenant.ID,
+		OwnerId:   tenant.OwnerID,
+		Name:      tenant.Name,
+		CreatedAt: tenant.CreatedAt.Format(time.RFC3339),
 	}
 
 	return &result
@@ -37,26 +37,26 @@ func replyTenant(team *ent.Tenant) *v1.Tenant {
 
 func replyTenants(tenants []*ent.Tenant) []*v1.Tenant {
 	result := make([]*v1.Tenant, len(tenants))
-	for i, team := range tenants {
-		result[i] = replyTenant(team)
+	for i, tenant := range tenants {
+		result[i] = replyTenant(tenant)
 	}
 	return result
 }
 
 func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantRequest) (*v1.TenantReply, error) {
-	team, err := s.tu.CreateTenant(ctx, data.TenantDto{
+	tenant, err := s.tu.CreateTenant(ctx, data.TenantDto{
 		Name: req.Name,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &v1.TenantReply{
-		Tenant: replyTenant(team),
+		Tenant: replyTenant(tenant),
 	}, nil
 }
 
 func (s *TenantsService) UpdateTenant(ctx context.Context, req *v1.UpdateTenantRequest) (*v1.TenantReply, error) {
-	team, err := s.tu.UpdateTenant(ctx, req.TenantId, data.TenantDto{
+	tenant, err := s.tu.UpdateTenant(ctx, req.TenantId, data.TenantDto{
 		Name: req.Name,
 	})
 	if err != nil {
@@ -66,7 +66,7 @@ func (s *TenantsService) UpdateTenant(ctx context.Context, req *v1.UpdateTenantR
 		return nil, err
 	}
 	return &v1.TenantReply{
-		Tenant: replyTenant(team),
+		Tenant: replyTenant(tenant),
 	}, nil
 }
 
@@ -82,24 +82,16 @@ func (s *TenantsService) DeleteTenant(ctx context.Context, req *v1.TenantRequest
 }
 
 func (s *TenantsService) GetTenant(ctx context.Context, req *v1.TenantRequest) (*v1.TenantReply, error) {
-	team, err := s.tu.GetTenant(ctx, req.TenantId)
+	tenant, err := s.tu.GetTenant(ctx, req.TenantId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("Tenant not found")
 		}
 		return nil, err
 	}
-
-	result := &v1.TenantReply{
-		Tenant: replyTenant(team),
-	}
-
-	member, _ := s.mu.GetOwnMember(ctx, team.ID)
-	if member != nil {
-		result.MemberId = &member.ID
-	}
-
-	return result, nil
+	return &v1.TenantReply{
+		Tenant: replyTenant(tenant),
+	}, nil
 }
 
 func (s *TenantsService) ListTenants(ctx context.Context, req *v1.ListTenantsRequest) (*v1.ListTenantsReply, error) {

@@ -26,10 +26,11 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Member",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			member.FieldDeletedAt: {Type: field.TypeTime, Column: member.FieldDeletedAt},
-			member.FieldTenantID:  {Type: field.TypeInt64, Column: member.FieldTenantID},
-			member.FieldUserID:    {Type: field.TypeInt64, Column: member.FieldUserID},
-			member.FieldCreatedAt: {Type: field.TypeTime, Column: member.FieldCreatedAt},
+			member.FieldDeletedAt:  {Type: field.TypeTime, Column: member.FieldDeletedAt},
+			member.FieldIdentityID: {Type: field.TypeUUID, Column: member.FieldIdentityID},
+			member.FieldTenantID:   {Type: field.TypeInt64, Column: member.FieldTenantID},
+			member.FieldUserID:     {Type: field.TypeInt64, Column: member.FieldUserID},
+			member.FieldCreatedAt:  {Type: field.TypeTime, Column: member.FieldCreatedAt},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -101,6 +102,11 @@ func (f *MemberFilter) WhereID(p entql.Int64P) {
 // WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
 func (f *MemberFilter) WhereDeletedAt(p entql.TimeP) {
 	f.Where(p.Field(member.FieldDeletedAt))
+}
+
+// WhereIdentityID applies the entql [16]byte predicate on the identity_id field.
+func (f *MemberFilter) WhereIdentityID(p entql.ValueP) {
+	f.Where(p.Field(member.FieldIdentityID))
 }
 
 // WhereTenantID applies the entql int64 predicate on the tenant_id field.

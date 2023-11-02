@@ -21,7 +21,7 @@ service Members {
 			delete: "/v1/tenants/{tenantId}/members/{userId}"
 		};
 	};
-	rpc GetMembers (GetMembersRequest) returns (GetMembersReply);
+	rpc GetMember (GetMemberRequest) returns (GetMemberReply);
 	rpc ListMembers (ListMembersRequest) returns (ListMembersReply) {
 		option (google.api.http) = {
 			post: "/v1/tenants/{tenantId}/members/list"
@@ -42,12 +42,13 @@ message DeleteMemberRequest {
 }
 message DeleteMemberReply {}
 
-message GetMembersRequest {
+message GetMemberRequest {
 	int64 tenantId = 1;
-	repeated int64 usersIds = 2;
+	int64 userId = 2;
 }
-message GetMembersReply {
-	repeated MemberShort members = 1;
+message GetMemberReply {
+	string member = 1;
+	repeated string groups = 2;
 }
 
 message ListMembersRequest {

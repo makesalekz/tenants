@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 )
 
 const (
@@ -36,6 +37,7 @@ type MemberMutation struct {
 	typ           string
 	id            *int64
 	deleted_at    *time.Time
+	identity_id   *uuid.UUID
 	tenant_id     *int64
 	addtenant_id  *int64
 	user_id       *int64
@@ -192,6 +194,42 @@ func (m *MemberMutation) DeletedAtCleared() bool {
 func (m *MemberMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	delete(m.clearedFields, member.FieldDeletedAt)
+}
+
+// SetIdentityID sets the "identity_id" field.
+func (m *MemberMutation) SetIdentityID(u uuid.UUID) {
+	m.identity_id = &u
+}
+
+// IdentityID returns the value of the "identity_id" field in the mutation.
+func (m *MemberMutation) IdentityID() (r uuid.UUID, exists bool) {
+	v := m.identity_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIdentityID returns the old "identity_id" field's value of the Member entity.
+// If the Member object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MemberMutation) OldIdentityID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIdentityID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIdentityID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIdentityID: %w", err)
+	}
+	return oldValue.IdentityID, nil
+}
+
+// ResetIdentityID resets all changes to the "identity_id" field.
+func (m *MemberMutation) ResetIdentityID() {
+	m.identity_id = nil
 }
 
 // SetTenantID sets the "tenant_id" field.
@@ -376,9 +414,12 @@ func (m *MemberMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MemberMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.deleted_at != nil {
 		fields = append(fields, member.FieldDeletedAt)
+	}
+	if m.identity_id != nil {
+		fields = append(fields, member.FieldIdentityID)
 	}
 	if m.tenant_id != nil {
 		fields = append(fields, member.FieldTenantID)
@@ -399,6 +440,8 @@ func (m *MemberMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case member.FieldDeletedAt:
 		return m.DeletedAt()
+	case member.FieldIdentityID:
+		return m.IdentityID()
 	case member.FieldTenantID:
 		return m.TenantID()
 	case member.FieldUserID:
@@ -416,6 +459,8 @@ func (m *MemberMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case member.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case member.FieldIdentityID:
+		return m.OldIdentityID(ctx)
 	case member.FieldTenantID:
 		return m.OldTenantID(ctx)
 	case member.FieldUserID:
@@ -437,6 +482,13 @@ func (m *MemberMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case member.FieldIdentityID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIdentityID(v)
 		return nil
 	case member.FieldTenantID:
 		v, ok := value.(int64)
@@ -546,6 +598,9 @@ func (m *MemberMutation) ResetField(name string) error {
 	switch name {
 	case member.FieldDeletedAt:
 		m.ResetDeletedAt()
+		return nil
+	case member.FieldIdentityID:
+		m.ResetIdentityID()
 		return nil
 	case member.FieldTenantID:
 		m.ResetTenantID()

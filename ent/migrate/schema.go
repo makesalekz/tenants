@@ -12,6 +12,7 @@ var (
 	MembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "identity_id", Type: field.TypeUUID},
 		{Name: "tenant_id", Type: field.TypeInt64},
 		{Name: "user_id", Type: field.TypeInt64},
 		{Name: "created_at", Type: field.TypeTime},
@@ -25,7 +26,7 @@ var (
 			{
 				Name:    "member_tenant_id_user_id",
 				Unique:  true,
-				Columns: []*schema.Column{MembersColumns[2], MembersColumns[3]},
+				Columns: []*schema.Column{MembersColumns[3], MembersColumns[4]},
 			},
 		},
 	}

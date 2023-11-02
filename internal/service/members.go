@@ -66,13 +66,13 @@ func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMember
 	return &v1.DeleteMemberReply{}, nil
 }
 
-func (s *MembersService) GetMembers(ctx context.Context, req *v1.GetMembersRequest) (*v1.GetMembersReply, error) {
-	members, err := s.mu.GetMembers(ctx, req.TenantId, req.UsersIds)
+func (s *MembersService) GetMember(ctx context.Context, req *v1.GetMemberRequest) (*v1.GetMemberReply, error) {
+	member, err := s.mu.GetMember(ctx, req.TenantId, req.UserId)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.GetMembersReply{
-		Members: replyShortMembers(members),
+	return &v1.GetMemberReply{
+		Member: member.IdentityID.String(),
 	}, nil
 }
 
