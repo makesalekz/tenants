@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package api.iam.v1;
+
+import "google/api/annotations.proto";
+import "iam/v1/users.proto";
+
+option go_package = "iam/api/iam/v1;iam_v1";
+option java_multiple_files = true;
+option java_package = "api.iam.v1";
+
+service Privacy {
+	rpc GetPrivacy (EmptyRequest) returns (PrivacyReply) {
+		option (google.api.http) = {
+			get: "/v1/users/me/privacy"
+		};
+	};
+	rpc UpdatePrivacy (PrivacyRequest) returns (PrivacyReply) {
+		option (google.api.http) = {
+			put: "/v1/users/me/privacy"
+			body: "*"
+		};
+	};
+}
+
+message PrivacyRequest {
+	map<string, string> settings = 1;
+}
+
+message PrivacyReply {
+	map<string, string> settings = 1;
+}

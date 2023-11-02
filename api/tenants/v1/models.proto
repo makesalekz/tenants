@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package api.tenants.v1;
+
+import "iam/api/iam/v1/users.proto";
+import "errors/errors.proto";
+
+option go_package = "tenants/api/tenants/v1;tenants_v1";
+option java_multiple_files = true;
+option java_package = "api.tenants.v1";
+
+message MemberShort {
+	int64 id = 1;
+	int64 userId = 2;
+}
+
+message Member {
+	int64 id = 1;
+	string createdAt = 2;
+
+	api.iam.v1.UserShort user = 3;
+}
+
+message Tenant {
+	int64 id = 1;
+	int64 ownerId = 2;
+	string name = 3;
+	string createdAt = 4;
+	string updatedAt = 5;
+}
+
+message EmptyReply {}
+
+message PaginateRequest {
+	int32 limit = 1;
+	int64 fromId = 2;
+	int64 toId = 3;
+	int64 aroundId = 4;
+	string fromDate = 5;
+	string toDate = 6;
+	string aroundDate = 7;
+	string fromLabel = 8;
+	bool descending = 9;
+}
+
+message PaginateReply {
+	optional int32 total = 1;
+	optional int64 fromId = 2;
+	optional int64 toId = 3;
+	optional string fromDate = 4;
+	optional string toDate = 5;
+	optional string fromLabel = 6;
+}
+
+enum ErrorReason {
+	// Set default error code.
+	option (errors.default_code) = 500;
+  
+	// Set the error code separately for an enumeration.
+	INTERNAL = 0;
+	GRPC_CONNECTION = 1;
+	SERVICE_FAILED = 2;
+	DATABASE_QUERY = 3;
+	
+	UNAUTHORIZED = 10 [(errors.code) = 401];
+	NOT_FOUND = 11 [(errors.code) = 404];
+	FORBIDDEN = 12 [(errors.code) = 403];
+	
+	INVALID_REQUEST = 20 [(errors.code) = 400];
+}

@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package api.iam.v1;
+
+import "google/api/annotations.proto";
+import "iam/v1/users.proto";
+
+option go_package = "iam/api/iam/v1;iam_v1";
+option java_multiple_files = true;
+option java_package = "api.iam.v1";
+
+service Auth {
+	rpc AuthByPhone (AuthByPhoneRequest) returns (AuthByPhoneReply) {
+		option (google.api.http) = {
+			post: "/v1/auth/phone"
+			body: "*"
+		};
+	};
+	rpc AuthByCode (AuthByCodeRequest) returns (AuthByCodeReply) {
+		option (google.api.http) = {
+			post: "/v1/auth/code"
+			body: "*"
+		};
+	};
+}
+
+message AuthByPhoneRequest {
+	string phone = 1;
+}
+message AuthByPhoneReply {
+	int64 user_id = 1;
+}
+
+message AuthByCodeRequest {
+	int64 user_id = 1;
+	string code = 2;
+}
+message AuthByCodeReply {
+	string token = 1;
+}

@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "protoc": {
+      "path": "./third_party/",
+      "options": ["--proto_path=./third_party/"]
+    }
+  }
+}

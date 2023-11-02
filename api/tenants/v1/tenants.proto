@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package api.tenants.v1;
+
+import "google/api/annotations.proto";
+import "tenants/v1/models.proto";
+
+option go_package = "tenants/api/tenants/v1;tenants_v1";
+option java_multiple_files = true;
+option java_package = "api.tenants.v1";
+
+service tenants {
+	rpc CreateTenant (CreateTenantRequest) returns (TenantReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants"
+			body: "*"
+		};
+	};
+	rpc UpdateTenant (UpdateTenantRequest) returns (TenantReply) {
+		option (google.api.http) = {
+			put: "/v1/tenants/{tenantId}"
+			body: "*"
+		};
+	};
+	rpc DeleteTenant (TenantRequest) returns (EmptyReply) {
+		option (google.api.http) = {
+			delete: "/v1/tenants/{tenantId}"
+		};
+	};
+	rpc GetTenant (TenantRequest) returns (TenantReply) {
+		option (google.api.http) = {
+			get: "/v1/tenants/{tenantId}"
+		};
+	};
+	rpc GetTenantTree (TenantRequest) returns (TenantReply) {
+		option (google.api.http) = {
+			get: "/v1/tenants/{tenantId}/tree"
+		};
+	};
+	rpc Listtenants (ListTenantsRequest) returns (ListTenantsReply) {
+		option (google.api.http) = {
+		  post: "/v1/tenants/list"
+		  body: "*"
+		};
+	  };
+}
+
+message CreateTenantRequest {
+	string name = 1;
+}
+
+message UpdateTenantRequest {
+	int64 tenantId = 1;
+	string name = 2;
+}
+
+message TenantRequest {
+	int64 tenantId = 1;
+}
+
+message TenantReply {
+	Tenant tenant = 1;
+	optional int64 memberId = 2;
+}
+
+message ListTenantsRequest {
+	int64 ownerId = 1;
+    PaginateRequest paginate = 3;
+}
+message ListTenantsReply {
+	repeated Tenant tenants = 1;
+	PaginateReply paginate = 2;
+}

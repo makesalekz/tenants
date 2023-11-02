@@ -1,0 +1,340 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: ""
+    version: 0.0.1
+paths:
+    /v1/tenants:
+        post:
+            tags:
+                - Tenants
+            operationId: Tenants_CreateTenant
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.tenants.v1.CreateTenantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+    /v1/tenants/list:
+        post:
+            tags:
+                - Tenants
+            operationId: Tenants_Listtenants
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.tenants.v1.ListTenantsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.ListTenantsReply'
+    /v1/tenants/{tenantId}:
+        get:
+            tags:
+                - Tenants
+            operationId: Tenants_GetTenant
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+        put:
+            tags:
+                - Tenants
+            operationId: Tenants_UpdateTenant
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.tenants.v1.UpdateTenantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+        delete:
+            tags:
+                - Tenants
+            operationId: Tenants_DeleteTenant
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
+    /v1/tenants/{tenantId}/members:
+        post:
+            tags:
+                - Members
+            operationId: Members_CreateMembers
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.tenants.v1.CreateMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.CreateMembersReply'
+    /v1/tenants/{tenantId}/members/list:
+        post:
+            tags:
+                - Members
+            operationId: Members_ListMembers
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.tenants.v1.ListMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.ListMembersReply'
+    /v1/tenants/{tenantId}/members/{userId}:
+        delete:
+            tags:
+                - Members
+            operationId: Members_DeleteMember
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.DeleteMemberReply'
+    /v1/tenants/{tenantId}/tree:
+        get:
+            tags:
+                - Tenants
+            operationId: Tenants_GetTenantTree
+            parameters:
+                - name: tenantId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+components:
+    schemas:
+        api.iam.v1.UserShort:
+            type: object
+            properties:
+                id:
+                    type: string
+                phone:
+                    type: string
+                email:
+                    type: string
+                name:
+                    type: string
+                avatar:
+                    type: string
+                lastLoginAt:
+                    type: string
+        api.tenants.v1.CreateMembersReply:
+            type: object
+            properties: {}
+        api.tenants.v1.CreateMembersRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                usersIds:
+                    type: array
+                    items:
+                        type: string
+        api.tenants.v1.CreateTenantRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+        api.tenants.v1.DeleteMemberReply:
+            type: object
+            properties: {}
+        api.tenants.v1.EmptyReply:
+            type: object
+            properties: {}
+        api.tenants.v1.ListMembersReply:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.tenants.v1.Member'
+                paginate:
+                    $ref: '#/components/schemas/api.tenants.v1.PaginateReply'
+        api.tenants.v1.ListMembersRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                paginate:
+                    $ref: '#/components/schemas/api.tenants.v1.PaginateRequest'
+        api.tenants.v1.ListTenantsReply:
+            type: object
+            properties:
+                tenants:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.tenants.v1.Tenant'
+                paginate:
+                    $ref: '#/components/schemas/api.tenants.v1.PaginateReply'
+        api.tenants.v1.ListTenantsRequest:
+            type: object
+            properties:
+                ownerId:
+                    type: string
+                paginate:
+                    $ref: '#/components/schemas/api.tenants.v1.PaginateRequest'
+        api.tenants.v1.Member:
+            type: object
+            properties:
+                id:
+                    type: string
+                createdAt:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/api.iam.v1.UserShort'
+        api.tenants.v1.PaginateReply:
+            type: object
+            properties:
+                total:
+                    type: integer
+                    format: int32
+                fromId:
+                    type: string
+                toId:
+                    type: string
+                fromDate:
+                    type: string
+                toDate:
+                    type: string
+                fromLabel:
+                    type: string
+        api.tenants.v1.PaginateRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                fromId:
+                    type: string
+                toId:
+                    type: string
+                aroundId:
+                    type: string
+                fromDate:
+                    type: string
+                toDate:
+                    type: string
+                aroundDate:
+                    type: string
+                fromLabel:
+                    type: string
+                descending:
+                    type: boolean
+        api.tenants.v1.Tenant:
+            type: object
+            properties:
+                id:
+                    type: string
+                ownerId:
+                    type: string
+                name:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        api.tenants.v1.TenantReply:
+            type: object
+            properties:
+                tenant:
+                    $ref: '#/components/schemas/api.tenants.v1.Tenant'
+                memberId:
+                    type: string
+        api.tenants.v1.UpdateTenantRequest:
+            type: object
+            properties:
+                tenantId:
+                    type: string
+                name:
+                    type: string
+tags:
+    - name: Members
+    - name: Tenants
