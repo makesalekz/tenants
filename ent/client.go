@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -310,6 +311,22 @@ func (c *MemberClient) GetX(ctx context.Context, id int64) *Member {
 	return obj
 }
 
+// QueryTenant queries the tenant edge of a Member.
+func (c *MemberClient) QueryTenant(m *Member) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(member.Table, member.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, member.TenantTable, member.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MemberClient) Hooks() []Hook {
 	hooks := c.hooks.Member
@@ -443,6 +460,22 @@ func (c *TenantClient) GetX(ctx context.Context, id int64) *Tenant {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryMembers queries the members edge of a Tenant.
+func (c *TenantClient) QueryMembers(t *Tenant) *MemberQuery {
+	query := (&MemberClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(member.Table, member.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.MembersTable, tenant.MembersColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

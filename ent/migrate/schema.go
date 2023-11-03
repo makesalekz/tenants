@@ -13,20 +13,28 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "identity_id", Type: field.TypeUUID},
-		{Name: "tenant_id", Type: field.TypeInt64},
 		{Name: "user_id", Type: field.TypeInt64},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "tenant_id", Type: field.TypeInt64},
 	}
 	// MembersTable holds the schema information for the "members" table.
 	MembersTable = &schema.Table{
 		Name:       "members",
 		Columns:    MembersColumns,
 		PrimaryKey: []*schema.Column{MembersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "members_tenants_members",
+				Columns:    []*schema.Column{MembersColumns[5]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "member_tenant_id_user_id",
 				Unique:  true,
-				Columns: []*schema.Column{MembersColumns[3], MembersColumns[4]},
+				Columns: []*schema.Column{MembersColumns[5], MembersColumns[3]},
 			},
 		},
 	}
@@ -37,6 +45,7 @@ var (
 		{Name: "owner_id", Type: field.TypeInt64},
 		{Name: "name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// TenantsTable holds the schema information for the "tenants" table.
 	TenantsTable = &schema.Table{
@@ -52,4 +61,5 @@ var (
 )
 
 func init() {
+	MembersTable.ForeignKeys[0].RefTable = TenantsTable
 }

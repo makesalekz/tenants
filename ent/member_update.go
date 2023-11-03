@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // MemberUpdate is the builder for updating Member entities.
@@ -50,52 +49,6 @@ func (mu *MemberUpdate) ClearDeletedAt() *MemberUpdate {
 	return mu
 }
 
-// SetIdentityID sets the "identity_id" field.
-func (mu *MemberUpdate) SetIdentityID(u uuid.UUID) *MemberUpdate {
-	mu.mutation.SetIdentityID(u)
-	return mu
-}
-
-// SetTenantID sets the "tenant_id" field.
-func (mu *MemberUpdate) SetTenantID(i int64) *MemberUpdate {
-	mu.mutation.ResetTenantID()
-	mu.mutation.SetTenantID(i)
-	return mu
-}
-
-// AddTenantID adds i to the "tenant_id" field.
-func (mu *MemberUpdate) AddTenantID(i int64) *MemberUpdate {
-	mu.mutation.AddTenantID(i)
-	return mu
-}
-
-// SetUserID sets the "user_id" field.
-func (mu *MemberUpdate) SetUserID(i int64) *MemberUpdate {
-	mu.mutation.ResetUserID()
-	mu.mutation.SetUserID(i)
-	return mu
-}
-
-// AddUserID adds i to the "user_id" field.
-func (mu *MemberUpdate) AddUserID(i int64) *MemberUpdate {
-	mu.mutation.AddUserID(i)
-	return mu
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (mu *MemberUpdate) SetCreatedAt(t time.Time) *MemberUpdate {
-	mu.mutation.SetCreatedAt(t)
-	return mu
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (mu *MemberUpdate) SetNillableCreatedAt(t *time.Time) *MemberUpdate {
-	if t != nil {
-		mu.SetCreatedAt(*t)
-	}
-	return mu
-}
-
 // Mutation returns the MemberMutation object of the builder.
 func (mu *MemberUpdate) Mutation() *MemberMutation {
 	return mu.mutation
@@ -128,6 +81,14 @@ func (mu *MemberUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (mu *MemberUpdate) check() error {
+	if _, ok := mu.mutation.TenantID(); mu.mutation.TenantCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Member.tenant"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (mu *MemberUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MemberUpdate {
 	mu.modifiers = append(mu.modifiers, modifiers...)
@@ -135,6 +96,9 @@ func (mu *MemberUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MemberU
 }
 
 func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := mu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(member.Table, member.Columns, sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64))
 	if ps := mu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -148,24 +112,6 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.DeletedAtCleared() {
 		_spec.ClearField(member.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := mu.mutation.IdentityID(); ok {
-		_spec.SetField(member.FieldIdentityID, field.TypeUUID, value)
-	}
-	if value, ok := mu.mutation.TenantID(); ok {
-		_spec.SetField(member.FieldTenantID, field.TypeInt64, value)
-	}
-	if value, ok := mu.mutation.AddedTenantID(); ok {
-		_spec.AddField(member.FieldTenantID, field.TypeInt64, value)
-	}
-	if value, ok := mu.mutation.UserID(); ok {
-		_spec.SetField(member.FieldUserID, field.TypeInt64, value)
-	}
-	if value, ok := mu.mutation.AddedUserID(); ok {
-		_spec.AddField(member.FieldUserID, field.TypeInt64, value)
-	}
-	if value, ok := mu.mutation.CreatedAt(); ok {
-		_spec.SetField(member.FieldCreatedAt, field.TypeTime, value)
 	}
 	_spec.AddModifiers(mu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
@@ -206,52 +152,6 @@ func (muo *MemberUpdateOne) SetNillableDeletedAt(t *time.Time) *MemberUpdateOne 
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (muo *MemberUpdateOne) ClearDeletedAt() *MemberUpdateOne {
 	muo.mutation.ClearDeletedAt()
-	return muo
-}
-
-// SetIdentityID sets the "identity_id" field.
-func (muo *MemberUpdateOne) SetIdentityID(u uuid.UUID) *MemberUpdateOne {
-	muo.mutation.SetIdentityID(u)
-	return muo
-}
-
-// SetTenantID sets the "tenant_id" field.
-func (muo *MemberUpdateOne) SetTenantID(i int64) *MemberUpdateOne {
-	muo.mutation.ResetTenantID()
-	muo.mutation.SetTenantID(i)
-	return muo
-}
-
-// AddTenantID adds i to the "tenant_id" field.
-func (muo *MemberUpdateOne) AddTenantID(i int64) *MemberUpdateOne {
-	muo.mutation.AddTenantID(i)
-	return muo
-}
-
-// SetUserID sets the "user_id" field.
-func (muo *MemberUpdateOne) SetUserID(i int64) *MemberUpdateOne {
-	muo.mutation.ResetUserID()
-	muo.mutation.SetUserID(i)
-	return muo
-}
-
-// AddUserID adds i to the "user_id" field.
-func (muo *MemberUpdateOne) AddUserID(i int64) *MemberUpdateOne {
-	muo.mutation.AddUserID(i)
-	return muo
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (muo *MemberUpdateOne) SetCreatedAt(t time.Time) *MemberUpdateOne {
-	muo.mutation.SetCreatedAt(t)
-	return muo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (muo *MemberUpdateOne) SetNillableCreatedAt(t *time.Time) *MemberUpdateOne {
-	if t != nil {
-		muo.SetCreatedAt(*t)
-	}
 	return muo
 }
 
@@ -300,6 +200,14 @@ func (muo *MemberUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (muo *MemberUpdateOne) check() error {
+	if _, ok := muo.mutation.TenantID(); muo.mutation.TenantCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Member.tenant"`)
+	}
+	return nil
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (muo *MemberUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MemberUpdateOne {
 	muo.modifiers = append(muo.modifiers, modifiers...)
@@ -307,6 +215,9 @@ func (muo *MemberUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Mem
 }
 
 func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err error) {
+	if err := muo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(member.Table, member.Columns, sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64))
 	id, ok := muo.mutation.ID()
 	if !ok {
@@ -337,24 +248,6 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	}
 	if muo.mutation.DeletedAtCleared() {
 		_spec.ClearField(member.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := muo.mutation.IdentityID(); ok {
-		_spec.SetField(member.FieldIdentityID, field.TypeUUID, value)
-	}
-	if value, ok := muo.mutation.TenantID(); ok {
-		_spec.SetField(member.FieldTenantID, field.TypeInt64, value)
-	}
-	if value, ok := muo.mutation.AddedTenantID(); ok {
-		_spec.AddField(member.FieldTenantID, field.TypeInt64, value)
-	}
-	if value, ok := muo.mutation.UserID(); ok {
-		_spec.SetField(member.FieldUserID, field.TypeInt64, value)
-	}
-	if value, ok := muo.mutation.AddedUserID(); ok {
-		_spec.AddField(member.FieldUserID, field.TypeInt64, value)
-	}
-	if value, ok := muo.mutation.CreatedAt(); ok {
-		_spec.SetField(member.FieldCreatedAt, field.TypeTime, value)
 	}
 	_spec.AddModifiers(muo.modifiers...)
 	_node = &Member{config: muo.config}

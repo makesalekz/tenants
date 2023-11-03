@@ -10,6 +10,7 @@ import (
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
 )
 
 type TenantsList struct {
@@ -78,6 +79,17 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 	}
 
 	// TODO: check permissions to get all tenants
+	claims := uc.jwt.GetClaimsFromContext(ctx)
+	if claims == nil {
+		return nil, v1.ErrorUnauthorized("Unauthorized")
+	}
+
+	memberId, err := uuid.FromBytes([]byte(claims.MemberId))
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("Unauthorized")
+	}
+
+	filter.MemberId = &memberId
 
 	tenants, err := uc.repo.ListTenants(ctx, filter, paginate)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"tenants/ent/member"
+	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -67,6 +68,11 @@ func (mc *MemberCreate) SetNillableCreatedAt(t *time.Time) *MemberCreate {
 		mc.SetCreatedAt(*t)
 	}
 	return mc
+}
+
+// SetTenant sets the "tenant" edge to the Tenant entity.
+func (mc *MemberCreate) SetTenant(t *Tenant) *MemberCreate {
+	return mc.SetTenantID(t.ID)
 }
 
 // Mutation returns the MemberMutation object of the builder.
@@ -130,6 +136,9 @@ func (mc *MemberCreate) check() error {
 	if _, ok := mc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Member.created_at"`)}
 	}
+	if _, ok := mc.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Member.tenant"`)}
+	}
 	return nil
 }
 
@@ -165,10 +174,6 @@ func (mc *MemberCreate) createSpec() (*Member, *sqlgraph.CreateSpec) {
 		_spec.SetField(member.FieldIdentityID, field.TypeUUID, value)
 		_node.IdentityID = value
 	}
-	if value, ok := mc.mutation.TenantID(); ok {
-		_spec.SetField(member.FieldTenantID, field.TypeInt64, value)
-		_node.TenantID = value
-	}
 	if value, ok := mc.mutation.UserID(); ok {
 		_spec.SetField(member.FieldUserID, field.TypeInt64, value)
 		_node.UserID = value
@@ -176,6 +181,23 @@ func (mc *MemberCreate) createSpec() (*Member, *sqlgraph.CreateSpec) {
 	if value, ok := mc.mutation.CreatedAt(); ok {
 		_spec.SetField(member.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if nodes := mc.mutation.TenantIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   member.TenantTable,
+			Columns: []string{member.TenantColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.TenantID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -247,66 +269,6 @@ func (u *MemberUpsert) ClearDeletedAt() *MemberUpsert {
 	return u
 }
 
-// SetIdentityID sets the "identity_id" field.
-func (u *MemberUpsert) SetIdentityID(v uuid.UUID) *MemberUpsert {
-	u.Set(member.FieldIdentityID, v)
-	return u
-}
-
-// UpdateIdentityID sets the "identity_id" field to the value that was provided on create.
-func (u *MemberUpsert) UpdateIdentityID() *MemberUpsert {
-	u.SetExcluded(member.FieldIdentityID)
-	return u
-}
-
-// SetTenantID sets the "tenant_id" field.
-func (u *MemberUpsert) SetTenantID(v int64) *MemberUpsert {
-	u.Set(member.FieldTenantID, v)
-	return u
-}
-
-// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
-func (u *MemberUpsert) UpdateTenantID() *MemberUpsert {
-	u.SetExcluded(member.FieldTenantID)
-	return u
-}
-
-// AddTenantID adds v to the "tenant_id" field.
-func (u *MemberUpsert) AddTenantID(v int64) *MemberUpsert {
-	u.Add(member.FieldTenantID, v)
-	return u
-}
-
-// SetUserID sets the "user_id" field.
-func (u *MemberUpsert) SetUserID(v int64) *MemberUpsert {
-	u.Set(member.FieldUserID, v)
-	return u
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *MemberUpsert) UpdateUserID() *MemberUpsert {
-	u.SetExcluded(member.FieldUserID)
-	return u
-}
-
-// AddUserID adds v to the "user_id" field.
-func (u *MemberUpsert) AddUserID(v int64) *MemberUpsert {
-	u.Add(member.FieldUserID, v)
-	return u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *MemberUpsert) SetCreatedAt(v time.Time) *MemberUpsert {
-	u.Set(member.FieldCreatedAt, v)
-	return u
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *MemberUpsert) UpdateCreatedAt() *MemberUpsert {
-	u.SetExcluded(member.FieldCreatedAt)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -317,6 +279,20 @@ func (u *MemberUpsert) UpdateCreatedAt() *MemberUpsert {
 //		Exec(ctx)
 func (u *MemberUpsertOne) UpdateNewValues() *MemberUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.IdentityID(); exists {
+			s.SetIgnore(member.FieldIdentityID)
+		}
+		if _, exists := u.create.mutation.TenantID(); exists {
+			s.SetIgnore(member.FieldTenantID)
+		}
+		if _, exists := u.create.mutation.UserID(); exists {
+			s.SetIgnore(member.FieldUserID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(member.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -365,76 +341,6 @@ func (u *MemberUpsertOne) UpdateDeletedAt() *MemberUpsertOne {
 func (u *MemberUpsertOne) ClearDeletedAt() *MemberUpsertOne {
 	return u.Update(func(s *MemberUpsert) {
 		s.ClearDeletedAt()
-	})
-}
-
-// SetIdentityID sets the "identity_id" field.
-func (u *MemberUpsertOne) SetIdentityID(v uuid.UUID) *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetIdentityID(v)
-	})
-}
-
-// UpdateIdentityID sets the "identity_id" field to the value that was provided on create.
-func (u *MemberUpsertOne) UpdateIdentityID() *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateIdentityID()
-	})
-}
-
-// SetTenantID sets the "tenant_id" field.
-func (u *MemberUpsertOne) SetTenantID(v int64) *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetTenantID(v)
-	})
-}
-
-// AddTenantID adds v to the "tenant_id" field.
-func (u *MemberUpsertOne) AddTenantID(v int64) *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.AddTenantID(v)
-	})
-}
-
-// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
-func (u *MemberUpsertOne) UpdateTenantID() *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateTenantID()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *MemberUpsertOne) SetUserID(v int64) *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// AddUserID adds v to the "user_id" field.
-func (u *MemberUpsertOne) AddUserID(v int64) *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.AddUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *MemberUpsertOne) UpdateUserID() *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *MemberUpsertOne) SetCreatedAt(v time.Time) *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetCreatedAt(v)
-	})
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *MemberUpsertOne) UpdateCreatedAt() *MemberUpsertOne {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateCreatedAt()
 	})
 }
 
@@ -612,6 +518,22 @@ type MemberUpsertBulk struct {
 //		Exec(ctx)
 func (u *MemberUpsertBulk) UpdateNewValues() *MemberUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.IdentityID(); exists {
+				s.SetIgnore(member.FieldIdentityID)
+			}
+			if _, exists := b.mutation.TenantID(); exists {
+				s.SetIgnore(member.FieldTenantID)
+			}
+			if _, exists := b.mutation.UserID(); exists {
+				s.SetIgnore(member.FieldUserID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(member.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -660,76 +582,6 @@ func (u *MemberUpsertBulk) UpdateDeletedAt() *MemberUpsertBulk {
 func (u *MemberUpsertBulk) ClearDeletedAt() *MemberUpsertBulk {
 	return u.Update(func(s *MemberUpsert) {
 		s.ClearDeletedAt()
-	})
-}
-
-// SetIdentityID sets the "identity_id" field.
-func (u *MemberUpsertBulk) SetIdentityID(v uuid.UUID) *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetIdentityID(v)
-	})
-}
-
-// UpdateIdentityID sets the "identity_id" field to the value that was provided on create.
-func (u *MemberUpsertBulk) UpdateIdentityID() *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateIdentityID()
-	})
-}
-
-// SetTenantID sets the "tenant_id" field.
-func (u *MemberUpsertBulk) SetTenantID(v int64) *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetTenantID(v)
-	})
-}
-
-// AddTenantID adds v to the "tenant_id" field.
-func (u *MemberUpsertBulk) AddTenantID(v int64) *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.AddTenantID(v)
-	})
-}
-
-// UpdateTenantID sets the "tenant_id" field to the value that was provided on create.
-func (u *MemberUpsertBulk) UpdateTenantID() *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateTenantID()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *MemberUpsertBulk) SetUserID(v int64) *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// AddUserID adds v to the "user_id" field.
-func (u *MemberUpsertBulk) AddUserID(v int64) *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.AddUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *MemberUpsertBulk) UpdateUserID() *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (u *MemberUpsertBulk) SetCreatedAt(v time.Time) *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.SetCreatedAt(v)
-	})
-}
-
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *MemberUpsertBulk) UpdateCreatedAt() *MemberUpsertBulk {
-	return u.Update(func(s *MemberUpsert) {
-		s.UpdateCreatedAt()
 	})
 }
 

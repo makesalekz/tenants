@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -26,7 +27,9 @@ func (Tenant) Fields() []ent.Field {
 
 // Edges of the Tenant.
 func (Tenant) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("members", Member.Type),
+	}
 }
 
 func (Tenant) Mixin() []ent.Mixin {

@@ -8,6 +8,7 @@ import (
 	"math"
 	"tenants/ent/member"
 	"tenants/ent/predicate"
+	"tenants/ent/tenant"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,6 +22,7 @@ type MemberQuery struct {
 	order      []member.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Member
+	withTenant *TenantQuery
 	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -56,6 +58,28 @@ func (mq *MemberQuery) Unique(unique bool) *MemberQuery {
 func (mq *MemberQuery) Order(o ...member.OrderOption) *MemberQuery {
 	mq.order = append(mq.order, o...)
 	return mq
+}
+
+// QueryTenant chains the current query on the "tenant" edge.
+func (mq *MemberQuery) QueryTenant() *TenantQuery {
+	query := (&TenantClient{config: mq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := mq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := mq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(member.Table, member.FieldID, selector),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, member.TenantTable, member.TenantColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Member entity from the query.
@@ -250,10 +274,22 @@ func (mq *MemberQuery) Clone() *MemberQuery {
 		order:      append([]member.OrderOption{}, mq.order...),
 		inters:     append([]Interceptor{}, mq.inters...),
 		predicates: append([]predicate.Member{}, mq.predicates...),
+		withTenant: mq.withTenant.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
 	}
+}
+
+// WithTenant tells the query-builder to eager-load the nodes that are connected to
+// the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MemberQuery) WithTenant(opts ...func(*TenantQuery)) *MemberQuery {
+	query := (&TenantClient{config: mq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	mq.withTenant = query
+	return mq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +368,11 @@ func (mq *MemberQuery) prepareQuery(ctx context.Context) error {
 
 func (mq *MemberQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Member, error) {
 	var (
-		nodes = []*Member{}
-		_spec = mq.querySpec()
+		nodes       = []*Member{}
+		_spec       = mq.querySpec()
+		loadedTypes = [1]bool{
+			mq.withTenant != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Member).scanValues(nil, columns)
@@ -341,6 +380,7 @@ func (mq *MemberQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Membe
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Member{config: mq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(mq.modifiers) > 0 {
@@ -355,7 +395,43 @@ func (mq *MemberQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Membe
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := mq.withTenant; query != nil {
+		if err := mq.loadTenant(ctx, query, nodes, nil,
+			func(n *Member, e *Tenant) { n.Edges.Tenant = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (mq *MemberQuery) loadTenant(ctx context.Context, query *TenantQuery, nodes []*Member, init func(*Member), assign func(*Member, *Tenant)) error {
+	ids := make([]int64, 0, len(nodes))
+	nodeids := make(map[int64][]*Member)
+	for i := range nodes {
+		fk := nodes[i].TenantID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tenant.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tenant_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (mq *MemberQuery) sqlCount(ctx context.Context) (int, error) {
@@ -385,6 +461,9 @@ func (mq *MemberQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != member.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if mq.withTenant != nil {
+			_spec.Node.AddColumnOnce(member.FieldTenantID)
 		}
 	}
 	if ps := mq.predicates; len(ps) > 0 {

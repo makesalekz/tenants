@@ -5,8 +5,10 @@ import (
 
 	tenants_v1 "tenants/api/tenants/v1"
 	"tenants/ent"
+	"tenants/ent/member"
 	"tenants/ent/tenant"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -17,8 +19,7 @@ type TenantDto struct {
 
 type TenantsListFilter struct {
 	OwnerId  int64
-	MemberId string
-	ParentId int64
+	MemberId *uuid.UUID
 }
 
 // TenantsRepo
@@ -67,6 +68,10 @@ func (r *tenantsRepo) GetTenant(ctx context.Context, tenantId int64) (*ent.Tenan
 func (r *tenantsRepo) ListTenants(ctx context.Context, filter TenantsListFilter, paginate *tenants_v1.PaginateRequest) ([]*ent.Tenant, error) {
 	query := r.db.Tenant.Query()
 
+	if filter.MemberId != nil {
+		query.Where(tenant.HasMembersWith(member.IdentityID(*filter.MemberId)))
+	}
+
 	if filter.OwnerId != 0 {
 		query.Where(tenant.OwnerID(filter.OwnerId))
 	}
@@ -84,6 +89,10 @@ func (r *tenantsRepo) ListTenants(ctx context.Context, filter TenantsListFilter,
 
 func (r *tenantsRepo) CountListTenants(ctx context.Context, filter TenantsListFilter) (int32, error) {
 	query := r.db.Tenant.Query()
+
+	if filter.MemberId != nil {
+		query.Where(tenant.HasMembersWith(member.IdentityID(*filter.MemberId)))
+	}
 
 	if filter.OwnerId != 0 {
 		query.Where(tenant.OwnerID(filter.OwnerId))

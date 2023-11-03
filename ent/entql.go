@@ -4,6 +4,7 @@ package ent
 
 import (
 	"tenants/ent/member"
+	"tenants/ent/predicate"
 	"tenants/ent/tenant"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,8 +49,33 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldOwnerID:   {Type: field.TypeInt64, Column: tenant.FieldOwnerID},
 			tenant.FieldName:      {Type: field.TypeString, Column: tenant.FieldName},
 			tenant.FieldCreatedAt: {Type: field.TypeTime, Column: tenant.FieldCreatedAt},
+			tenant.FieldUpdatedAt: {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
 		},
 	}
+	graph.MustAddE(
+		"tenant",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   member.TenantTable,
+			Columns: []string{member.TenantColumn},
+			Bidi:    false,
+		},
+		"Member",
+		"Tenant",
+	)
+	graph.MustAddE(
+		"members",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.MembersTable,
+			Columns: []string{tenant.MembersColumn},
+			Bidi:    false,
+		},
+		"Tenant",
+		"Member",
+	)
 	return graph
 }()
 
@@ -124,6 +150,20 @@ func (f *MemberFilter) WhereCreatedAt(p entql.TimeP) {
 	f.Where(p.Field(member.FieldCreatedAt))
 }
 
+// WhereHasTenant applies a predicate to check if query has an edge tenant.
+func (f *MemberFilter) WhereHasTenant() {
+	f.Where(entql.HasEdge("tenant"))
+}
+
+// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
+func (f *MemberFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
+	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (tq *TenantQuery) addPredicate(pred func(s *sql.Selector)) {
 	tq.predicates = append(tq.predicates, pred)
@@ -182,4 +222,23 @@ func (f *TenantFilter) WhereName(p entql.StringP) {
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
 func (f *TenantFilter) WhereCreatedAt(p entql.TimeP) {
 	f.Where(p.Field(tenant.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *TenantFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(tenant.FieldUpdatedAt))
+}
+
+// WhereHasMembers applies a predicate to check if query has an edge members.
+func (f *TenantFilter) WhereHasMembers() {
+	f.Where(entql.HasEdge("members"))
+}
+
+// WhereHasMembersWith applies a predicate to check if query has an edge members with a given conditions (other predicates).
+func (f *TenantFilter) WhereHasMembersWith(preds ...predicate.Member) {
+	f.Where(entql.HasEdgeWith("members", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
 }

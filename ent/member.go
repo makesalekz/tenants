@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"tenants/ent/member"
+	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent"
@@ -27,8 +28,33 @@ type Member struct {
 	// UserID holds the value of the "user_id" field.
 	UserID int64 `json:"user_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt    time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the MemberQuery when eager-loading is set.
+	Edges        MemberEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// MemberEdges holds the relations/edges for other nodes in the graph.
+type MemberEdges struct {
+	// Tenant holds the value of the tenant edge.
+	Tenant *Tenant `json:"tenant,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// TenantOrErr returns the Tenant value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MemberEdges) TenantOrErr() (*Tenant, error) {
+	if e.loadedTypes[0] {
+		if e.Tenant == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tenant.Label}
+		}
+		return e.Tenant, nil
+	}
+	return nil, &NotLoadedError{edge: "tenant"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -105,6 +131,11 @@ func (m *Member) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (m *Member) Value(name string) (ent.Value, error) {
 	return m.selectValues.Get(name)
+}
+
+// QueryTenant queries the "tenant" edge of the Member entity.
+func (m *Member) QueryTenant() *TenantQuery {
+	return NewMemberClient(m.config).QueryTenant(m)
 }
 
 // Update returns a builder for updating this Member.

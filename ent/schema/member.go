@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
@@ -27,7 +28,14 @@ func (Member) Fields() []ent.Field {
 
 // Edges of the Member.
 func (Member) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("tenant", Tenant.Type).
+			Ref("members").
+			Immutable().
+			Required().
+			Unique().
+			Field("tenant_id"),
+	}
 }
 
 func (Member) Indexes() []ent.Index {

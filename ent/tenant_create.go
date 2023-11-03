@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"tenants/ent/member"
 	"tenants/ent/tenant"
 	"time"
 
@@ -62,10 +63,39 @@ func (tc *TenantCreate) SetNillableCreatedAt(t *time.Time) *TenantCreate {
 	return tc
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (tc *TenantCreate) SetUpdatedAt(t time.Time) *TenantCreate {
+	tc.mutation.SetUpdatedAt(t)
+	return tc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (tc *TenantCreate) SetNillableUpdatedAt(t *time.Time) *TenantCreate {
+	if t != nil {
+		tc.SetUpdatedAt(*t)
+	}
+	return tc
+}
+
 // SetID sets the "id" field.
 func (tc *TenantCreate) SetID(i int64) *TenantCreate {
 	tc.mutation.SetID(i)
 	return tc
+}
+
+// AddMemberIDs adds the "members" edge to the Member entity by IDs.
+func (tc *TenantCreate) AddMemberIDs(ids ...int64) *TenantCreate {
+	tc.mutation.AddMemberIDs(ids...)
+	return tc
+}
+
+// AddMembers adds the "members" edges to the Member entity.
+func (tc *TenantCreate) AddMembers(m ...*Member) *TenantCreate {
+	ids := make([]int64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return tc.AddMemberIDs(ids...)
 }
 
 // Mutation returns the TenantMutation object of the builder.
@@ -112,6 +142,13 @@ func (tc *TenantCreate) defaults() error {
 		v := tenant.DefaultCreatedAt()
 		tc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tc.mutation.UpdatedAt(); !ok {
+		if tenant.DefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized tenant.DefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
+		v := tenant.DefaultUpdatedAt()
+		tc.mutation.SetUpdatedAt(v)
+	}
 	return nil
 }
 
@@ -125,6 +162,9 @@ func (tc *TenantCreate) check() error {
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Tenant.created_at"`)}
+	}
+	if _, ok := tc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Tenant.updated_at"`)}
 	}
 	return nil
 }
@@ -174,6 +214,26 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.SetField(tenant.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := tc.mutation.UpdatedAt(); ok {
+		_spec.SetField(tenant.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if nodes := tc.mutation.MembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.MembersTable,
+			Columns: []string{tenant.MembersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -275,15 +335,15 @@ func (u *TenantUpsert) UpdateName() *TenantUpsert {
 	return u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (u *TenantUpsert) SetCreatedAt(v time.Time) *TenantUpsert {
-	u.Set(tenant.FieldCreatedAt, v)
+// SetUpdatedAt sets the "updated_at" field.
+func (u *TenantUpsert) SetUpdatedAt(v time.Time) *TenantUpsert {
+	u.Set(tenant.FieldUpdatedAt, v)
 	return u
 }
 
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *TenantUpsert) UpdateCreatedAt() *TenantUpsert {
-	u.SetExcluded(tenant.FieldCreatedAt)
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *TenantUpsert) UpdateUpdatedAt() *TenantUpsert {
+	u.SetExcluded(tenant.FieldUpdatedAt)
 	return u
 }
 
@@ -303,6 +363,9 @@ func (u *TenantUpsertOne) UpdateNewValues() *TenantUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(tenant.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(tenant.FieldCreatedAt)
 		}
 	}))
 	return u
@@ -391,17 +454,17 @@ func (u *TenantUpsertOne) UpdateName() *TenantUpsertOne {
 	})
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (u *TenantUpsertOne) SetCreatedAt(v time.Time) *TenantUpsertOne {
+// SetUpdatedAt sets the "updated_at" field.
+func (u *TenantUpsertOne) SetUpdatedAt(v time.Time) *TenantUpsertOne {
 	return u.Update(func(s *TenantUpsert) {
-		s.SetCreatedAt(v)
+		s.SetUpdatedAt(v)
 	})
 }
 
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *TenantUpsertOne) UpdateCreatedAt() *TenantUpsertOne {
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *TenantUpsertOne) UpdateUpdatedAt() *TenantUpsertOne {
 	return u.Update(func(s *TenantUpsert) {
-		s.UpdateCreatedAt()
+		s.UpdateUpdatedAt()
 	})
 }
 
@@ -587,6 +650,9 @@ func (u *TenantUpsertBulk) UpdateNewValues() *TenantUpsertBulk {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(tenant.FieldID)
 			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(tenant.FieldCreatedAt)
+			}
 		}
 	}))
 	return u
@@ -675,17 +741,17 @@ func (u *TenantUpsertBulk) UpdateName() *TenantUpsertBulk {
 	})
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (u *TenantUpsertBulk) SetCreatedAt(v time.Time) *TenantUpsertBulk {
+// SetUpdatedAt sets the "updated_at" field.
+func (u *TenantUpsertBulk) SetUpdatedAt(v time.Time) *TenantUpsertBulk {
 	return u.Update(func(s *TenantUpsert) {
-		s.SetCreatedAt(v)
+		s.SetUpdatedAt(v)
 	})
 }
 
-// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
-func (u *TenantUpsertBulk) UpdateCreatedAt() *TenantUpsertBulk {
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *TenantUpsertBulk) UpdateUpdatedAt() *TenantUpsertBulk {
 	return u.Update(func(s *TenantUpsert) {
-		s.UpdateCreatedAt()
+		s.UpdateUpdatedAt()
 	})
 }
 

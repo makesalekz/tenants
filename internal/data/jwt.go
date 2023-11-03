@@ -13,6 +13,14 @@ type JwtProcessor struct {
 	jwtSecret []byte
 }
 
+type TenantClaims struct {
+	jwtv4.RegisteredClaims
+
+	TenantId  int64    `json:"tenant,omitempty"`
+	MemberId  string   `json:"member,omitempty"`
+	GroupsIds []string `json:"groups,omitempty"`
+}
+
 // NewJwtProcessor .
 func NewJwtProcessor(c *Config) (*JwtProcessor, error) {
 	secret, err := c.ReadGlobalSecretsFor(context.Background(), "jwt")
@@ -43,13 +51,13 @@ func (j *JwtProcessor) GetUserIdFromContext(ctx context.Context) (int64, bool) {
 	return userId, true
 }
 
-func (j *JwtProcessor) GetClaimsFromContext(ctx context.Context) *jwtv4.RegisteredClaims {
+func (j *JwtProcessor) GetClaimsFromContext(ctx context.Context) *TenantClaims {
 	token, ok := jwt.FromContext(ctx)
 	if !ok {
 		return nil
 	}
 
-	claims, ok := token.(*jwtv4.RegisteredClaims)
+	claims, ok := token.(*TenantClaims)
 	if !ok {
 		return nil
 	}
