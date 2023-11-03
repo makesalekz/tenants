@@ -10,7 +10,6 @@ import (
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/uuid"
 )
 
 type TenantsList struct {
@@ -49,28 +48,38 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 	return uc.repo.CreateTenant(ctx, dto)
 }
 
-func (uc *TenantsUsecase) UpdateTenant(ctx context.Context, teamId int64, dto data.TenantDto) (*ent.Tenant, error) {
-	userId, ok := uc.jwt.GetUserIdFromContext(ctx)
+func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
+	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
-	dto.OwnerId = userId
+	// TODO: check permissions
+	dto.OwnerId = ownerId
 
-	return uc.repo.UpdateTenant(ctx, teamId, dto)
+	return uc.repo.UpdateTenant(ctx, claims.TenantId, dto)
 }
 
-func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, teamId int64) error {
-	userId, ok := uc.jwt.GetUserIdFromContext(ctx)
+func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
+	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return v1.ErrorUnauthorized("Unauthorized")
 	}
 
-	return uc.repo.DeleteTenant(ctx, teamId, userId)
+	// TODO: check permissions
+
+	return uc.repo.DeleteTenant(ctx, claims.TenantId, ownerId)
 }
 
-func (uc *TenantsUsecase) GetTenant(ctx context.Context, teamId int64) (*ent.Tenant, error) {
-	return uc.repo.GetTenant(ctx, teamId)
+func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, error) {
+	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	if !ok {
+		return nil, v1.ErrorUnauthorized("Unauthorized")
+	}
+
+	// TODO: check permissions
+
+	return uc.repo.GetTenant(ctx, claims.TenantId)
 }
 
 func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsListFilter, paginate *v1.PaginateRequest) (*TenantsList, error) {
@@ -79,17 +88,12 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 	}
 
 	// TODO: check permissions to get all tenants
-	claims := uc.jwt.GetClaimsFromContext(ctx)
-	if claims == nil {
+	userId, _, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	if !ok {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
-	memberId, err := uuid.FromBytes([]byte(claims.MemberId))
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
-	}
-
-	filter.MemberId = &memberId
+	filter.UserId = userId
 
 	tenants, err := uc.repo.ListTenants(ctx, filter, paginate)
 	if err != nil {

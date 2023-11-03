@@ -6,16 +6,27 @@ info:
     title: ""
     version: 0.0.1
 paths:
-    /v1/tenants:
-        post:
+    /v1/tenants/current:
+        get:
             tags:
                 - Tenants
-            operationId: Tenants_CreateTenant
+            operationId: Tenants_GetCurrentTenant
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+        put:
+            tags:
+                - Tenants
+            operationId: Tenants_UpdateCurrentTenant
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.tenants.v1.CreateTenantRequest'
+                            $ref: '#/components/schemas/api.tenants.v1.UpdateTenantRequest'
                 required: true
             responses:
                 "200":
@@ -24,6 +35,17 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+        delete:
+            tags:
+                - Tenants
+            operationId: Tenants_DeleteCurrentTenant
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
     /v1/tenants/list:
         post:
             tags:
@@ -42,75 +64,11 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.tenants.v1.ListTenantsReply'
-    /v1/tenants/{tenantId}:
-        get:
-            tags:
-                - Tenants
-            operationId: Tenants_GetTenant
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
-        put:
-            tags:
-                - Tenants
-            operationId: Tenants_UpdateTenant
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.tenants.v1.UpdateTenantRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
-        delete:
-            tags:
-                - Tenants
-            operationId: Tenants_DeleteTenant
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
-    /v1/tenants/{tenantId}/members:
+    /v1/tenants/members:
         post:
             tags:
                 - Members
             operationId: Members_CreateMembers
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
             requestBody:
                 content:
                     application/json:
@@ -123,18 +81,12 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.CreateMembersReply'
-    /v1/tenants/{tenantId}/members/list:
+                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
+    /v1/tenants/members/list:
         post:
             tags:
                 - Members
             operationId: Members_ListMembers
-            parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
             requestBody:
                 content:
                     application/json:
@@ -148,18 +100,13 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.tenants.v1.ListMembersReply'
-    /v1/tenants/{tenantId}/members/{userId}:
+    /v1/tenants/members/{memberId}:
         delete:
             tags:
                 - Members
             operationId: Members_DeleteMember
             parameters:
-                - name: tenantId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-                - name: userId
+                - name: memberId
                   in: path
                   required: true
                   schema:
@@ -170,7 +117,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.DeleteMemberReply'
+                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
 components:
     schemas:
         api.iam.v1.UserShort:
@@ -188,26 +135,13 @@ components:
                     type: string
                 lastLoginAt:
                     type: string
-        api.tenants.v1.CreateMembersReply:
-            type: object
-            properties: {}
         api.tenants.v1.CreateMembersRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 usersIds:
                     type: array
                     items:
                         type: string
-        api.tenants.v1.CreateTenantRequest:
-            type: object
-            properties:
-                name:
-                    type: string
-        api.tenants.v1.DeleteMemberReply:
-            type: object
-            properties: {}
         api.tenants.v1.EmptyReply:
             type: object
             properties: {}
@@ -223,8 +157,6 @@ components:
         api.tenants.v1.ListMembersRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 paginate:
                     $ref: '#/components/schemas/api.tenants.v1.PaginateRequest'
         api.tenants.v1.ListTenantsReply:
@@ -311,8 +243,6 @@ components:
         api.tenants.v1.UpdateTenantRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 name:
                     type: string
 tags:

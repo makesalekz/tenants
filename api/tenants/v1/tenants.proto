@@ -9,27 +9,22 @@ option go_package = "tenants/api/tenants/v1;tenants_v1";
 option java_multiple_files = true;
 option java_package = "api.tenants.v1";
 
-service tenants {
-	rpc CreateTenant (CreateTenantRequest) returns (TenantReply) {
+service Tenants {
+	rpc CreateTenant (CreateTenantRequest) returns (TenantReply);
+	rpc UpdateCurrentTenant (UpdateTenantRequest) returns (TenantReply) {
 		option (google.api.http) = {
-			post: "/v1/tenants"
+			put: "/v1/tenants/current"
 			body: "*"
 		};
 	};
-	rpc UpdateTenant (UpdateTenantRequest) returns (TenantReply) {
+	rpc DeleteCurrentTenant (EmptyRequest) returns (EmptyReply) {
 		option (google.api.http) = {
-			put: "/v1/tenants/{tenantId}"
-			body: "*"
+			delete: "/v1/tenants/current"
 		};
 	};
-	rpc DeleteTenant (TenantRequest) returns (EmptyReply) {
+	rpc GetCurrentTenant (EmptyRequest) returns (TenantReply) {
 		option (google.api.http) = {
-			delete: "/v1/tenants/{tenantId}"
-		};
-	};
-	rpc GetTenant (TenantRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			get: "/v1/tenants/{tenantId}"
+			get: "/v1/tenants/current"
 		};
 	};
 	rpc ListTenants (ListTenantsRequest) returns (ListTenantsReply) {
@@ -37,7 +32,7 @@ service tenants {
 		  post: "/v1/tenants/list"
 		  body: "*"
 		};
-	  };
+	};
 }
 
 message CreateTenantRequest {
@@ -45,12 +40,7 @@ message CreateTenantRequest {
 }
 
 message UpdateTenantRequest {
-	int64 tenantId = 1;
 	string name = 2;
-}
-
-message TenantRequest {
-	int64 tenantId = 1;
 }
 
 message TenantReply {
@@ -59,7 +49,7 @@ message TenantReply {
 
 message ListTenantsRequest {
 	int64 ownerId = 1;
-    PaginateRequest paginate = 3;
+    PaginateRequest paginate = 2;
 }
 
 message ListTenantsReply {

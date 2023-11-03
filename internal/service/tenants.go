@@ -55,8 +55,8 @@ func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantR
 	}, nil
 }
 
-func (s *TenantsService) UpdateTenant(ctx context.Context, req *v1.UpdateTenantRequest) (*v1.TenantReply, error) {
-	tenant, err := s.tu.UpdateTenant(ctx, req.TenantId, data.TenantDto{
+func (s *TenantsService) UpdateCurrentTenant(ctx context.Context, req *v1.UpdateTenantRequest) (*v1.TenantReply, error) {
+	tenant, err := s.tu.UpdateCurrentTenant(ctx, data.TenantDto{
 		Name: req.Name,
 	})
 	if err != nil {
@@ -70,8 +70,8 @@ func (s *TenantsService) UpdateTenant(ctx context.Context, req *v1.UpdateTenantR
 	}, nil
 }
 
-func (s *TenantsService) DeleteTenant(ctx context.Context, req *v1.TenantRequest) (*v1.EmptyReply, error) {
-	err := s.tu.DeleteTenant(ctx, req.TenantId)
+func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *v1.EmptyRequest) (*v1.EmptyReply, error) {
+	err := s.tu.DeleteCurrentTenant(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("Tenant not found")
@@ -81,8 +81,8 @@ func (s *TenantsService) DeleteTenant(ctx context.Context, req *v1.TenantRequest
 	return &v1.EmptyReply{}, nil
 }
 
-func (s *TenantsService) GetTenant(ctx context.Context, req *v1.TenantRequest) (*v1.TenantReply, error) {
-	tenant, err := s.tu.GetTenant(ctx, req.TenantId)
+func (s *TenantsService) GetCurrentTenant(ctx context.Context, req *v1.EmptyRequest) (*v1.TenantReply, error) {
+	tenant, err := s.tu.GetCurrentTenant(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("Tenant not found")

@@ -7,6 +7,7 @@ import (
 	"tenants/ent"
 	"tenants/ent/member"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -17,7 +18,7 @@ type MembersListFilter struct {
 // MembersRepo
 type MembersRepo interface {
 	CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
-	DeleteMember(ctx context.Context, tenantId, userId int64) error
+	DeleteMember(ctx context.Context, tenantId int64, memberId uuid.UUID) error
 	GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
 	GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
 	ListMembers(ctx context.Context, filter MembersListFilter, paginate *tenants_v1.PaginateRequest) ([]*ent.Member, error)
@@ -38,14 +39,14 @@ func NewMembersRepo(d *Data) MembersRepo {
 func (r *membersRepo) CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
 	membersCreate := make([]*ent.MemberCreate, len(usersIds))
 	for i, userId := range usersIds {
-		membersCreate[i] = r.db.Member.Create().SetTenantID(tenantId).SetUserID(userId)
+		membersCreate[i] = r.db.Member.Create().SetTenantID(tenantId).SetUserID(userId).SetIdentityID(uuid.New())
 	}
 
 	return r.db.Member.CreateBulk(membersCreate...).Save(ctx)
 }
 
-func (r *membersRepo) DeleteMember(ctx context.Context, tenantId, userId int64) error {
-	_, err := r.db.Member.Delete().Where(member.TenantID(tenantId), member.UserID(userId)).Exec(ctx)
+func (r *membersRepo) DeleteMember(ctx context.Context, tenantId int64, memberId uuid.UUID) error {
+	_, err := r.db.Member.Delete().Where(member.TenantID(tenantId), member.IdentityID(memberId)).Exec(ctx)
 
 	return err
 }

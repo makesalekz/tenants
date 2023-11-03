@@ -284,6 +284,44 @@ func (x *Tenant) GetUpdatedAt() string {
 	return ""
 }
 
+type EmptyRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *EmptyRequest) Reset() {
+	*x = EmptyRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_tenants_v1_models_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *EmptyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EmptyRequest) ProtoMessage() {}
+
+func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tenants_v1_models_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EmptyRequest.ProtoReflect.Descriptor instead.
+func (*EmptyRequest) Descriptor() ([]byte, []int) {
+	return file_tenants_v1_models_proto_rawDescGZIP(), []int{3}
+}
+
 type EmptyReply struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -293,7 +331,7 @@ type EmptyReply struct {
 func (x *EmptyReply) Reset() {
 	*x = EmptyReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_tenants_v1_models_proto_msgTypes[3]
+		mi := &file_tenants_v1_models_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -306,7 +344,7 @@ func (x *EmptyReply) String() string {
 func (*EmptyReply) ProtoMessage() {}
 
 func (x *EmptyReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tenants_v1_models_proto_msgTypes[3]
+	mi := &file_tenants_v1_models_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -319,7 +357,7 @@ func (x *EmptyReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmptyReply.ProtoReflect.Descriptor instead.
 func (*EmptyReply) Descriptor() ([]byte, []int) {
-	return file_tenants_v1_models_proto_rawDescGZIP(), []int{3}
+	return file_tenants_v1_models_proto_rawDescGZIP(), []int{4}
 }
 
 type PaginateRequest struct {
@@ -341,7 +379,7 @@ type PaginateRequest struct {
 func (x *PaginateRequest) Reset() {
 	*x = PaginateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_tenants_v1_models_proto_msgTypes[4]
+		mi := &file_tenants_v1_models_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -354,7 +392,7 @@ func (x *PaginateRequest) String() string {
 func (*PaginateRequest) ProtoMessage() {}
 
 func (x *PaginateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tenants_v1_models_proto_msgTypes[4]
+	mi := &file_tenants_v1_models_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -367,7 +405,7 @@ func (x *PaginateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaginateRequest.ProtoReflect.Descriptor instead.
 func (*PaginateRequest) Descriptor() ([]byte, []int) {
-	return file_tenants_v1_models_proto_rawDescGZIP(), []int{4}
+	return file_tenants_v1_models_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PaginateRequest) GetLimit() int32 {
@@ -449,7 +487,7 @@ type PaginateReply struct {
 func (x *PaginateReply) Reset() {
 	*x = PaginateReply{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_tenants_v1_models_proto_msgTypes[5]
+		mi := &file_tenants_v1_models_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -462,7 +500,7 @@ func (x *PaginateReply) String() string {
 func (*PaginateReply) ProtoMessage() {}
 
 func (x *PaginateReply) ProtoReflect() protoreflect.Message {
-	mi := &file_tenants_v1_models_proto_msgTypes[5]
+	mi := &file_tenants_v1_models_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -475,7 +513,7 @@ func (x *PaginateReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaginateReply.ProtoReflect.Descriptor instead.
 func (*PaginateReply) Descriptor() ([]byte, []int) {
-	return file_tenants_v1_models_proto_rawDescGZIP(), []int{5}
+	return file_tenants_v1_models_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PaginateReply) GetTotal() int32 {
@@ -546,7 +584,8 @@ var file_tenants_v1_models_proto_rawDesc = []byte{
 	0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x75,
 	0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
-	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x0c, 0x0a, 0x0a, 0x45, 0x6d, 0x70,
+	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22, 0x0e, 0x0a, 0x0c, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x0c, 0x0a, 0x0a, 0x45, 0x6d, 0x70,
 	0x74, 0x79, 0x52, 0x65, 0x70, 0x6c, 0x79, 0x22, 0x81, 0x02, 0x0a, 0x0f, 0x50, 0x61, 0x67, 0x69,
 	0x6e, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6c,
 	0x69, 0x6d, 0x69, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69,
@@ -611,19 +650,20 @@ func file_tenants_v1_models_proto_rawDescGZIP() []byte {
 }
 
 var file_tenants_v1_models_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_tenants_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_tenants_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_tenants_v1_models_proto_goTypes = []interface{}{
 	(ErrorReason)(0),        // 0: api.tenants.v1.ErrorReason
 	(*MemberShort)(nil),     // 1: api.tenants.v1.MemberShort
 	(*Member)(nil),          // 2: api.tenants.v1.Member
 	(*Tenant)(nil),          // 3: api.tenants.v1.Tenant
-	(*EmptyReply)(nil),      // 4: api.tenants.v1.EmptyReply
-	(*PaginateRequest)(nil), // 5: api.tenants.v1.PaginateRequest
-	(*PaginateReply)(nil),   // 6: api.tenants.v1.PaginateReply
-	(*v1.UserShort)(nil),    // 7: api.iam.v1.UserShort
+	(*EmptyRequest)(nil),    // 4: api.tenants.v1.EmptyRequest
+	(*EmptyReply)(nil),      // 5: api.tenants.v1.EmptyReply
+	(*PaginateRequest)(nil), // 6: api.tenants.v1.PaginateRequest
+	(*PaginateReply)(nil),   // 7: api.tenants.v1.PaginateReply
+	(*v1.UserShort)(nil),    // 8: api.iam.v1.UserShort
 }
 var file_tenants_v1_models_proto_depIdxs = []int32{
-	7, // 0: api.tenants.v1.Member.user:type_name -> api.iam.v1.UserShort
+	8, // 0: api.tenants.v1.Member.user:type_name -> api.iam.v1.UserShort
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -674,7 +714,7 @@ func file_tenants_v1_models_proto_init() {
 			}
 		}
 		file_tenants_v1_models_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EmptyReply); i {
+			switch v := v.(*EmptyRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -686,7 +726,7 @@ func file_tenants_v1_models_proto_init() {
 			}
 		}
 		file_tenants_v1_models_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PaginateRequest); i {
+			switch v := v.(*EmptyReply); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -698,6 +738,18 @@ func file_tenants_v1_models_proto_init() {
 			}
 		}
 		file_tenants_v1_models_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PaginateRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_tenants_v1_models_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PaginateReply); i {
 			case 0:
 				return &v.state
@@ -710,14 +762,14 @@ func file_tenants_v1_models_proto_init() {
 			}
 		}
 	}
-	file_tenants_v1_models_proto_msgTypes[5].OneofWrappers = []interface{}{}
+	file_tenants_v1_models_proto_msgTypes[6].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_tenants_v1_models_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

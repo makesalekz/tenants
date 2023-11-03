@@ -29,6 +29,7 @@ message Tenant {
 	string updatedAt = 5;
 }
 
+message EmptyRequest {}
 message EmptyReply {}
 
 message PaginateRequest {

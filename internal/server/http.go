@@ -1,7 +1,7 @@
 package server
 
 import (
-	tenants_v1 "tenants/api/tenants/v1"
+	v1 "tenants/api/tenants/v1"
 	"tenants/internal/conf"
 	"tenants/internal/data"
 	"tenants/internal/service"
@@ -28,7 +28,7 @@ func NewHTTPServer(
 			metadata.Server(),
 			jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
 				return jwtp.GetSecret(), nil
-			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims { return &jwtv4.RegisteredClaims{} })),
+			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims { return &data.TenantClaims{} })),
 		),
 	}
 	if c.Server.Http.Network != "" {
@@ -42,8 +42,8 @@ func NewHTTPServer(
 	}
 	srv := khttp.NewServer(opts...)
 
-	tenants_v1.RegisterTenantsHTTPServer(srv, tenantsService)
-	tenants_v1.RegisterMembersHTTPServer(srv, membersService)
+	v1.RegisterTenantsHTTPServer(srv, tenantsService)
+	v1.RegisterMembersHTTPServer(srv, membersService)
 
 	return srv
 }

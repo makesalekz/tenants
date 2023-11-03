@@ -10,7 +10,6 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
-	// iam_v1 "gitlab.alageum.info/alageum-cloud/iam/api/iam/v1"
 )
 
 type Dialer struct {

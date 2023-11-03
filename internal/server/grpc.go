@@ -28,7 +28,7 @@ func NewGRPCServer(
 			metadata.Server(),
 			jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
 				return jwtp.GetSecret(), nil
-			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256)),
+			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims { return &data.TenantClaims{} })),
 		),
 	}
 	if c.Server.Grpc.Network != "" {

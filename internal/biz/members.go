@@ -9,6 +9,7 @@ import (
 	"tenants/internal/data"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
 )
 
 type MemberItem struct {
@@ -48,13 +49,13 @@ func NewMembersUsecase(
 	}, nil
 }
 
-func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
-	ownerId, ok := uc.jwt.GetUserIdFromContext(ctx)
+func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) ([]*ent.Member, error) {
+	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
 
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.TenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -64,16 +65,21 @@ func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantId int64, use
 		return nil, v1.ErrorForbidden("only owner can add members")
 	}
 
-	return uc.membersRepo.CreateMembers(ctx, tenantId, usersIds)
+	return uc.membersRepo.CreateMembers(ctx, tenant.ID, usersIds)
 }
 
-func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId, userId int64) error {
-	ownerId, ok := uc.jwt.GetUserIdFromContext(ctx)
+func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) error {
+	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return v1.ErrorUnauthorized("jwt token is missing")
 	}
 
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
+	memberUUID, err := uuid.FromBytes([]byte(memberId))
+	if err != nil {
+		return v1.ErrorInvalidRequest("invalid member id")
+	}
+
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.TenantId)
 	if err != nil {
 		return err
 	}
@@ -83,33 +89,32 @@ func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId, userId int
 		return v1.ErrorForbidden("only owner can remove members")
 	}
 
-	return uc.membersRepo.DeleteMember(ctx, tenantId, userId)
+	return uc.membersRepo.DeleteMember(ctx, tenant.ID, memberUUID)
 }
 
-func (uc *MembersUsecase) GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
-	return uc.membersRepo.GetMembers(ctx, tenantId, usersIds)
-}
-
-func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
-	return uc.membersRepo.GetMember(ctx, tenantId, userId)
-}
-
-func (uc *MembersUsecase) GetOwnMember(ctx context.Context, tenantId int64) (*ent.Member, error) {
-	userId, ok := uc.jwt.GetUserIdFromContext(ctx)
+func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Member, error) {
+	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
 
-	return uc.membersRepo.GetMember(ctx, tenantId, userId)
+	uc.log.Debugf("claims: %+v", claims)
+
+	return uc.membersRepo.GetMember(ctx, claims.TenantId, userId)
 }
 
-func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersListFilter, paginate *v1.PaginateRequest) (*MembersList, error) {
-	if filter.TenantId == 0 {
-		return nil, v1.ErrorInvalidRequest("tenantId is required")
+func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *v1.PaginateRequest) (*MembersList, error) {
+	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	if !ok {
+		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
 
 	if paginate == nil {
 		paginate = &v1.PaginateRequest{}
+	}
+
+	filter := data.MembersListFilter{
+		TenantId: claims.TenantId,
 	}
 
 	members, err := uc.membersRepo.ListMembers(ctx, filter, paginate)

@@ -7,7 +7,6 @@ import (
 	v1 "tenants/api/tenants/v1"
 	"tenants/ent"
 	"tenants/internal/biz"
-	"tenants/internal/data"
 )
 
 type MembersService struct {
@@ -49,37 +48,39 @@ func replyShortMembers(members []*ent.Member) []*v1.MemberShort {
 	return reply
 }
 
-func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*v1.CreateMembersReply, error) {
-	_, err := s.mu.CreateMembers(ctx, req.TenantId, req.UsersIds)
+func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*v1.EmptyReply, error) {
+	_, err := s.mu.CreateMembers(ctx, req.UsersIds)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.CreateMembersReply{}, nil
+	return &v1.EmptyReply{}, nil
 }
 
-func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMemberRequest) (*v1.DeleteMemberReply, error) {
-	err := s.mu.DeleteMember(ctx, req.TenantId, req.UserId)
+func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMemberRequest) (*v1.EmptyReply, error) {
+	err := s.mu.DeleteMember(ctx, req.MemberId)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.DeleteMemberReply{}, nil
+	return &v1.EmptyReply{}, nil
 }
 
 func (s *MembersService) GetMember(ctx context.Context, req *v1.GetMemberRequest) (*v1.GetMemberReply, error) {
-	member, err := s.mu.GetMember(ctx, req.TenantId, req.UserId)
+	member, err := s.mu.GetMember(ctx, req.UserId)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("Member not found")
+		}
 		return nil, err
 	}
 	return &v1.GetMemberReply{
 		Member: member.IdentityID.String(),
+		Groups: []string{},
 	}, nil
 }
 
 func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
-	list, err := s.mu.ListMembers(ctx, data.MembersListFilter{
-		TenantId: req.TenantId,
-	}, req.Paginate)
+	list, err := s.mu.ListMembers(ctx, req.Paginate)
 	if err != nil {
 		return nil, err
 	}
