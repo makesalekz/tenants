@@ -7,14 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"tenants/ent/member"
-	"tenants/ent/predicate"
-	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 const (

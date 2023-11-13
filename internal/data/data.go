@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	"tenants/ent"
-	_ "tenants/ent/runtime"
-	"tenants/internal/conf"
+	"gitlab.calendaria.team/services/tenants/ent"
+	_ "gitlab.calendaria.team/services/tenants/ent/runtime"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"

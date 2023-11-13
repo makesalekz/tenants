@@ -3,10 +3,11 @@
 package runtime
 
 import (
-	"tenants/ent/member"
-	"tenants/ent/schema"
-	"tenants/ent/tenant"
 	"time"
+
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/schema"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // The init function reads all schema descriptors with runtime code

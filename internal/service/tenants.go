@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	v1 "tenants/api/tenants/v1"
-	"tenants/ent"
-	"tenants/internal/biz"
-	"tenants/internal/data"
+	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/internal/biz"
+	"gitlab.calendaria.team/services/tenants/internal/data"
 )
 
 type TenantsService struct {

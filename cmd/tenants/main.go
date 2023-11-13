@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"tenants/internal/conf"
-	"tenants/internal/data"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"gitlab.calendaria.team/services/tenants/internal/data"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -23,7 +23,7 @@ var (
 	// Name is the name of the compiled software.
 	Name string = "tenants"
 	// Version is the version of the compiled software.
-	Version string = "1.0.0"
+	Version string = "0.1.0"
 	// flagconf is the config flag.
 	flagconf string
 

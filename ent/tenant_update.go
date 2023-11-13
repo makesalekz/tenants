@@ -6,14 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"tenants/ent/member"
-	"tenants/ent/predicate"
-	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // TenantUpdate is the builder for updating Tenant entities.

@@ -5,13 +5,13 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"tenants/ent/member"
-	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // Member is the model entity for the Member schema.

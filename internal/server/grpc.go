@@ -1,10 +1,10 @@
 package server
 
 import (
-	tenants_v1 "tenants/api/tenants/v1"
-	"tenants/internal/conf"
-	"tenants/internal/data"
-	"tenants/internal/service"
+	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"gitlab.calendaria.team/services/tenants/internal/data"
+	"gitlab.calendaria.team/services/tenants/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"tenants/internal/conf"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
 
 	"github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"

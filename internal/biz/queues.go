@@ -3,7 +3,7 @@ package biz
 import (
 	"context"
 
-	"tenants/internal/data"
+	"gitlab.calendaria.team/services/tenants/internal/data"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/nats-io/nats.go"

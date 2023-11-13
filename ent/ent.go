@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
-	"tenants/ent/member"
-	"tenants/ent/tenant"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // ent aliases to avoid import conflicts in user's code.

@@ -6,13 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"tenants/ent/member"
-	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // TenantCreate is the builder for creating a Tenant entity.

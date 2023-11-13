@@ -3,10 +3,11 @@ package biz
 import (
 	"context"
 
-	iam_v1 "iam/api/iam/v1"
-	v1 "tenants/api/tenants/v1"
-	"tenants/ent"
-	"tenants/internal/data"
+	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/internal/data"
+
+	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
