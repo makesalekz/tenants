@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"tenants/ent/member"
-	"tenants/ent/predicate"
-	"tenants/ent/tenant"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

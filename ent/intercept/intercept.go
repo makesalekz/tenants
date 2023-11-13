@@ -5,12 +5,12 @@ package intercept
 import (
 	"context"
 	"fmt"
-	"tenants/ent"
-	"tenants/ent/member"
-	"tenants/ent/predicate"
-	"tenants/ent/tenant"
 
 	"entgo.io/ent/dialect/sql"
+	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // The Query interface represents an operation that queries a graph.

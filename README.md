@@ -1,8 +1,4 @@
-# dummy
-
-## Init project
-
-3. Replace every "dummy" code with your code
+# tenants
 
 ## Proto files
 

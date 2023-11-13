@@ -6,14 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"tenants/ent/member"
-	"tenants/ent/tenant"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
 // MemberCreate is the builder for creating a Member entity.

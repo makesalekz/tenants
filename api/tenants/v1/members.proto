@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package api.tenants.v1;
+package tenants.v1;
 
 import "google/api/annotations.proto";
-import "tenants/v1/models.proto";
+import "api/tenants/v1/models.proto";
 
-option go_package = "tenants/api/tenants/v1;tenants_v1";
+option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
 option java_multiple_files = true;
-option java_package = "api.tenants.v1";
+option java_package = "tenants.v1";
 
 service Members {
 	rpc CreateMembers (CreateMembersRequest) returns (EmptyReply) {

@@ -3,8 +3,9 @@ package data
 import (
 	"context"
 
-	iam_v1 "iam/api/iam/v1"
-	"tenants/internal/conf"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
+
+	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"

@@ -5,7 +5,8 @@ package hook
 import (
 	"context"
 	"fmt"
-	"tenants/ent"
+
+	"gitlab.calendaria.team/services/tenants/ent"
 )
 
 // The MemberFunc type is an adapter to allow the use of ordinary

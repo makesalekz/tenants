@@ -3,9 +3,9 @@ package data
 import (
 	"context"
 
-	tenants_v1 "tenants/api/tenants/v1"
-	"tenants/ent"
-	"tenants/ent/member"
+	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/ent/member"
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"

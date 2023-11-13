@@ -3,11 +3,11 @@
 package tenant
 
 import (
-	"tenants/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"gitlab.calendaria.team/services/tenants/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

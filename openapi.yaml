@@ -17,7 +17,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+                                $ref: '#/components/schemas/tenants.v1.TenantReply'
         put:
             tags:
                 - Tenants
@@ -26,7 +26,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.tenants.v1.UpdateTenantRequest'
+                            $ref: '#/components/schemas/tenants.v1.UpdateTenantRequest'
                 required: true
             responses:
                 "200":
@@ -34,7 +34,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.TenantReply'
+                                $ref: '#/components/schemas/tenants.v1.TenantReply'
         delete:
             tags:
                 - Tenants
@@ -45,7 +45,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
+                                $ref: '#/components/schemas/tenants.v1.EmptyReply'
     /v1/tenants/list:
         post:
             tags:
@@ -55,7 +55,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.tenants.v1.ListTenantsRequest'
+                            $ref: '#/components/schemas/tenants.v1.ListTenantsRequest'
                 required: true
             responses:
                 "200":
@@ -63,7 +63,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.ListTenantsReply'
+                                $ref: '#/components/schemas/tenants.v1.ListTenantsReply'
     /v1/tenants/members:
         post:
             tags:
@@ -73,7 +73,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.tenants.v1.CreateMembersRequest'
+                            $ref: '#/components/schemas/tenants.v1.CreateMembersRequest'
                 required: true
             responses:
                 "200":
@@ -81,7 +81,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
+                                $ref: '#/components/schemas/tenants.v1.EmptyReply'
     /v1/tenants/members/list:
         post:
             tags:
@@ -91,7 +91,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.tenants.v1.ListMembersRequest'
+                            $ref: '#/components/schemas/tenants.v1.ListMembersRequest'
                 required: true
             responses:
                 "200":
@@ -99,7 +99,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.ListMembersReply'
+                                $ref: '#/components/schemas/tenants.v1.ListMembersReply'
     /v1/tenants/members/{memberId}:
         delete:
             tags:
@@ -117,10 +117,17 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.tenants.v1.EmptyReply'
+                                $ref: '#/components/schemas/tenants.v1.EmptyReply'
 components:
     schemas:
-        api.iam.v1.UserShort:
+        iam.v1.Relation:
+            type: object
+            properties:
+                isBlocked:
+                    type: boolean
+                isMuted:
+                    type: boolean
+        iam.v1.UserShort:
             type: object
             properties:
                 id:
@@ -135,47 +142,49 @@ components:
                     type: string
                 lastLoginAt:
                     type: string
-        api.tenants.v1.CreateMembersRequest:
+                relation:
+                    $ref: '#/components/schemas/iam.v1.Relation'
+        tenants.v1.CreateMembersRequest:
             type: object
             properties:
                 usersIds:
                     type: array
                     items:
                         type: string
-        api.tenants.v1.EmptyReply:
+        tenants.v1.EmptyReply:
             type: object
             properties: {}
-        api.tenants.v1.ListMembersReply:
+        tenants.v1.ListMembersReply:
             type: object
             properties:
                 members:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.tenants.v1.Member'
+                        $ref: '#/components/schemas/tenants.v1.Member'
                 paginate:
-                    $ref: '#/components/schemas/api.tenants.v1.PaginateReply'
-        api.tenants.v1.ListMembersRequest:
+                    $ref: '#/components/schemas/tenants.v1.PaginateReply'
+        tenants.v1.ListMembersRequest:
             type: object
             properties:
                 paginate:
-                    $ref: '#/components/schemas/api.tenants.v1.PaginateRequest'
-        api.tenants.v1.ListTenantsReply:
+                    $ref: '#/components/schemas/tenants.v1.PaginateRequest'
+        tenants.v1.ListTenantsReply:
             type: object
             properties:
                 tenants:
                     type: array
                     items:
-                        $ref: '#/components/schemas/api.tenants.v1.Tenant'
+                        $ref: '#/components/schemas/tenants.v1.Tenant'
                 paginate:
-                    $ref: '#/components/schemas/api.tenants.v1.PaginateReply'
-        api.tenants.v1.ListTenantsRequest:
+                    $ref: '#/components/schemas/tenants.v1.PaginateReply'
+        tenants.v1.ListTenantsRequest:
             type: object
             properties:
                 ownerId:
                     type: string
                 paginate:
-                    $ref: '#/components/schemas/api.tenants.v1.PaginateRequest'
-        api.tenants.v1.Member:
+                    $ref: '#/components/schemas/tenants.v1.PaginateRequest'
+        tenants.v1.Member:
             type: object
             properties:
                 id:
@@ -183,8 +192,8 @@ components:
                 createdAt:
                     type: string
                 user:
-                    $ref: '#/components/schemas/api.iam.v1.UserShort'
-        api.tenants.v1.PaginateReply:
+                    $ref: '#/components/schemas/iam.v1.UserShort'
+        tenants.v1.PaginateReply:
             type: object
             properties:
                 total:
@@ -200,7 +209,7 @@ components:
                     type: string
                 fromLabel:
                     type: string
-        api.tenants.v1.PaginateRequest:
+        tenants.v1.PaginateRequest:
             type: object
             properties:
                 limit:
@@ -222,7 +231,7 @@ components:
                     type: string
                 descending:
                     type: boolean
-        api.tenants.v1.Tenant:
+        tenants.v1.Tenant:
             type: object
             properties:
                 id:
@@ -235,12 +244,12 @@ components:
                     type: string
                 updatedAt:
                     type: string
-        api.tenants.v1.TenantReply:
+        tenants.v1.TenantReply:
             type: object
             properties:
                 tenant:
-                    $ref: '#/components/schemas/api.tenants.v1.Tenant'
-        api.tenants.v1.UpdateTenantRequest:
+                    $ref: '#/components/schemas/tenants.v1.Tenant'
+        tenants.v1.UpdateTenantRequest:
             type: object
             properties:
                 name:

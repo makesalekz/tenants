@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"tenants/ent/mixins"
 	"time"
+
+	"gitlab.calendaria.team/services/tenants/ent/mixins"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"

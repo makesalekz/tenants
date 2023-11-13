@@ -6,13 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"tenants/ent/member"
-	"tenants/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/predicate"
 )
 
 // MemberUpdate is the builder for updating Member entities.
