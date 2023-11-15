@@ -3,20 +3,21 @@ syntax = "proto3";
 package tenants.v1;
 
 import "google/api/annotations.proto";
-import "api/tenants/v1/models.proto";
+import "utils/v1/models.proto";
+import "iam/v1/models.proto";
 
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
 option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Members {
-	rpc CreateMembers (CreateMembersRequest) returns (EmptyReply) {
+	rpc CreateMembers (CreateMembersRequest) returns (utils.v1.EmptyReply) {
 		option (google.api.http) = {
 			post: "/v1/tenants/members"
 			body: "*"
 		};
 	};
-	rpc DeleteMember (DeleteMemberRequest) returns (EmptyReply) {
+	rpc DeleteMember (DeleteMemberRequest) returns (utils.v1.EmptyReply) {
 		option (google.api.http) = {
 			delete: "/v1/tenants/members/{memberId}"
 		};
@@ -48,10 +49,17 @@ message GetMemberReply {
 }
 
 message ListMembersRequest {
-	PaginateRequest paginate = 1;
+	utils.v1.PaginateRequest paginate = 1;
 }
 
 message ListMembersReply {
 	repeated Member members = 1;
-	PaginateReply paginate = 2;
+	utils.v1.PaginateReply paginate = 2;
+}
+
+message Member {
+	int64 id = 1;
+	string createdAt = 2;
+
+	iam.v1.UserShort user = 3;
 }

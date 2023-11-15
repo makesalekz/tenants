@@ -8,6 +8,7 @@ package tenants_v1
 
 import (
 	context "context"
+	v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -32,8 +33,8 @@ const (
 type TenantsClient interface {
 	CreateTenant(ctx context.Context, in *CreateTenantRequest, opts ...grpc.CallOption) (*TenantReply, error)
 	UpdateCurrentTenant(ctx context.Context, in *UpdateTenantRequest, opts ...grpc.CallOption) (*TenantReply, error)
-	DeleteCurrentTenant(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyReply, error)
-	GetCurrentTenant(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*TenantReply, error)
+	DeleteCurrentTenant(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	GetCurrentTenant(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*TenantReply, error)
 	ListTenants(ctx context.Context, in *ListTenantsRequest, opts ...grpc.CallOption) (*ListTenantsReply, error)
 }
 
@@ -63,8 +64,8 @@ func (c *tenantsClient) UpdateCurrentTenant(ctx context.Context, in *UpdateTenan
 	return out, nil
 }
 
-func (c *tenantsClient) DeleteCurrentTenant(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyReply, error) {
-	out := new(EmptyReply)
+func (c *tenantsClient) DeleteCurrentTenant(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
 	err := c.cc.Invoke(ctx, Tenants_DeleteCurrentTenant_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -72,7 +73,7 @@ func (c *tenantsClient) DeleteCurrentTenant(ctx context.Context, in *EmptyReques
 	return out, nil
 }
 
-func (c *tenantsClient) GetCurrentTenant(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*TenantReply, error) {
+func (c *tenantsClient) GetCurrentTenant(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*TenantReply, error) {
 	out := new(TenantReply)
 	err := c.cc.Invoke(ctx, Tenants_GetCurrentTenant_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -96,8 +97,8 @@ func (c *tenantsClient) ListTenants(ctx context.Context, in *ListTenantsRequest,
 type TenantsServer interface {
 	CreateTenant(context.Context, *CreateTenantRequest) (*TenantReply, error)
 	UpdateCurrentTenant(context.Context, *UpdateTenantRequest) (*TenantReply, error)
-	DeleteCurrentTenant(context.Context, *EmptyRequest) (*EmptyReply, error)
-	GetCurrentTenant(context.Context, *EmptyRequest) (*TenantReply, error)
+	DeleteCurrentTenant(context.Context, *v1.EmptyRequest) (*v1.EmptyReply, error)
+	GetCurrentTenant(context.Context, *v1.EmptyRequest) (*TenantReply, error)
 	ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error)
 	mustEmbedUnimplementedTenantsServer()
 }
@@ -112,10 +113,10 @@ func (UnimplementedTenantsServer) CreateTenant(context.Context, *CreateTenantReq
 func (UnimplementedTenantsServer) UpdateCurrentTenant(context.Context, *UpdateTenantRequest) (*TenantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCurrentTenant not implemented")
 }
-func (UnimplementedTenantsServer) DeleteCurrentTenant(context.Context, *EmptyRequest) (*EmptyReply, error) {
+func (UnimplementedTenantsServer) DeleteCurrentTenant(context.Context, *v1.EmptyRequest) (*v1.EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCurrentTenant not implemented")
 }
-func (UnimplementedTenantsServer) GetCurrentTenant(context.Context, *EmptyRequest) (*TenantReply, error) {
+func (UnimplementedTenantsServer) GetCurrentTenant(context.Context, *v1.EmptyRequest) (*TenantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCurrentTenant not implemented")
 }
 func (UnimplementedTenantsServer) ListTenants(context.Context, *ListTenantsRequest) (*ListTenantsReply, error) {
@@ -171,7 +172,7 @@ func _Tenants_UpdateCurrentTenant_Handler(srv interface{}, ctx context.Context, 
 }
 
 func _Tenants_DeleteCurrentTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EmptyRequest)
+	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -183,13 +184,13 @@ func _Tenants_DeleteCurrentTenant_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: Tenants_DeleteCurrentTenant_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantsServer).DeleteCurrentTenant(ctx, req.(*EmptyRequest))
+		return srv.(TenantsServer).DeleteCurrentTenant(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Tenants_GetCurrentTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EmptyRequest)
+	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -201,7 +202,7 @@ func _Tenants_GetCurrentTenant_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: Tenants_GetCurrentTenant_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TenantsServer).GetCurrentTenant(ctx, req.(*EmptyRequest))
+		return srv.(TenantsServer).GetCurrentTenant(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -3,11 +3,11 @@ package data
 import (
 	"context"
 
-	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/member"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 
-	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -21,7 +21,7 @@ type MembersRepo interface {
 	DeleteMember(ctx context.Context, tenantId int64, memberId uuid.UUID) error
 	GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
 	GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
-	ListMembers(ctx context.Context, filter MembersListFilter, paginate *tenants_v1.PaginateRequest) ([]*ent.Member, error)
+	ListMembers(ctx context.Context, filter MembersListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Member, error)
 	CountListMembers(ctx context.Context, filter MembersListFilter) (int32, error)
 }
 
@@ -59,7 +59,7 @@ func (r *membersRepo) GetMember(ctx context.Context, tenantId, userId int64) (*e
 	return r.db.Member.Query().Where(member.TenantID(tenantId), member.UserID(userId)).Only(ctx)
 }
 
-func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter, paginate *tenants_v1.PaginateRequest) ([]*ent.Member, error) {
+func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Member, error) {
 	query := r.db.Member.Query().Where(member.TenantID(filter.TenantId))
 
 	if paginate.FromId != 0 {
