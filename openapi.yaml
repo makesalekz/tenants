@@ -45,7 +45,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/tenants.v1.EmptyReply'
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/list:
         post:
             tags:
@@ -81,7 +81,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/tenants.v1.EmptyReply'
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/members/list:
         post:
             tags:
@@ -117,7 +117,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/tenants.v1.EmptyReply'
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
 components:
     schemas:
         iam.v1.Relation:
@@ -151,9 +151,6 @@ components:
                     type: array
                     items:
                         type: string
-        tenants.v1.EmptyReply:
-            type: object
-            properties: {}
         tenants.v1.ListMembersReply:
             type: object
             properties:
@@ -162,12 +159,12 @@ components:
                     items:
                         $ref: '#/components/schemas/tenants.v1.Member'
                 paginate:
-                    $ref: '#/components/schemas/tenants.v1.PaginateReply'
+                    $ref: '#/components/schemas/utils.v1.PaginateReply'
         tenants.v1.ListMembersRequest:
             type: object
             properties:
                 paginate:
-                    $ref: '#/components/schemas/tenants.v1.PaginateRequest'
+                    $ref: '#/components/schemas/utils.v1.PaginateRequest'
         tenants.v1.ListTenantsReply:
             type: object
             properties:
@@ -176,14 +173,14 @@ components:
                     items:
                         $ref: '#/components/schemas/tenants.v1.Tenant'
                 paginate:
-                    $ref: '#/components/schemas/tenants.v1.PaginateReply'
+                    $ref: '#/components/schemas/utils.v1.PaginateReply'
         tenants.v1.ListTenantsRequest:
             type: object
             properties:
                 ownerId:
                     type: string
                 paginate:
-                    $ref: '#/components/schemas/tenants.v1.PaginateRequest'
+                    $ref: '#/components/schemas/utils.v1.PaginateRequest'
         tenants.v1.Member:
             type: object
             properties:
@@ -193,44 +190,6 @@ components:
                     type: string
                 user:
                     $ref: '#/components/schemas/iam.v1.UserShort'
-        tenants.v1.PaginateReply:
-            type: object
-            properties:
-                total:
-                    type: integer
-                    format: int32
-                fromId:
-                    type: string
-                toId:
-                    type: string
-                fromDate:
-                    type: string
-                toDate:
-                    type: string
-                fromLabel:
-                    type: string
-        tenants.v1.PaginateRequest:
-            type: object
-            properties:
-                limit:
-                    type: integer
-                    format: int32
-                fromId:
-                    type: string
-                toId:
-                    type: string
-                aroundId:
-                    type: string
-                fromDate:
-                    type: string
-                toDate:
-                    type: string
-                aroundDate:
-                    type: string
-                fromLabel:
-                    type: string
-                descending:
-                    type: boolean
         tenants.v1.Tenant:
             type: object
             properties:
@@ -254,6 +213,47 @@ components:
             properties:
                 name:
                     type: string
+        utils.v1.EmptyReply:
+            type: object
+            properties: {}
+        utils.v1.PaginateReply:
+            type: object
+            properties:
+                total:
+                    type: integer
+                    format: int32
+                fromId:
+                    type: string
+                toId:
+                    type: string
+                fromDate:
+                    type: string
+                toDate:
+                    type: string
+                fromLabel:
+                    type: string
+        utils.v1.PaginateRequest:
+            type: object
+            properties:
+                limit:
+                    type: integer
+                    format: int32
+                fromId:
+                    type: string
+                toId:
+                    type: string
+                aroundId:
+                    type: string
+                fromDate:
+                    type: string
+                toDate:
+                    type: string
+                aroundDate:
+                    type: string
+                fromLabel:
+                    type: string
+                descending:
+                    type: boolean
 tags:
     - name: Members
     - name: Tenants

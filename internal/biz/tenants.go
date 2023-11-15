@@ -3,18 +3,18 @@ package biz
 import (
 	"context"
 
+	consul "github.com/go-kratos/consul/registry"
+	"github.com/go-kratos/kratos/v2/log"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/data"
-
-	consul "github.com/go-kratos/consul/registry"
-	"github.com/go-kratos/kratos/v2/log"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
 type TenantsList struct {
 	Tenants  []*ent.Tenant
-	Paginate *v1.PaginateReply
+	Paginate *utils_v1.PaginateReply
 }
 
 // TenantsUsecase is a Greeter usecase.
@@ -82,9 +82,9 @@ func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, er
 	return uc.repo.GetTenant(ctx, claims.TenantId)
 }
 
-func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsListFilter, paginate *v1.PaginateRequest) (*TenantsList, error) {
+func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsListFilter, paginate *utils_v1.PaginateRequest) (*TenantsList, error) {
 	if paginate == nil {
-		paginate = &v1.PaginateRequest{}
+		paginate = &utils_v1.PaginateRequest{}
 	}
 
 	// TODO: check permissions to get all tenants
@@ -105,7 +105,7 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 		return nil, err
 	}
 
-	paginateReply := v1.PaginateReply{
+	paginateReply := utils_v1.PaginateReply{
 		Total: &total,
 	}
 

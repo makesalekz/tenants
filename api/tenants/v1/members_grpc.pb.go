@@ -8,6 +8,7 @@ package tenants_v1
 
 import (
 	context "context"
+	v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -29,8 +30,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MembersClient interface {
-	CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...grpc.CallOption) (*EmptyReply, error)
-	DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...grpc.CallOption) (*EmptyReply, error)
+	CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersReply, error)
 }
@@ -43,8 +44,8 @@ func NewMembersClient(cc grpc.ClientConnInterface) MembersClient {
 	return &membersClient{cc}
 }
 
-func (c *membersClient) CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...grpc.CallOption) (*EmptyReply, error) {
-	out := new(EmptyReply)
+func (c *membersClient) CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
 	err := c.cc.Invoke(ctx, Members_CreateMembers_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -52,8 +53,8 @@ func (c *membersClient) CreateMembers(ctx context.Context, in *CreateMembersRequ
 	return out, nil
 }
 
-func (c *membersClient) DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...grpc.CallOption) (*EmptyReply, error) {
-	out := new(EmptyReply)
+func (c *membersClient) DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
 	err := c.cc.Invoke(ctx, Members_DeleteMember_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -83,8 +84,8 @@ func (c *membersClient) ListMembers(ctx context.Context, in *ListMembersRequest,
 // All implementations must embed UnimplementedMembersServer
 // for forward compatibility
 type MembersServer interface {
-	CreateMembers(context.Context, *CreateMembersRequest) (*EmptyReply, error)
-	DeleteMember(context.Context, *DeleteMemberRequest) (*EmptyReply, error)
+	CreateMembers(context.Context, *CreateMembersRequest) (*v1.EmptyReply, error)
+	DeleteMember(context.Context, *DeleteMemberRequest) (*v1.EmptyReply, error)
 	GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error)
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
 	mustEmbedUnimplementedMembersServer()
@@ -94,10 +95,10 @@ type MembersServer interface {
 type UnimplementedMembersServer struct {
 }
 
-func (UnimplementedMembersServer) CreateMembers(context.Context, *CreateMembersRequest) (*EmptyReply, error) {
+func (UnimplementedMembersServer) CreateMembers(context.Context, *CreateMembersRequest) (*v1.EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMembers not implemented")
 }
-func (UnimplementedMembersServer) DeleteMember(context.Context, *DeleteMemberRequest) (*EmptyReply, error) {
+func (UnimplementedMembersServer) DeleteMember(context.Context, *DeleteMemberRequest) (*v1.EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMember not implemented")
 }
 func (UnimplementedMembersServer) GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error) {

@@ -3,14 +3,13 @@ package biz
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
+	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
-
-	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/uuid"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
 type MemberItem struct {
@@ -21,7 +20,7 @@ type MemberItem struct {
 
 type MembersList struct {
 	Members  []MemberItem
-	Paginate *v1.PaginateReply
+	Paginate *utils_v1.PaginateReply
 }
 
 // MembersUsecase is a Greeter usecase.
@@ -104,14 +103,14 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Mem
 	return uc.membersRepo.GetMember(ctx, claims.TenantId, userId)
 }
 
-func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *v1.PaginateRequest) (*MembersList, error) {
+func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
 	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
 
 	if paginate == nil {
-		paginate = &v1.PaginateRequest{}
+		paginate = &utils_v1.PaginateRequest{}
 	}
 
 	filter := data.MembersListFilter{
@@ -128,7 +127,7 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *v1.Paginate
 		return nil, err
 	}
 
-	paginateReply := v1.PaginateReply{
+	paginateReply := utils_v1.PaginateReply{
 		Total: &total,
 	}
 

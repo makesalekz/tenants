@@ -7,6 +7,7 @@ import (
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
 type MembersService struct {
@@ -48,21 +49,21 @@ func replyShortMembers(members []*ent.Member) []*v1.MemberShort {
 	return reply
 }
 
-func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*v1.EmptyReply, error) {
+func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*utils_v1.EmptyReply, error) {
 	_, err := s.mu.CreateMembers(ctx, req.UsersIds)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.EmptyReply{}, nil
+	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMemberRequest) (*v1.EmptyReply, error) {
+func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMemberRequest) (*utils_v1.EmptyReply, error) {
 	err := s.mu.DeleteMember(ctx, req.MemberId)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.EmptyReply{}, nil
+	return &utils_v1.EmptyReply{}, nil
 }
 
 func (s *MembersService) GetMember(ctx context.Context, req *v1.GetMemberRequest) (*v1.GetMemberReply, error) {

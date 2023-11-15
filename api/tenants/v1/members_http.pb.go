@@ -10,6 +10,7 @@ import (
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
+	v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -24,8 +25,8 @@ const OperationMembersDeleteMember = "/tenants.v1.Members/DeleteMember"
 const OperationMembersListMembers = "/tenants.v1.Members/ListMembers"
 
 type MembersHTTPServer interface {
-	CreateMembers(context.Context, *CreateMembersRequest) (*EmptyReply, error)
-	DeleteMember(context.Context, *DeleteMemberRequest) (*EmptyReply, error)
+	CreateMembers(context.Context, *CreateMembersRequest) (*v1.EmptyReply, error)
+	DeleteMember(context.Context, *DeleteMemberRequest) (*v1.EmptyReply, error)
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
 }
 
@@ -53,7 +54,7 @@ func _Members_CreateMembers0_HTTP_Handler(srv MembersHTTPServer) func(ctx http.C
 		if err != nil {
 			return err
 		}
-		reply := out.(*EmptyReply)
+		reply := out.(*v1.EmptyReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -75,7 +76,7 @@ func _Members_DeleteMember0_HTTP_Handler(srv MembersHTTPServer) func(ctx http.Co
 		if err != nil {
 			return err
 		}
-		reply := out.(*EmptyReply)
+		reply := out.(*v1.EmptyReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -103,8 +104,8 @@ func _Members_ListMembers0_HTTP_Handler(srv MembersHTTPServer) func(ctx http.Con
 }
 
 type MembersHTTPClient interface {
-	CreateMembers(ctx context.Context, req *CreateMembersRequest, opts ...http.CallOption) (rsp *EmptyReply, err error)
-	DeleteMember(ctx context.Context, req *DeleteMemberRequest, opts ...http.CallOption) (rsp *EmptyReply, err error)
+	CreateMembers(ctx context.Context, req *CreateMembersRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
+	DeleteMember(ctx context.Context, req *DeleteMemberRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	ListMembers(ctx context.Context, req *ListMembersRequest, opts ...http.CallOption) (rsp *ListMembersReply, err error)
 }
 
@@ -116,8 +117,8 @@ func NewMembersHTTPClient(client *http.Client) MembersHTTPClient {
 	return &MembersHTTPClientImpl{client}
 }
 
-func (c *MembersHTTPClientImpl) CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...http.CallOption) (*EmptyReply, error) {
-	var out EmptyReply
+func (c *MembersHTTPClientImpl) CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
+	var out v1.EmptyReply
 	pattern := "/v1/tenants/members"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationMembersCreateMembers))
@@ -129,8 +130,8 @@ func (c *MembersHTTPClientImpl) CreateMembers(ctx context.Context, in *CreateMem
 	return &out, err
 }
 
-func (c *MembersHTTPClientImpl) DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...http.CallOption) (*EmptyReply, error) {
-	var out EmptyReply
+func (c *MembersHTTPClientImpl) DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
+	var out v1.EmptyReply
 	pattern := "/v1/tenants/members/{memberId}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationMembersDeleteMember))

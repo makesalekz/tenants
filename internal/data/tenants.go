@@ -3,10 +3,10 @@ package data
 import (
 	"context"
 
-	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 
 	_ "github.com/lib/pq"
 )
@@ -27,7 +27,7 @@ type TenantsRepo interface {
 	UpdateTenant(ctx context.Context, tenantId int64, dto TenantDto) (*ent.Tenant, error)
 	DeleteTenant(ctx context.Context, tenantId, ownerId int64) error
 	GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error)
-	ListTenants(ctx context.Context, filter TenantsListFilter, paginate *tenants_v1.PaginateRequest) ([]*ent.Tenant, error)
+	ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Tenant, error)
 	CountListTenants(ctx context.Context, filter TenantsListFilter) (int32, error)
 }
 
@@ -64,7 +64,7 @@ func (r *tenantsRepo) GetTenant(ctx context.Context, tenantId int64) (*ent.Tenan
 	return r.db.Tenant.Get(ctx, tenantId)
 }
 
-func (r *tenantsRepo) ListTenants(ctx context.Context, filter TenantsListFilter, paginate *tenants_v1.PaginateRequest) ([]*ent.Tenant, error) {
+func (r *tenantsRepo) ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Tenant, error) {
 	query := r.db.Tenant.Query()
 
 	if filter.UserId != 0 {

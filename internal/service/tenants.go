@@ -8,6 +8,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
 type TenantsService struct {
@@ -70,7 +71,7 @@ func (s *TenantsService) UpdateCurrentTenant(ctx context.Context, req *v1.Update
 	}, nil
 }
 
-func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *v1.EmptyRequest) (*v1.EmptyReply, error) {
+func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *utils_v1.EmptyRequest) (*utils_v1.EmptyReply, error) {
 	err := s.tu.DeleteCurrentTenant(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -78,10 +79,10 @@ func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *v1.EmptyR
 		}
 		return nil, err
 	}
-	return &v1.EmptyReply{}, nil
+	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *TenantsService) GetCurrentTenant(ctx context.Context, req *v1.EmptyRequest) (*v1.TenantReply, error) {
+func (s *TenantsService) GetCurrentTenant(ctx context.Context, req *utils_v1.EmptyRequest) (*v1.TenantReply, error) {
 	tenant, err := s.tu.GetCurrentTenant(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
