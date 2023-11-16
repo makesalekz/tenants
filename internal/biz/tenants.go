@@ -49,37 +49,37 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 }
 
 func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
 	// TODO: check permissions
-	dto.OwnerId = ownerId
+	dto.OwnerId = claims.GetUserId()
 
-	return uc.repo.UpdateTenant(ctx, claims.TenantId, dto)
+	return uc.repo.UpdateTenant(ctx, claims.GetTenantId(), dto)
 }
 
 func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
-	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return v1.ErrorUnauthorized("Unauthorized")
 	}
 
 	// TODO: check permissions
 
-	return uc.repo.DeleteTenant(ctx, claims.TenantId, ownerId)
+	return uc.repo.DeleteTenant(ctx, claims.GetTenantId(), claims.GetUserId())
 }
 
 func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, error) {
-	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
 	// TODO: check permissions
 
-	return uc.repo.GetTenant(ctx, claims.TenantId)
+	return uc.repo.GetTenant(ctx, claims.GetTenantId())
 }
 
 func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsListFilter, paginate *utils_v1.PaginateRequest) (*TenantsList, error) {
@@ -88,12 +88,12 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 	}
 
 	// TODO: check permissions to get all tenants
-	userId, _, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
-	filter.UserId = userId
+	filter.UserId = claims.GetUserId()
 
 	tenants, err := uc.repo.ListTenants(ctx, filter, paginate)
 	if err != nil {

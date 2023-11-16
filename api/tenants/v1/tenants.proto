@@ -11,7 +11,12 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Tenants {
-	rpc CreateTenant (CreateTenantRequest) returns (TenantReply);
+	rpc CreateTenant (CreateTenantRequest) returns (TenantReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants"
+			body: "*"
+		};
+	};
 	rpc UpdateCurrentTenant (UpdateTenantRequest) returns (TenantReply) {
 		option (google.api.http) = {
 			put: "/v1/tenants/current"

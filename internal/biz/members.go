@@ -50,7 +50,7 @@ func NewMembersUsecase(
 }
 
 func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) ([]*ent.Member, error) {
-	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
@@ -61,7 +61,7 @@ func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) (
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != ownerId {
+	if tenant.OwnerID != claims.GetUserId() {
 		return nil, v1.ErrorForbidden("only owner can add members")
 	}
 
@@ -69,7 +69,7 @@ func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) (
 }
 
 func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) error {
-	ownerId, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return v1.ErrorUnauthorized("jwt token is missing")
 	}
@@ -85,7 +85,7 @@ func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) err
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != ownerId {
+	if tenant.OwnerID != claims.GetUserId() {
 		return v1.ErrorForbidden("only owner can remove members")
 	}
 
@@ -93,7 +93,7 @@ func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) err
 }
 
 func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Member, error) {
-	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
@@ -104,7 +104,7 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Mem
 }
 
 func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
-	_, claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
+	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
 	if !ok {
 		return nil, v1.ErrorUnauthorized("jwt token is missing")
 	}
