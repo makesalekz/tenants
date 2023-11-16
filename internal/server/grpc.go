@@ -1,17 +1,17 @@
 package server
 
 import (
-	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/tenants/internal/data"
-	"gitlab.calendaria.team/services/tenants/internal/service"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
+	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"gitlab.calendaria.team/services/tenants/internal/data"
+	"gitlab.calendaria.team/services/tenants/internal/service"
 )
 
 // NewGRPCServer new a gRPC server.
@@ -22,13 +22,26 @@ func NewGRPCServer(
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,
 ) *grpc.Server {
+	tenantClaimsMatcher, commonClaimsMatcher := TenantMatchers()
+
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
 			metadata.Server(),
-			jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
-				return jwtp.GetSecret(), nil
-			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims { return &data.TenantClaims{} })),
+			selector.Server(
+				jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
+					return jwtp.GetSecret(), nil
+				}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims { return &data.TenantClaims{} })),
+			).
+				Match(tenantClaimsMatcher).
+				Build(),
+			selector.Server(
+				jwt.Server(func(token *jwtv4.Token) (interface{}, error) {
+					return jwtp.GetSecret(), nil
+				}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims { return &jwtv4.RegisteredClaims{} })),
+			).
+				Match(commonClaimsMatcher).
+				Build(),
 		),
 	}
 	if c.Server.Grpc.Network != "" {

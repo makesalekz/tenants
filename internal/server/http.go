@@ -1,8 +1,6 @@
 package server
 
 import (
-	"context"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
@@ -15,15 +13,6 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 )
-
-func TenantMatchers() (selector.MatchFunc, selector.MatchFunc) {
-	return func(ctx context.Context, operation string) bool {
-			return operation != "/tenants.v1.Tenants/CreateTenant"
-		},
-		func(ctx context.Context, operation string) bool {
-			return operation == "/tenants.v1.Tenants/CreateTenant"
-		}
-}
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(
