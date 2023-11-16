@@ -65,21 +65,33 @@ func (j *JwtProcessor) GetClaimsFromContext(ctx context.Context) *jwtv4.Register
 	return claims
 }
 
-func (j *JwtProcessor) GetTenantClaimsFromContext(ctx context.Context) (int64, *TenantClaims, bool) {
+func (j *JwtProcessor) GetTenantClaimsFromContext(ctx context.Context) (*TenantClaims, bool) {
 	token, ok := jwt.FromContext(ctx)
 	if !ok {
-		return 0, nil, false
+		return nil, false
 	}
 
 	claims, ok := token.(*TenantClaims)
 	if !ok {
-		return 0, nil, false
+		return nil, false
 	}
 
-	userId, err := strconv.ParseInt(claims.Subject, 10, 64)
+	return claims, true
+}
+
+func (tc *TenantClaims) GetUserId() int64 {
+	userId, err := strconv.ParseInt(tc.Subject, 10, 64)
 	if err != nil {
-		return 0, nil, false
+		return 0
 	}
 
-	return userId, claims, true
+	return userId
+}
+
+func (tc *TenantClaims) GetTenantId() int64 {
+	return tc.TenantId
+}
+
+func (tc *TenantClaims) GetIdentities() []string {
+	return append(tc.GroupsIds, tc.MemberId)
 }

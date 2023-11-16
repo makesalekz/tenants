@@ -6,6 +6,24 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /v1/tenants:
+        post:
+            tags:
+                - Tenants
+            operationId: Tenants_CreateTenant
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.CreateTenantRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.TenantReply'
     /v1/tenants/current:
         get:
             tags:
@@ -151,6 +169,11 @@ components:
                     type: array
                     items:
                         type: string
+        tenants.v1.CreateTenantRequest:
+            type: object
+            properties:
+                name:
+                    type: string
         tenants.v1.ListMembersReply:
             type: object
             properties:
