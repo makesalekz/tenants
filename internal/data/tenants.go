@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
@@ -43,10 +44,32 @@ func NewTenantsRepo(d *Data) TenantsRepo {
 }
 
 func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error) {
-	return r.db.Tenant.Create().
+	tx, err := r.db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	tenant, err := tx.Tenant.Create().
 		SetOwnerID(dto.OwnerId).
 		SetName(dto.Name).
 		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = tx.Member.Create().SetTenantID(tenant.ID).SetUserID(dto.OwnerId).SetIdentityID(uuid.New()).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tx.Commit()
+
+	return tenant, nil
 }
 
 func (r *tenantsRepo) UpdateTenant(ctx context.Context, tenantId int64, dto TenantDto) (*ent.Tenant, error) {
