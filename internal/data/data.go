@@ -4,17 +4,19 @@ import (
 	"context"
 	"os"
 
-	"gitlab.calendaria.team/services/tenants/ent"
-	_ "gitlab.calendaria.team/services/tenants/ent/runtime"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
+
 	_ "github.com/lib/pq"
+	_ "gitlab.calendaria.team/services/tenants/ent/runtime"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewConfig, NewJwtProcessor, NewNatsClient, NewDialer, NewTenantsRepo, NewMembersRepo)
+var ProviderSet = wire.NewSet(NewData, config.NewConfig, jwt.NewJwtProcessor, NewNatsClient, NewDialer, NewTenantsRepo, NewMembersRepo)
 
 // Data .
 type Data struct {

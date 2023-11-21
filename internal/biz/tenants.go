@@ -9,6 +9,8 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type TenantsList struct {
@@ -20,12 +22,12 @@ type TenantsList struct {
 type TenantsUsecase struct {
 	log       *log.Helper
 	discovery *consul.Registry
-	jwt       *data.JwtProcessor
+	jwt       *jwt.JwtProcessor
 	repo      data.TenantsRepo
 }
 
 // NewGreeterUsecase new a Greeter usecase.
-func NewTenantsUsecase(logger log.Logger, c *data.Config, jwt *data.JwtProcessor, repo data.TenantsRepo) (*TenantsUsecase, error) {
+func NewTenantsUsecase(logger log.Logger, c *config.Config, jwt *jwt.JwtProcessor, repo data.TenantsRepo) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
 		log:       log.NewHelper(logger),
 		discovery: c.GetRegistry(),

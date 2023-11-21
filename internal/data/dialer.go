@@ -4,21 +4,23 @@ import (
 	"context"
 
 	consul "github.com/go-kratos/consul/registry"
-	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
+	kjwt "github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type Dialer struct {
 	conf      *conf.Bootstrap
 	discovery *consul.Registry
-	jwt       *JwtProcessor
+	jwt       *jwt.JwtProcessor
 }
 
 // NewJwtProcessor .
-func NewDialer(c *Config, conf *conf.Bootstrap, jwt *JwtProcessor) (*Dialer, error) {
+func NewDialer(c *config.Config, conf *conf.Bootstrap, jwt *jwt.JwtProcessor) (*Dialer, error) {
 	return &Dialer{
 		conf:      conf,
 		discovery: c.GetRegistry(),
@@ -33,9 +35,9 @@ func (d *Dialer) Users(ctx context.Context) (iam_v1.UsersClient, error) {
 		grpc.WithDiscovery(d.discovery),
 		grpc.WithTimeout(d.conf.Discovery.IamTimeout.AsDuration()),
 		grpc.WithMiddleware(
-			jwt.Client(func(token *jwtv4.Token) (interface{}, error) {
+			kjwt.Client(func(token *jwtv4.Token) (interface{}, error) {
 				return d.jwt.GetSecret(), nil
-			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims {
+			}, kjwt.WithSigningMethod(jwtv4.SigningMethodHS256), kjwt.WithClaims(func() jwtv4.Claims {
 				claims, _ := d.jwt.GetClaimsFromContext(ctx)
 				return claims
 			})),

@@ -10,6 +10,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type MemberItem struct {
@@ -26,7 +27,7 @@ type MembersList struct {
 // MembersUsecase is a Greeter usecase.
 type MembersUsecase struct {
 	log         *log.Helper
-	jwt         *data.JwtProcessor
+	jwt         *jwt.JwtProcessor
 	dialer      *data.Dialer
 	tenantsRepo data.TenantsRepo
 	membersRepo data.MembersRepo
@@ -35,7 +36,7 @@ type MembersUsecase struct {
 // NewGreeterUsecase new a Greeter usecase.
 func NewMembersUsecase(
 	logger log.Logger,
-	jwt *data.JwtProcessor,
+	jwt *jwt.JwtProcessor,
 	dialer *data.Dialer,
 	tenantsRepo data.TenantsRepo,
 	membersRepo data.MembersRepo,
