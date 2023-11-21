@@ -39,7 +39,7 @@ func NewTenantsUsecase(logger log.Logger, c *config.Config, jwt *jwt.JwtProcesso
 func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserRequest() {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	dto.OwnerId = claims.GetUserId()
@@ -50,7 +50,7 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
@@ -62,7 +62,7 @@ func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.Tena
 func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
-		return v1.ErrorUnauthorized("Unauthorized")
+		return v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
@@ -73,7 +73,7 @@ func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
 func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, error) {
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
@@ -89,7 +89,7 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 	// TODO: check permissions to get all tenants
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	filter.UserId = claims.GetUserId()
