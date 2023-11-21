@@ -88,7 +88,7 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 
 	// TODO: check permissions to get all tenants
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	if !ok || !claims.IsUserRequest() {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
