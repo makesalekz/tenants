@@ -24,7 +24,7 @@ import (
 
 // wireApp init kratos application.
 func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
-	config, err := data.NewConfig(bootstrap)
+	config, err := data.NewConfig()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -42,7 +42,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	dialer, err := data.NewDialer(config, jwtProcessor)
+	dialer, err := data.NewDialer(config, bootstrap, jwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

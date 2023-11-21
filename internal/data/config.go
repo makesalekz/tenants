@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-
 	"github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -22,11 +20,10 @@ type Config struct {
 	appPath      string
 	consulClient *api.Client
 
-	Bootstrap *conf.Bootstrap
-	vault     *vault.Client
+	vault *vault.Client
 }
 
-func NewConfig(bootstrap *conf.Bootstrap) (*Config, error) {
+func NewConfig() (*Config, error) {
 	appName := os.Getenv("SERVICE_NAME")
 	if appName == "" {
 		return nil, fmt.Errorf("SERVICE_NAME not found")
@@ -65,7 +62,6 @@ func NewConfig(bootstrap *conf.Bootstrap) (*Config, error) {
 		appName:      appName,
 		appPath:      appPath,
 		Config:       cfg,
-		Bootstrap:    bootstrap,
 	}, nil
 }
 

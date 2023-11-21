@@ -2,6 +2,7 @@ package data
 
 import (
 	"github.com/nats-io/nats.go"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
 )
 
 type NatsClient struct {
@@ -9,8 +10,8 @@ type NatsClient struct {
 }
 
 // NewNatsClient .
-func NewNatsClient(c *Config) (*NatsClient, func(), error) {
-	nc, err := nats.Connect(c.Bootstrap.Nats)
+func NewNatsClient(conf *conf.Bootstrap) (*NatsClient, func(), error) {
+	nc, err := nats.Connect(conf.Nats)
 	if err != nil {
 		return nil, nil, err
 	}

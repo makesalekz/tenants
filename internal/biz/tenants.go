@@ -7,7 +7,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
@@ -19,7 +18,6 @@ type TenantsList struct {
 
 // TenantsUsecase is a Greeter usecase.
 type TenantsUsecase struct {
-	conf      *conf.Bootstrap
 	log       *log.Helper
 	discovery *consul.Registry
 	jwt       *data.JwtProcessor
@@ -29,7 +27,6 @@ type TenantsUsecase struct {
 // NewGreeterUsecase new a Greeter usecase.
 func NewTenantsUsecase(logger log.Logger, c *data.Config, jwt *data.JwtProcessor, repo data.TenantsRepo) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
-		conf:      c.Bootstrap,
 		log:       log.NewHelper(logger),
 		discovery: c.GetRegistry(),
 		jwt:       jwt,

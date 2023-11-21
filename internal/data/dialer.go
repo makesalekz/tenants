@@ -3,14 +3,12 @@ package data
 import (
 	"context"
 
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-
-	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
-
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
+	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
 )
 
 type Dialer struct {
@@ -20,9 +18,9 @@ type Dialer struct {
 }
 
 // NewJwtProcessor .
-func NewDialer(c *Config, jwt *JwtProcessor) (*Dialer, error) {
+func NewDialer(c *Config, conf *conf.Bootstrap, jwt *JwtProcessor) (*Dialer, error) {
 	return &Dialer{
-		conf:      c.Bootstrap,
+		conf:      conf,
 		discovery: c.GetRegistry(),
 		jwt:       jwt,
 	}, nil
