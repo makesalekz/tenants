@@ -224,8 +224,6 @@ components:
                     type: string
                 createdAt:
                     type: string
-                updatedAt:
-                    type: string
         tenants.v1.TenantReply:
             type: object
             properties:

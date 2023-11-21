@@ -38,7 +38,8 @@ func (d *Dialer) Users(ctx context.Context) (iam_v1.UsersClient, error) {
 			jwt.Client(func(token *jwtv4.Token) (interface{}, error) {
 				return d.jwt.GetSecret(), nil
 			}, jwt.WithSigningMethod(jwtv4.SigningMethodHS256), jwt.WithClaims(func() jwtv4.Claims {
-				return d.jwt.GetClaimsFromContext(ctx)
+				claims, _ := d.jwt.GetClaimsFromContext(ctx)
+				return claims
 			})),
 		),
 	)

@@ -38,19 +38,19 @@ func NewTenantsUsecase(logger log.Logger, c *data.Config, jwt *data.JwtProcessor
 }
 
 func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	userId, ok := uc.jwt.GetUserIdFromContext(ctx)
-	if !ok {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserRequest() {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
-	dto.OwnerId = userId
+	dto.OwnerId = claims.GetUserId()
 
 	return uc.repo.CreateTenant(ctx, dto)
 }
 
 func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
@@ -61,8 +61,8 @@ func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.Tena
 }
 
 func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
 		return v1.ErrorUnauthorized("Unauthorized")
 	}
 
@@ -72,8 +72,8 @@ func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
 }
 
 func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 
@@ -88,8 +88,8 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 	}
 
 	// TODO: check permissions to get all tenants
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("Unauthorized")
 	}
 

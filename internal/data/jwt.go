@@ -16,6 +16,7 @@ type JwtProcessor struct {
 type TenantClaims struct {
 	jwtv4.RegisteredClaims
 
+	userId    *int64
 	TenantId  int64    `json:"tenant,omitempty"`
 	MemberId  string   `json:"member,omitempty"`
 	GroupsIds []string `json:"groups,omitempty"`
@@ -37,35 +38,7 @@ func (j *JwtProcessor) GetSecret() []byte {
 	return j.jwtSecret
 }
 
-func (j *JwtProcessor) GetUserIdFromContext(ctx context.Context) (int64, bool) {
-	claims := j.GetClaimsFromContext(ctx)
-	if claims == nil {
-		return 0, false
-	}
-
-	userId, err := strconv.ParseInt(claims.Subject, 10, 64)
-	if err != nil {
-		return 0, false
-	}
-
-	return userId, true
-}
-
-func (j *JwtProcessor) GetClaimsFromContext(ctx context.Context) *jwtv4.RegisteredClaims {
-	token, ok := jwt.FromContext(ctx)
-	if !ok {
-		return nil
-	}
-
-	claims, ok := token.(*jwtv4.RegisteredClaims)
-	if !ok {
-		return nil
-	}
-
-	return claims
-}
-
-func (j *JwtProcessor) GetTenantClaimsFromContext(ctx context.Context) (*TenantClaims, bool) {
+func (j *JwtProcessor) GetClaimsFromContext(ctx context.Context) (*TenantClaims, bool) {
 	token, ok := jwt.FromContext(ctx)
 	if !ok {
 		return nil, false
@@ -79,11 +52,25 @@ func (j *JwtProcessor) GetTenantClaimsFromContext(ctx context.Context) (*TenantC
 	return claims, true
 }
 
-func (tc *TenantClaims) GetUserId() int64 {
-	userId, err := strconv.ParseInt(tc.Subject, 10, 64)
-	if err != nil {
+func (j *JwtProcessor) GetUserIdFromContext(ctx context.Context) int64 {
+	claims, ok := j.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserRequest() {
 		return 0
 	}
+
+	return claims.GetUserId()
+}
+
+func (tc *TenantClaims) GetUserId() int64 {
+	if tc.userId != nil {
+		return *tc.userId
+	}
+
+	userId, err := strconv.ParseInt(tc.Subject, 10, 64)
+	if err != nil {
+		userId = 0
+	}
+	tc.userId = &userId
 
 	return userId
 }
@@ -94,4 +81,12 @@ func (tc *TenantClaims) GetTenantId() int64 {
 
 func (tc *TenantClaims) GetIdentities() []string {
 	return append(tc.GroupsIds, tc.MemberId)
+}
+
+func (tc *TenantClaims) IsUserRequest() bool {
+	return tc.Issuer == "iam" && tc.GetUserId() != 0
+}
+
+func (tc *TenantClaims) IsUserTenantRequest() bool {
+	return tc.IsUserRequest() && tc.GetTenantId() != 0
 }
