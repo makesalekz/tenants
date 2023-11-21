@@ -3,10 +3,10 @@ package biz
 import (
 	"context"
 
-	"gitlab.calendaria.team/services/tenants/internal/data"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/nats-io/nats.go"
+	"gitlab.calendaria.team/services/tenants/internal/data"
+	"gitlab.calendaria.team/services/utils/v1/config"
 )
 
 type QueueManager struct {
@@ -16,7 +16,7 @@ type QueueManager struct {
 	queues  map[string]*Queue
 }
 
-func NewQueueManager(c *data.Config, nc *data.NatsClient, logger log.Logger) *QueueManager {
+func NewQueueManager(c *config.Config, nc *data.NatsClient, logger log.Logger) *QueueManager {
 	return &QueueManager{
 		nc:      nc,
 		log:     log.NewHelper(logger),

@@ -10,6 +10,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type MemberItem struct {
@@ -26,7 +27,7 @@ type MembersList struct {
 // MembersUsecase is a Greeter usecase.
 type MembersUsecase struct {
 	log         *log.Helper
-	jwt         *data.JwtProcessor
+	jwt         *jwt.JwtProcessor
 	dialer      *data.Dialer
 	tenantsRepo data.TenantsRepo
 	membersRepo data.MembersRepo
@@ -35,7 +36,7 @@ type MembersUsecase struct {
 // NewGreeterUsecase new a Greeter usecase.
 func NewMembersUsecase(
 	logger log.Logger,
-	jwt *data.JwtProcessor,
+	jwt *jwt.JwtProcessor,
 	dialer *data.Dialer,
 	tenantsRepo data.TenantsRepo,
 	membersRepo data.MembersRepo,
@@ -50,12 +51,12 @@ func NewMembersUsecase(
 }
 
 func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) ([]*ent.Member, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("jwt token is missing")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.TenantId)
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
 	if err != nil {
 		return nil, err
 	}
@@ -69,9 +70,9 @@ func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) (
 }
 
 func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) error {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return v1.ErrorUnauthorized("jwt token is missing")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return v1.ErrorUnauthorized("invalid token")
 	}
 
 	memberUUID, err := uuid.FromBytes([]byte(memberId))
@@ -79,7 +80,7 @@ func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) err
 		return v1.ErrorInvalidRequest("invalid member id")
 	}
 
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.TenantId)
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
 	if err != nil {
 		return err
 	}
@@ -93,20 +94,18 @@ func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) err
 }
 
 func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Member, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("jwt token is missing")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	uc.log.Debugf("claims: %+v", claims)
-
-	return uc.membersRepo.GetMember(ctx, claims.TenantId, userId)
+	return uc.membersRepo.GetMember(ctx, claims.GetTenantId(), userId)
 }
 
 func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("jwt token is missing")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	if paginate == nil {
@@ -114,7 +113,7 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *utils_v1.Pa
 	}
 
 	filter := data.MembersListFilter{
-		TenantId: claims.TenantId,
+		TenantId: claims.GetTenantId(),
 	}
 
 	members, err := uc.membersRepo.ListMembers(ctx, filter, paginate)

@@ -7,9 +7,10 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type TenantsList struct {
@@ -19,17 +20,15 @@ type TenantsList struct {
 
 // TenantsUsecase is a Greeter usecase.
 type TenantsUsecase struct {
-	conf      *conf.Bootstrap
 	log       *log.Helper
 	discovery *consul.Registry
-	jwt       *data.JwtProcessor
+	jwt       *jwt.JwtProcessor
 	repo      data.TenantsRepo
 }
 
 // NewGreeterUsecase new a Greeter usecase.
-func NewTenantsUsecase(logger log.Logger, c *data.Config, jwt *data.JwtProcessor, repo data.TenantsRepo) (*TenantsUsecase, error) {
+func NewTenantsUsecase(logger log.Logger, c *config.Config, jwt *jwt.JwtProcessor, repo data.TenantsRepo) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
-		conf:      c.Bootstrap,
 		log:       log.NewHelper(logger),
 		discovery: c.GetRegistry(),
 		jwt:       jwt,
@@ -38,20 +37,20 @@ func NewTenantsUsecase(logger log.Logger, c *data.Config, jwt *data.JwtProcessor
 }
 
 func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	userId, ok := uc.jwt.GetUserIdFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	dto.OwnerId = userId
+	dto.OwnerId = claims.GetUserId()
 
 	return uc.repo.CreateTenant(ctx, dto)
 }
 
 func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
@@ -61,9 +60,9 @@ func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.Tena
 }
 
 func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return v1.ErrorUnauthorized("Unauthorized")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
@@ -72,9 +71,9 @@ func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
 }
 
 func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
@@ -88,9 +87,9 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 	}
 
 	// TODO: check permissions to get all tenants
-	claims, ok := uc.jwt.GetTenantClaimsFromContext(ctx)
-	if !ok {
-		return nil, v1.ErrorUnauthorized("Unauthorized")
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	filter.UserId = claims.GetUserId()
