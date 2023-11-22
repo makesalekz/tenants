@@ -99,6 +99,8 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 		return nil, err
 	}
 
+	uc.log.Debug("ListTenants", "claims", claims, "filter", filter, "tenants", tenants)
+
 	total, err := uc.repo.CountListTenants(ctx, filter)
 	if err != nil {
 		return nil, err
