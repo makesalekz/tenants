@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Invite is the client for interacting with the Invite builders.
+	Invite *InviteClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
 	// Tenant is the client for interacting with the Tenant builders.
@@ -147,6 +149,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Invite = NewInviteClient(tx.config)
 	tx.Member = NewMemberClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)
 }
@@ -158,7 +161,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Member.QueryXXX(), the query will be executed
+// applies a query, for example: Invite.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

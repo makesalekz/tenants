@@ -20,6 +20,7 @@ func NewGRPCServer(
 	jwtp *jwt.JwtProcessor,
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,
+	invitesService *service.InvitesService,
 ) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -43,6 +44,7 @@ func NewGRPCServer(
 
 	tenants_v1.RegisterTenantsServer(srv, tenantsService)
 	tenants_v1.RegisterMembersServer(srv, membersService)
+	tenants_v1.RegisterInvitesServer(srv, invitesService)
 
 	return srv
 }

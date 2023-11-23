@@ -20,6 +20,7 @@ func NewHTTPServer(
 	jwtp *jwt.JwtProcessor,
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,
+	invitesService *service.InvitesService,
 ) *khttp.Server {
 	var opts = []khttp.ServerOption{
 		khttp.Middleware(
@@ -43,6 +44,7 @@ func NewHTTPServer(
 
 	v1.RegisterTenantsHTTPServer(srv, tenantsService)
 	v1.RegisterMembersHTTPServer(srv, membersService)
+	v1.RegisterInvitesHTTPServer(srv, invitesService)
 
 	return srv
 }

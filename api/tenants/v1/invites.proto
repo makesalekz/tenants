@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package tenants.v1;
+
+import "google/api/annotations.proto";
+import "utils/v1/models.proto";
+import "iam/v1/models.proto";
+
+option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
+option java_multiple_files = true;
+option java_package = "tenants.v1";
+
+service Invites {
+	rpc CreateInvites (CreateInvitesRequest) returns (ListInvitesReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites"
+			body: "*"
+		};
+	};
+	rpc UpdateInvite (UpdateInviteRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			put: "/v1/tenants/invites/{inviteId}"
+			body: "*"
+		};
+	};
+	rpc DeleteInvite (DeleteInviteRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			delete: "/v1/tenants/invites/{inviteId}"
+		};
+	};
+	rpc ListInvites (ListInvitesRequest) returns (ListInvitesReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites/list"
+			body: "*"
+		};
+	};
+}
+
+message CreateInvitesRequest {
+	repeated string emails = 1;
+}
+
+message UpdateInviteRequest {
+	int64 inviteId = 1;
+	Status status = 2;
+}
+
+message DeleteInviteRequest {
+	int64 inviteId = 1;
+}
+
+message ListInvitesRequest {
+	utils.v1.PaginateRequest paginate = 1;
+}
+
+message ListInvitesReply {
+	repeated Invite invites = 1;
+	optional utils.v1.PaginateReply paginate = 2;
+}
+
+enum Status {
+	NEW = 0;
+	SENT = 1;
+	SHOWN = 2;
+	ACCEPTED = 3;
+	DECLINED = 4;
+	CANCELED = 5;
+}
+
+message Invite {
+	int64 id = 1;
+	string email = 2;
+	Status status = 3;
+	string createdAt = 4;
+	string updatedAt = 5;
+	
+	iam.v1.UserShort user = 6;
+}

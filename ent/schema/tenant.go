@@ -30,6 +30,7 @@ func (Tenant) Fields() []ent.Field {
 func (Tenant) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("members", Member.Type),
+		edge.To("invites", Invite.Type),
 	}
 }
 

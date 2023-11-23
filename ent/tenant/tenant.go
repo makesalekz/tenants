@@ -27,6 +27,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeMembers holds the string denoting the members edge name in mutations.
 	EdgeMembers = "members"
+	// EdgeInvites holds the string denoting the invites edge name in mutations.
+	EdgeInvites = "invites"
 	// Table holds the table name of the tenant in the database.
 	Table = "tenants"
 	// MembersTable is the table that holds the members relation/edge.
@@ -36,6 +38,13 @@ const (
 	MembersInverseTable = "members"
 	// MembersColumn is the table column denoting the members relation/edge.
 	MembersColumn = "tenant_id"
+	// InvitesTable is the table that holds the invites relation/edge.
+	InvitesTable = "invites"
+	// InvitesInverseTable is the table name for the Invite entity.
+	// It exists in this package in order to avoid circular dependency with the "invite" package.
+	InvitesInverseTable = "invites"
+	// InvitesColumn is the table column denoting the invites relation/edge.
+	InvitesColumn = "tenant_id"
 )
 
 // Columns holds all SQL columns for tenant fields.
@@ -118,10 +127,31 @@ func ByMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByInvitesCount orders the results by invites count.
+func ByInvitesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInvitesStep(), opts...)
+	}
+}
+
+// ByInvites orders the results by invites terms.
+func ByInvites(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInvitesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMembersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(MembersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, MembersTable, MembersColumn),
+	)
+}
+func newInvitesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InvitesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InvitesTable, InvitesColumn),
 	)
 }

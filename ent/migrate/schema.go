@@ -8,6 +8,38 @@ import (
 )
 
 var (
+	// InvitesColumns holds the columns for the "invites" table.
+	InvitesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "code", Type: field.TypeUUID},
+		{Name: "email", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"NEW", "SENT", "SHOWN", "ACCEPTED", "DECLINED", "CANCELED"}, Default: "NEW"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_id", Type: field.TypeInt64},
+	}
+	// InvitesTable holds the schema information for the "invites" table.
+	InvitesTable = &schema.Table{
+		Name:       "invites",
+		Columns:    InvitesColumns,
+		PrimaryKey: []*schema.Column{InvitesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invites_tenants_invites",
+				Columns:    []*schema.Column{InvitesColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "invite_tenant_id_email",
+				Unique:  true,
+				Columns: []*schema.Column{InvitesColumns[7], InvitesColumns[2]},
+			},
+		},
+	}
 	// MembersColumns holds the columns for the "members" table.
 	MembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -55,11 +87,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		InvitesTable,
 		MembersTable,
 		TenantsTable,
 	}
 )
 
 func init() {
+	InvitesTable.ForeignKeys[0].RefTable = TenantsTable
 	MembersTable.ForeignKeys[0].RefTable = TenantsTable
 }

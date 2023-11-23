@@ -64,6 +64,83 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/utils.v1.EmptyReply'
+    /v1/tenants/invites:
+        post:
+            tags:
+                - Invites
+            operationId: Invites_CreateInvites
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.CreateInvitesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.ListInvitesReply'
+    /v1/tenants/invites/list:
+        post:
+            tags:
+                - Invites
+            operationId: Invites_ListInvites
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.ListInvitesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.ListInvitesReply'
+    /v1/tenants/invites/{inviteId}:
+        put:
+            tags:
+                - Invites
+            operationId: Invites_UpdateInvite
+            parameters:
+                - name: inviteId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.UpdateInviteRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
+        delete:
+            tags:
+                - Invites
+            operationId: Invites_DeleteInvite
+            parameters:
+                - name: inviteId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/list:
         post:
             tags:
@@ -162,6 +239,13 @@ components:
                     type: string
                 relation:
                     $ref: '#/components/schemas/iam.v1.Relation'
+        tenants.v1.CreateInvitesRequest:
+            type: object
+            properties:
+                emails:
+                    type: array
+                    items:
+                        type: string
         tenants.v1.CreateMembersRequest:
             type: object
             properties:
@@ -174,6 +258,36 @@ components:
             properties:
                 name:
                     type: string
+        tenants.v1.Invite:
+            type: object
+            properties:
+                id:
+                    type: string
+                email:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/iam.v1.UserShort'
+        tenants.v1.ListInvitesReply:
+            type: object
+            properties:
+                invites:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/tenants.v1.Invite'
+                paginate:
+                    $ref: '#/components/schemas/utils.v1.PaginateReply'
+        tenants.v1.ListInvitesRequest:
+            type: object
+            properties:
+                paginate:
+                    $ref: '#/components/schemas/utils.v1.PaginateRequest'
         tenants.v1.ListMembersReply:
             type: object
             properties:
@@ -229,6 +343,14 @@ components:
             properties:
                 tenant:
                     $ref: '#/components/schemas/tenants.v1.Tenant'
+        tenants.v1.UpdateInviteRequest:
+            type: object
+            properties:
+                inviteId:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
         tenants.v1.UpdateTenantRequest:
             type: object
             properties:
@@ -276,5 +398,6 @@ components:
                 descending:
                     type: boolean
 tags:
+    - name: Invites
     - name: Members
     - name: Tenants

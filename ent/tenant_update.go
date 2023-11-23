@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
@@ -98,6 +99,21 @@ func (tu *TenantUpdate) AddMembers(m ...*Member) *TenantUpdate {
 	return tu.AddMemberIDs(ids...)
 }
 
+// AddInviteIDs adds the "invites" edge to the Invite entity by IDs.
+func (tu *TenantUpdate) AddInviteIDs(ids ...int64) *TenantUpdate {
+	tu.mutation.AddInviteIDs(ids...)
+	return tu
+}
+
+// AddInvites adds the "invites" edges to the Invite entity.
+func (tu *TenantUpdate) AddInvites(i ...*Invite) *TenantUpdate {
+	ids := make([]int64, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tu.AddInviteIDs(ids...)
+}
+
 // Mutation returns the TenantMutation object of the builder.
 func (tu *TenantUpdate) Mutation() *TenantMutation {
 	return tu.mutation
@@ -122,6 +138,27 @@ func (tu *TenantUpdate) RemoveMembers(m ...*Member) *TenantUpdate {
 		ids[i] = m[i].ID
 	}
 	return tu.RemoveMemberIDs(ids...)
+}
+
+// ClearInvites clears all "invites" edges to the Invite entity.
+func (tu *TenantUpdate) ClearInvites() *TenantUpdate {
+	tu.mutation.ClearInvites()
+	return tu
+}
+
+// RemoveInviteIDs removes the "invites" edge to Invite entities by IDs.
+func (tu *TenantUpdate) RemoveInviteIDs(ids ...int64) *TenantUpdate {
+	tu.mutation.RemoveInviteIDs(ids...)
+	return tu
+}
+
+// RemoveInvites removes "invites" edges to Invite entities.
+func (tu *TenantUpdate) RemoveInvites(i ...*Invite) *TenantUpdate {
+	ids := make([]int64, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tu.RemoveInviteIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -229,6 +266,51 @@ func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.InvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedInvitesIDs(); len(nodes) > 0 && !tu.mutation.InvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.InvitesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(tu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -319,6 +401,21 @@ func (tuo *TenantUpdateOne) AddMembers(m ...*Member) *TenantUpdateOne {
 	return tuo.AddMemberIDs(ids...)
 }
 
+// AddInviteIDs adds the "invites" edge to the Invite entity by IDs.
+func (tuo *TenantUpdateOne) AddInviteIDs(ids ...int64) *TenantUpdateOne {
+	tuo.mutation.AddInviteIDs(ids...)
+	return tuo
+}
+
+// AddInvites adds the "invites" edges to the Invite entity.
+func (tuo *TenantUpdateOne) AddInvites(i ...*Invite) *TenantUpdateOne {
+	ids := make([]int64, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tuo.AddInviteIDs(ids...)
+}
+
 // Mutation returns the TenantMutation object of the builder.
 func (tuo *TenantUpdateOne) Mutation() *TenantMutation {
 	return tuo.mutation
@@ -343,6 +440,27 @@ func (tuo *TenantUpdateOne) RemoveMembers(m ...*Member) *TenantUpdateOne {
 		ids[i] = m[i].ID
 	}
 	return tuo.RemoveMemberIDs(ids...)
+}
+
+// ClearInvites clears all "invites" edges to the Invite entity.
+func (tuo *TenantUpdateOne) ClearInvites() *TenantUpdateOne {
+	tuo.mutation.ClearInvites()
+	return tuo
+}
+
+// RemoveInviteIDs removes the "invites" edge to Invite entities by IDs.
+func (tuo *TenantUpdateOne) RemoveInviteIDs(ids ...int64) *TenantUpdateOne {
+	tuo.mutation.RemoveInviteIDs(ids...)
+	return tuo
+}
+
+// RemoveInvites removes "invites" edges to Invite entities.
+func (tuo *TenantUpdateOne) RemoveInvites(i ...*Invite) *TenantUpdateOne {
+	ids := make([]int64, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tuo.RemoveInviteIDs(ids...)
 }
 
 // Where appends a list predicates to the TenantUpdate builder.
@@ -473,6 +591,51 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.InvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedInvitesIDs(); len(nodes) > 0 && !tuo.mutation.InvitesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.InvitesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
