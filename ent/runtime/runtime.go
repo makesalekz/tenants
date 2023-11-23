@@ -5,6 +5,7 @@ package runtime
 import (
 	"time"
 
+	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/schema"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
@@ -14,6 +15,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	inviteFields := schema.Invite{}.Fields()
+	_ = inviteFields
+	// inviteDescCreatedAt is the schema descriptor for created_at field.
+	inviteDescCreatedAt := inviteFields[5].Descriptor()
+	// invite.DefaultCreatedAt holds the default value on creation for the created_at field.
+	invite.DefaultCreatedAt = inviteDescCreatedAt.Default.(func() time.Time)
+	// inviteDescUpdatedAt is the schema descriptor for updated_at field.
+	inviteDescUpdatedAt := inviteFields[6].Descriptor()
+	// invite.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	invite.DefaultUpdatedAt = inviteDescUpdatedAt.Default.(func() time.Time)
 	memberMixin := schema.Member{}.Mixin()
 	memberMixinHooks0 := memberMixin[0].Hooks()
 	member.Hooks[0] = memberMixinHooks0[0]

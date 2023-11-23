@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
@@ -15,8 +16,28 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 2)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
 	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   invite.Table,
+			Columns: invite.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt64,
+				Column: invite.FieldID,
+			},
+		},
+		Type: "Invite",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			invite.FieldTenantID:  {Type: field.TypeInt64, Column: invite.FieldTenantID},
+			invite.FieldCode:      {Type: field.TypeUUID, Column: invite.FieldCode},
+			invite.FieldEmail:     {Type: field.TypeString, Column: invite.FieldEmail},
+			invite.FieldUserID:    {Type: field.TypeInt64, Column: invite.FieldUserID},
+			invite.FieldStatus:    {Type: field.TypeEnum, Column: invite.FieldStatus},
+			invite.FieldCreatedAt: {Type: field.TypeTime, Column: invite.FieldCreatedAt},
+			invite.FieldUpdatedAt: {Type: field.TypeTime, Column: invite.FieldUpdatedAt},
+		},
+	}
+	graph.Nodes[1] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   member.Table,
 			Columns: member.Columns,
@@ -34,7 +55,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			member.FieldCreatedAt:  {Type: field.TypeTime, Column: member.FieldCreatedAt},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{
+	graph.Nodes[2] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
@@ -52,6 +73,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldUpdatedAt: {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
 		},
 	}
+	graph.MustAddE(
+		"tenant",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   invite.TenantTable,
+			Columns: []string{invite.TenantColumn},
+			Bidi:    false,
+		},
+		"Invite",
+		"Tenant",
+	)
 	graph.MustAddE(
 		"tenant",
 		&sqlgraph.EdgeSpec{
@@ -76,6 +109,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"Tenant",
 		"Member",
 	)
+	graph.MustAddE(
+		"invites",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+		},
+		"Tenant",
+		"Invite",
+	)
 	return graph
 }()
 
@@ -83,6 +128,95 @@ var schemaGraph = func() *sqlgraph.Schema {
 // All update, update-one and query builders implement this interface.
 type predicateAdder interface {
 	addPredicate(func(s *sql.Selector))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (iq *InviteQuery) addPredicate(pred func(s *sql.Selector)) {
+	iq.predicates = append(iq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the InviteQuery builder.
+func (iq *InviteQuery) Filter() *InviteFilter {
+	return &InviteFilter{config: iq.config, predicateAdder: iq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *InviteMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the InviteMutation builder.
+func (m *InviteMutation) Filter() *InviteFilter {
+	return &InviteFilter{config: m.config, predicateAdder: m}
+}
+
+// InviteFilter provides a generic filtering capability at runtime for InviteQuery.
+type InviteFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *InviteFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[0].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int64 predicate on the id field.
+func (f *InviteFilter) WhereID(p entql.Int64P) {
+	f.Where(p.Field(invite.FieldID))
+}
+
+// WhereTenantID applies the entql int64 predicate on the tenant_id field.
+func (f *InviteFilter) WhereTenantID(p entql.Int64P) {
+	f.Where(p.Field(invite.FieldTenantID))
+}
+
+// WhereCode applies the entql [16]byte predicate on the code field.
+func (f *InviteFilter) WhereCode(p entql.ValueP) {
+	f.Where(p.Field(invite.FieldCode))
+}
+
+// WhereEmail applies the entql string predicate on the email field.
+func (f *InviteFilter) WhereEmail(p entql.StringP) {
+	f.Where(p.Field(invite.FieldEmail))
+}
+
+// WhereUserID applies the entql int64 predicate on the user_id field.
+func (f *InviteFilter) WhereUserID(p entql.Int64P) {
+	f.Where(p.Field(invite.FieldUserID))
+}
+
+// WhereStatus applies the entql string predicate on the status field.
+func (f *InviteFilter) WhereStatus(p entql.StringP) {
+	f.Where(p.Field(invite.FieldStatus))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *InviteFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(invite.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *InviteFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(invite.FieldUpdatedAt))
+}
+
+// WhereHasTenant applies a predicate to check if query has an edge tenant.
+func (f *InviteFilter) WhereHasTenant() {
+	f.Where(entql.HasEdge("tenant"))
+}
+
+// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
+func (f *InviteFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
+	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -114,7 +248,7 @@ type MemberFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MemberFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[0].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -193,7 +327,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -237,6 +371,20 @@ func (f *TenantFilter) WhereHasMembers() {
 // WhereHasMembersWith applies a predicate to check if query has an edge members with a given conditions (other predicates).
 func (f *TenantFilter) WhereHasMembersWith(preds ...predicate.Member) {
 	f.Where(entql.HasEdgeWith("members", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasInvites applies a predicate to check if query has an edge invites.
+func (f *TenantFilter) WhereHasInvites() {
+	f.Where(entql.HasEdge("invites"))
+}
+
+// WhereHasInvitesWith applies a predicate to check if query has an edge invites with a given conditions (other predicates).
+func (f *TenantFilter) WhereHasInvitesWith(preds ...predicate.Invite) {
+	f.Where(entql.HasEdgeWith("invites", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

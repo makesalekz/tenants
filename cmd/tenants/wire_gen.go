@@ -57,8 +57,20 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	}
 	tenantsService := service.NewTenantsService(tenantsUsecase, membersUsecase)
 	membersService := service.NewMembersService(membersUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, logger, jwtProcessor, tenantsService, membersService)
-	httpServer := server.NewHTTPServer(bootstrap, logger, jwtProcessor, tenantsService, membersService)
+	invitesRepo := data.NewInvitesRepo(dataData)
+	iamRemote, err := data.NewIamRemote(dialer)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	invitesUsecase, err := biz.NewInvitesUsecase(logger, jwtProcessor, tenantsRepo, invitesRepo, iamRemote)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	invitesService := service.NewInvitesService(invitesUsecase)
+	grpcServer := server.NewGRPCServer(bootstrap, logger, jwtProcessor, tenantsService, membersService, invitesService)
+	httpServer := server.NewHTTPServer(bootstrap, logger, jwtProcessor, tenantsService, membersService, invitesService)
 	app := newApp(logger, configConfig, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
@@ -96,6 +97,21 @@ func (tc *TenantCreate) AddMembers(m ...*Member) *TenantCreate {
 		ids[i] = m[i].ID
 	}
 	return tc.AddMemberIDs(ids...)
+}
+
+// AddInviteIDs adds the "invites" edge to the Invite entity by IDs.
+func (tc *TenantCreate) AddInviteIDs(ids ...int64) *TenantCreate {
+	tc.mutation.AddInviteIDs(ids...)
+	return tc
+}
+
+// AddInvites adds the "invites" edges to the Invite entity.
+func (tc *TenantCreate) AddInvites(i ...*Invite) *TenantCreate {
+	ids := make([]int64, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tc.AddInviteIDs(ids...)
 }
 
 // Mutation returns the TenantMutation object of the builder.
@@ -228,6 +244,22 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.InvitesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.InvitesTable,
+			Columns: []string{tenant.InvitesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

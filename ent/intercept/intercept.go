@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
@@ -69,6 +70,33 @@ func (f TraverseFunc) Traverse(ctx context.Context, q ent.Query) error {
 	return f(ctx, query)
 }
 
+// The InviteFunc type is an adapter to allow the use of ordinary function as a Querier.
+type InviteFunc func(context.Context, *ent.InviteQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f InviteFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.InviteQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.InviteQuery", q)
+}
+
+// The TraverseInvite type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseInvite func(context.Context, *ent.InviteQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseInvite) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseInvite) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.InviteQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.InviteQuery", q)
+}
+
 // The MemberFunc type is an adapter to allow the use of ordinary function as a Querier.
 type MemberFunc func(context.Context, *ent.MemberQuery) (ent.Value, error)
 
@@ -126,6 +154,8 @@ func (f TraverseTenant) Traverse(ctx context.Context, q ent.Query) error {
 // NewQuery returns the generic Query interface for the given typed query.
 func NewQuery(q ent.Query) (Query, error) {
 	switch q := q.(type) {
+	case *ent.InviteQuery:
+		return &query[*ent.InviteQuery, predicate.Invite, invite.OrderOption]{typ: ent.TypeInvite, tq: q}, nil
 	case *ent.MemberQuery:
 		return &query[*ent.MemberQuery, predicate.Member, member.OrderOption]{typ: ent.TypeMember, tq: q}, nil
 	case *ent.TenantQuery:
