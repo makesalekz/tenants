@@ -102,21 +102,17 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Mem
 	return uc.membersRepo.GetMember(ctx, claims.GetTenantId(), userId)
 }
 
-func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
+func (uc *MembersUsecase) ListMembers(ctx context.Context, search string, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	if paginate == nil {
-		paginate = &utils_v1.PaginateRequest{}
 	}
 
 	filter := data.MembersListFilter{
 		TenantId: claims.GetTenantId(),
 	}
 
-	members, err := uc.membersRepo.ListMembers(ctx, filter, paginate)
+	members, err := uc.membersRepo.ListMembers(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -126,44 +122,40 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, paginate *utils_v1.Pa
 		return nil, err
 	}
 
-	paginateReply := utils_v1.PaginateReply{
-		Total: &total,
-	}
-
-	if len(members) == int(paginate.Limit) {
-		paginateReply.FromId = &members[len(members)-1].ID
-	}
-
 	usersIds := make([]int64, len(members))
+	membersMap := make(map[int64]*ent.Member)
 	for i, member := range members {
 		usersIds[i] = member.UserID
+		membersMap[member.UserID] = member
 	}
 
 	usersClient, err := uc.dialer.Users(ctx)
 	if err != nil {
-		return nil, v1.ErrorGrpcConnection("dialer.Users: %s", err.Error())
+		return nil, v1.ErrorGrpcConnection("iam: %s", err.Error())
 	}
 
-	reply, err := usersClient.GetUsers(ctx, &iam_v1.GetUsersRequest{Ids: usersIds})
+	reply, err := usersClient.GetUsers(ctx, &iam_v1.GetUsersRequest{
+		Ids:      usersIds,
+		Search:   search,
+		Sort:     sort,
+		Paginate: paginate,
+	})
 	if err != nil {
-		return nil, v1.ErrorServiceFailed("usersClient.GetUsers: %s", err.Error())
+		return nil, v1.ErrorServiceFailed("iam: %s", err.Error())
 	}
 
-	users := make(map[int64]*iam_v1.UserShort)
-	for _, user := range reply.GetUsers() {
-		users[user.Id] = user
-	}
-
-	membersItems := make([]MemberItem, len(members))
-	for i, member := range members {
+	membersItems := make([]MemberItem, len(reply.Users))
+	for i, user := range reply.Users {
 		membersItems[i] = MemberItem{
-			Member: member,
-			User:   users[member.UserID],
+			Member: membersMap[user.Id],
+			User:   user,
 		}
 	}
 
 	return &MembersList{
-		Members:  membersItems,
-		Paginate: &paginateReply,
+		Members: membersItems,
+		Paginate: &utils_v1.PaginateReply{
+			Total: &total,
+		},
 	}, nil
 }

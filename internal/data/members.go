@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/member"
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 
 	_ "github.com/lib/pq"
 )
@@ -21,7 +20,7 @@ type MembersRepo interface {
 	DeleteMember(ctx context.Context, tenantId int64, memberId uuid.UUID) error
 	GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
 	GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
-	ListMembers(ctx context.Context, filter MembersListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Member, error)
+	ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error)
 	CountListMembers(ctx context.Context, filter MembersListFilter) (int32, error)
 }
 
@@ -59,18 +58,8 @@ func (r *membersRepo) GetMember(ctx context.Context, tenantId, userId int64) (*e
 	return r.db.Member.Query().Where(member.TenantID(tenantId), member.UserID(userId)).Only(ctx)
 }
 
-func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Member, error) {
-	query := r.db.Member.Query().Where(member.TenantID(filter.TenantId))
-
-	if paginate.FromId != 0 {
-		query.Where(member.IDGT(paginate.FromId))
-	}
-
-	if paginate.Limit == 0 {
-		paginate.Limit = 100
-	}
-
-	return query.Limit(int(paginate.Limit)).Order(ent.Asc(member.FieldID)).All(ctx)
+func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error) {
+	return r.db.Member.Query().Where(member.TenantID(filter.TenantId)).All(ctx)
 }
 
 func (r *membersRepo) CountListMembers(ctx context.Context, filter MembersListFilter) (int32, error) {

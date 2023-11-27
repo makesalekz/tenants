@@ -81,7 +81,7 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.GetMemberRequest
 }
 
 func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
-	list, err := s.mu.ListMembers(ctx, req.Paginate)
+	list, err := s.mu.ListMembers(ctx, req.Search, req.Sort, req.Paginate)
 	if err != nil {
 		return nil, err
 	}

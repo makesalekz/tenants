@@ -50,7 +50,10 @@ message DeleteInviteRequest {
 }
 
 message ListInvitesRequest {
-	utils.v1.PaginateRequest paginate = 1;
+	string search = 1;
+	Status status = 2;
+	utils.v1.SortRequest sort = 3;
+	utils.v1.PaginateRequest paginate = 4;
 }
 
 message ListInvitesReply {
@@ -59,12 +62,13 @@ message ListInvitesReply {
 }
 
 enum Status {
-	NEW = 0;
-	SENT = 1;
-	SHOWN = 2;
-	ACCEPTED = 3;
-	DECLINED = 4;
-	CANCELED = 5;
+	UNSPECIFIED = 0;
+	NEW = 1;
+	SENT = 2;
+	SHOWN = 3;
+	ACCEPTED = 4;
+	DECLINED = 5;
+	CANCELED = 6;
 }
 
 message Invite {
