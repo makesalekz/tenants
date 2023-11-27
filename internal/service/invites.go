@@ -90,6 +90,30 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 	}, nil
 }
 
+func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeRequest) (*utils_v1.EmptyReply, error) {
+	if req.Code == "" {
+		return nil, v1.ErrorInvalidRequest("code is empty")
+	}
+
+	_, err := s.iu.AcceptInvite(ctx, req.Id, req.Code)
+	if err != nil {
+		return nil, err
+	}
+	return &utils_v1.EmptyReply{}, nil
+}
+
+func (s *InvitesService) DeclineInvite(ctx context.Context, req *v1.InviteCodeRequest) (*utils_v1.EmptyReply, error) {
+	if req.Code == "" {
+		return nil, v1.ErrorInvalidRequest("code is empty")
+	}
+
+	_, err := s.iu.DeclineInvite(ctx, req.Id, req.Code)
+	if err != nil {
+		return nil, err
+	}
+	return &utils_v1.EmptyReply{}, nil
+}
+
 func replyInvite(invite biz.InviteItem) *v1.Invite {
 	return &v1.Invite{
 		Id:        invite.ID,

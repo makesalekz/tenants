@@ -34,6 +34,18 @@ service Invites {
 			body: "*"
 		};
 	};
+	rpc AcceptInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites/accept"
+			body: "*"
+		};
+	};
+	rpc DeclineInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites/decline"
+			body: "*"
+		};
+	};
 }
 
 message CreateInvitesRequest {
@@ -59,6 +71,11 @@ message ListInvitesRequest {
 message ListInvitesReply {
 	repeated Invite invites = 1;
 	optional utils.v1.PaginateReply paginate = 2;
+}
+
+message InviteCodeRequest {
+	int64 id = 1;
+	string code = 2;
 }
 
 enum Status {

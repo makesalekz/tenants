@@ -82,6 +82,42 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/tenants.v1.ListInvitesReply'
+    /v1/tenants/invites/accept:
+        post:
+            tags:
+                - Invites
+            operationId: Invites_AcceptInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.InviteCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
+    /v1/tenants/invites/decline:
+        post:
+            tags:
+                - Invites
+            operationId: Invites_DeclineInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.InviteCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/invites/list:
         post:
             tags:
@@ -265,6 +301,13 @@ components:
                     type: string
                 user:
                     $ref: '#/components/schemas/iam.v1.UserShort'
+        tenants.v1.InviteCodeRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                code:
+                    type: string
         tenants.v1.ListInvitesReply:
             type: object
             properties:

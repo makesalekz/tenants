@@ -20,13 +20,17 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationInvitesAcceptInvite = "/tenants.v1.Invites/AcceptInvite"
 const OperationInvitesCreateInvites = "/tenants.v1.Invites/CreateInvites"
+const OperationInvitesDeclineInvite = "/tenants.v1.Invites/DeclineInvite"
 const OperationInvitesDeleteInvite = "/tenants.v1.Invites/DeleteInvite"
 const OperationInvitesListInvites = "/tenants.v1.Invites/ListInvites"
 const OperationInvitesUpdateInvite = "/tenants.v1.Invites/UpdateInvite"
 
 type InvitesHTTPServer interface {
+	AcceptInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
 	CreateInvites(context.Context, *CreateInvitesRequest) (*ListInvitesReply, error)
+	DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
 	DeleteInvite(context.Context, *DeleteInviteRequest) (*v1.EmptyReply, error)
 	ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error)
 	UpdateInvite(context.Context, *UpdateInviteRequest) (*v1.EmptyReply, error)
@@ -38,6 +42,8 @@ func RegisterInvitesHTTPServer(s *http.Server, srv InvitesHTTPServer) {
 	r.PUT("/v1/tenants/invites/{inviteId}", _Invites_UpdateInvite0_HTTP_Handler(srv))
 	r.DELETE("/v1/tenants/invites/{inviteId}", _Invites_DeleteInvite0_HTTP_Handler(srv))
 	r.POST("/v1/tenants/invites/list", _Invites_ListInvites0_HTTP_Handler(srv))
+	r.POST("/v1/tenants/invites/accept", _Invites_AcceptInvite0_HTTP_Handler(srv))
+	r.POST("/v1/tenants/invites/decline", _Invites_DeclineInvite0_HTTP_Handler(srv))
 }
 
 func _Invites_CreateInvites0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Context) error {
@@ -131,8 +137,54 @@ func _Invites_ListInvites0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Con
 	}
 }
 
+func _Invites_AcceptInvite0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in InviteCodeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInvitesAcceptInvite)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AcceptInvite(ctx, req.(*InviteCodeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.EmptyReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Invites_DeclineInvite0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in InviteCodeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationInvitesDeclineInvite)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DeclineInvite(ctx, req.(*InviteCodeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.EmptyReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type InvitesHTTPClient interface {
+	AcceptInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	CreateInvites(ctx context.Context, req *CreateInvitesRequest, opts ...http.CallOption) (rsp *ListInvitesReply, err error)
+	DeclineInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	DeleteInvite(ctx context.Context, req *DeleteInviteRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	ListInvites(ctx context.Context, req *ListInvitesRequest, opts ...http.CallOption) (rsp *ListInvitesReply, err error)
 	UpdateInvite(ctx context.Context, req *UpdateInviteRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
@@ -146,11 +198,37 @@ func NewInvitesHTTPClient(client *http.Client) InvitesHTTPClient {
 	return &InvitesHTTPClientImpl{client}
 }
 
+func (c *InvitesHTTPClientImpl) AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
+	var out v1.EmptyReply
+	pattern := "/v1/tenants/invites/accept"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationInvitesAcceptInvite))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
 func (c *InvitesHTTPClientImpl) CreateInvites(ctx context.Context, in *CreateInvitesRequest, opts ...http.CallOption) (*ListInvitesReply, error) {
 	var out ListInvitesReply
 	pattern := "/v1/tenants/invites"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationInvitesCreateInvites))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *InvitesHTTPClientImpl) DeclineInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
+	var out v1.EmptyReply
+	pattern := "/v1/tenants/invites/decline"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationInvitesDeclineInvite))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
@@ -104,8 +105,9 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, emails []string) ([
 }
 
 func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, status enum.InviteStatus) (*ent.Invite, error) {
-
-	uc.log.Debugf("UpdateInvite: %d, %s", inviteId, status)
+	if status != enum.Canceled {
+		return nil, v1.ErrorInvalidRequest("invalid status")
+	}
 
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
@@ -203,4 +205,48 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 			Total: &total,
 		},
 	}, nil
+}
+
+func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteId int64, code string) (*ent.Invite, error) {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	uuid, err := uuid.Parse(code)
+	if err != nil {
+		return nil, v1.ErrorInvalidRequest("invalid code")
+	}
+
+	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, uuid)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("invite not found")
+		}
+		return nil, err
+	}
+
+	return uc.invitesRepo.AcceptInvite(ctx, claims.GetUserId(), invite)
+}
+
+func (uc *InvitesUsecase) DeclineInvite(ctx context.Context, inviteId int64, code string) (*ent.Invite, error) {
+	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	uuid, err := uuid.Parse(code)
+	if err != nil {
+		return nil, v1.ErrorInvalidRequest("invalid code")
+	}
+
+	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, uuid)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("invite not found")
+		}
+		return nil, err
+	}
+
+	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, enum.Declined)
 }
