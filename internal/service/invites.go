@@ -7,6 +7,7 @@ import (
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
+	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 )
 
@@ -67,7 +68,19 @@ func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.DeleteInviteR
 }
 
 func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesRequest) (*v1.ListInvitesReply, error) {
-	list, err := s.iu.ListInvites(ctx, req.Paginate)
+	var status *enum.InviteStatus
+	if req.Status != v1.Status_UNSPECIFIED {
+		statusString := enum.InviteStatus(req.Status.String())
+		if !statusString.IsValid() {
+			return nil, v1.ErrorInvalidRequest("invalid status")
+		}
+		status = &statusString
+	}
+
+	list, err := s.iu.ListInvites(ctx, data.InvitesListFilter{
+		Status: status,
+		Search: req.Search,
+	}, req.Sort, req.Paginate)
 	if err != nil {
 		return nil, err
 	}

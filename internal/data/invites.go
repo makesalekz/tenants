@@ -19,6 +19,8 @@ type InviteDto struct {
 
 type InvitesListFilter struct {
 	TenantId int64
+	Search   string
+	Status   *enum.InviteStatus
 }
 
 // InvitesRepo
@@ -27,7 +29,7 @@ type InvitesRepo interface {
 	GetInvite(ctx context.Context, tenantId, inviteId int64) (*ent.Invite, error)
 	UpdateInviteStatus(ctx context.Context, invite *ent.Invite, status enum.InviteStatus) (*ent.Invite, error)
 	DeleteInvite(ctx context.Context, tenantId, inviteId int64) error
-	ListInvites(ctx context.Context, filter InvitesListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Invite, error)
+	ListInvites(ctx context.Context, filter InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) ([]*ent.Invite, error)
 	CountListInvites(ctx context.Context, filter InvitesListFilter) (int32, error)
 }
 
@@ -82,18 +84,55 @@ func (r *invitesRepo) DeleteInvite(ctx context.Context, tenantId, inviteId int64
 	return err
 }
 
-func (r *invitesRepo) ListInvites(ctx context.Context, filter InvitesListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Invite, error) {
+func (r *invitesRepo) ListInvites(ctx context.Context, filter InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) ([]*ent.Invite, error) {
 	query := r.db.Invite.Query().Where(invite.TenantID(filter.TenantId))
 
-	if paginate.FromId != 0 {
-		query.Where(invite.IDGT(paginate.FromId))
+	if filter.Status != nil {
+		query.Where(invite.StatusEQ(*filter.Status))
+	}
+
+	if filter.Search != "" {
+		query.Where(invite.EmailContains(filter.Search))
+	}
+
+	if sort != nil {
+		switch sort.Field {
+		case "email":
+			if sort.Descending {
+				query.Order(ent.Desc(invite.FieldEmail))
+			} else {
+				query.Order(ent.Asc(invite.FieldEmail))
+			}
+		case "status":
+			if sort.Descending {
+				query.Order(ent.Desc(invite.FieldStatus))
+			} else {
+				query.Order(ent.Asc(invite.FieldStatus))
+			}
+		default: // case "id"
+			if sort.Descending {
+				query.Order(ent.Desc(invite.FieldID))
+			} else {
+				query.Order(ent.Asc(invite.FieldID))
+			}
+		}
+	} else {
+		if paginate.FromId != 0 {
+			query.Where(invite.IDGT(paginate.FromId))
+		}
+
+		query.Order(ent.Asc(invite.FieldID))
 	}
 
 	if paginate.Limit == 0 {
 		paginate.Limit = 100
 	}
 
-	return query.Limit(int(paginate.Limit)).Order(ent.Asc(invite.FieldID)).All(ctx)
+	if paginate.Page != 0 {
+		query.Offset(int((paginate.Page - 1) * paginate.Limit))
+	}
+
+	return query.Limit(int(paginate.Limit)).All(ctx)
 }
 
 func (r *invitesRepo) CountListInvites(ctx context.Context, filter InvitesListFilter) (int32, error) {

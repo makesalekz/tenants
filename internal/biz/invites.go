@@ -149,7 +149,7 @@ func (uc *InvitesUsecase) DeleteInvite(ctx context.Context, inviteId int64) erro
 	return uc.invitesRepo.DeleteInvite(ctx, tenant.ID, inviteId)
 }
 
-func (uc *InvitesUsecase) ListInvites(ctx context.Context, paginate *utils_v1.PaginateRequest) (*InvitesList, error) {
+func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*InvitesList, error) {
 	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("invalid token")
@@ -159,11 +159,9 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, paginate *utils_v1.Pa
 		paginate = &utils_v1.PaginateRequest{}
 	}
 
-	filter := data.InvitesListFilter{
-		TenantId: claims.GetTenantId(),
-	}
+	filter.TenantId = claims.GetTenantId()
 
-	invites, err := uc.invitesRepo.ListInvites(ctx, filter, paginate)
+	invites, err := uc.invitesRepo.ListInvites(ctx, filter, sort, paginate)
 	if err != nil {
 		return nil, err
 	}

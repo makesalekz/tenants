@@ -286,6 +286,13 @@ components:
         tenants.v1.ListInvitesRequest:
             type: object
             properties:
+                search:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                sort:
+                    $ref: '#/components/schemas/utils.v1.SortRequest'
                 paginate:
                     $ref: '#/components/schemas/utils.v1.PaginateRequest'
         tenants.v1.ListMembersReply:
@@ -394,6 +401,16 @@ components:
                 aroundDate:
                     type: string
                 fromLabel:
+                    type: string
+                descending:
+                    type: boolean
+                page:
+                    type: integer
+                    format: int32
+        utils.v1.SortRequest:
+            type: object
+            properties:
+                field:
                     type: string
                 descending:
                     type: boolean
