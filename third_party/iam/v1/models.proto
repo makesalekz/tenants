@@ -2,14 +2,9 @@ syntax = "proto3";
 
 package iam.v1;
 
-import "errors/errors.proto";
-
 option go_package = "gitlab.calendaria.team/services/iam/api/iam/v1;iam_v1";
 option java_multiple_files = true;
 option java_package = "iam.v1";
-
-message EmptyRequest {}
-message EmptyReply {}
 
 message User {
 	int64 id = 1;
@@ -25,9 +20,12 @@ message User {
 	optional string avatar = 11;
 	optional string bioUpdatedAt = 12;
 
-	// field containing tied contact info
+	// field contains contact info
 	optional Contact contact = 13;
+	// field contains relation info
 	optional Relation relation = 14;
+	// field contains commonChat info
+	optional CommonChat commonChat = 15;
 }
 
 message UserShort {
@@ -37,8 +35,6 @@ message UserShort {
 	string name = 4;
 	string avatar = 6;
 	string lastLoginAt = 7;
-
-	optional Relation relation = 8;
 }
 
 message Contact {
@@ -50,22 +46,18 @@ message Relation {
 	bool isMuted = 2;
 }
 
-enum ErrorReason {
-    // Set default error code.
-    option (errors.default_code) = 500;
-  
-    // Set the error code separately for an enumeration.
-    INTERNAL = 0;
-    GRPC_CONNECTION = 1;
-    SERVICE_FAILED = 2;
-    DATABASE_QUERY = 3;
-    
-    UNAUTHORIZED = 10 [(errors.code) = 401];
-    INVALID_PHONE_NUMBER = 11 [(errors.code) = 400];
-    INVALID_TOKEN = 12 [(errors.code) = 401];
-    INVALID_CODE = 13 [(errors.code) = 401];
-  
-    USER_NOT_FOUND = 20 [(errors.code) = 404];
-    INVALID_REQUEST = 21 [(errors.code) = 400];
-	CONTACT_NOT_FOUND = 22 [(errors.code) = 404];
-  }
+message CommonChat {
+	int64 chatId = 1;
+	string status = 2;
+	string role = 3;
+	bool isPinned = 4;
+	bool isMuted = 5;
+	optional string mutedTill = 6;
+	optional string archivedAt = 7;
+	bool autoSave = 8;
+}
+
+message TenantShort {
+	int64 id = 1;
+	string name = 3;
+}

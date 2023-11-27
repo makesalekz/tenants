@@ -171,14 +171,6 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 		return nil, err
 	}
 
-	paginateReply := utils_v1.PaginateReply{
-		Total: &total,
-	}
-
-	if len(invites) == int(paginate.Limit) {
-		paginateReply.FromId = &invites[len(invites)-1].ID
-	}
-
 	usersIds := make([]int64, 0, len(invites))
 	for _, invite := range invites {
 		if invite.UserID != nil {
@@ -206,7 +198,9 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 	}
 
 	return &InvitesList{
-		Invites:  invitesItems,
-		Paginate: &paginateReply,
+		Invites: invitesItems,
+		Paginate: &utils_v1.PaginateReply{
+			Total: &total,
+		},
 	}, nil
 }

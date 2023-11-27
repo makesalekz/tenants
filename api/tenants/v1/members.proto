@@ -49,7 +49,9 @@ message GetMemberReply {
 }
 
 message ListMembersRequest {
-	utils.v1.PaginateRequest paginate = 1;
+	string search = 1;
+	utils.v1.SortRequest sort = 3;
+	utils.v1.PaginateRequest paginate = 4;
 }
 
 message ListMembersReply {
