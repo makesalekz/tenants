@@ -5,7 +5,7 @@ import (
 
 	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/log"
-	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
@@ -37,48 +37,41 @@ func NewTenantsUsecase(logger log.Logger, c *config.Config, jwt *jwt.JwtProcesso
 }
 
 func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	dto.OwnerId = claims.GetUserId()
-
 	return uc.repo.CreateTenant(ctx, dto)
 }
 
-func (uc *TenantsUsecase) UpdateCurrentTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
+func (uc *TenantsUsecase) UpdateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
+	tenant, err := uc.repo.UpdateTenant(ctx, dto)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, tenants_v1.ErrorNotFound("tenant not found")
+		}
+		return nil, err
 	}
-
-	// TODO: check permissions
-	dto.OwnerId = claims.GetUserId()
-
-	return uc.repo.UpdateTenant(ctx, claims.GetTenantId(), dto)
+	return tenant, nil
 }
 
-func (uc *TenantsUsecase) DeleteCurrentTenant(ctx context.Context) error {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return v1.ErrorUnauthorized("invalid token")
+func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, dto data.TenantDto) error {
+	err := uc.repo.DeleteTenant(ctx, dto)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return tenants_v1.ErrorNotFound("tenant not found")
+		}
+		return err
 	}
+	return nil
 
-	// TODO: check permissions
-
-	return uc.repo.DeleteTenant(ctx, claims.GetTenantId(), claims.GetUserId())
 }
 
-func (uc *TenantsUsecase) GetCurrentTenant(ctx context.Context) (*ent.Tenant, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
+func (uc *TenantsUsecase) GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error) {
+	tenant, err := uc.repo.GetTenant(ctx, tenantId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, tenants_v1.ErrorNotFound("tenant not found")
+		}
+		return nil, err
 	}
-
-	// TODO: check permissions
-
-	return uc.repo.GetTenant(ctx, claims.GetTenantId())
+	return tenant, nil
 }
 
 func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsListFilter, paginate *utils_v1.PaginateRequest) (*TenantsList, error) {
@@ -86,20 +79,10 @@ func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsLi
 		paginate = &utils_v1.PaginateRequest{}
 	}
 
-	// TODO: check permissions to get all tenants
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	filter.UserId = claims.GetUserId()
-
 	tenants, err := uc.repo.ListTenants(ctx, filter, paginate)
 	if err != nil {
 		return nil, err
 	}
-
-	uc.log.Debug("ListTenants", "claims", claims, "filter", filter, "tenants", tenants)
 
 	total, err := uc.repo.CountListTenants(ctx, filter)
 	if err != nil {

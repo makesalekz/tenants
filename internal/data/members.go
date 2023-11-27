@@ -12,6 +12,7 @@ import (
 
 type MembersListFilter struct {
 	TenantId int64
+	Search   string
 }
 
 // MembersRepo

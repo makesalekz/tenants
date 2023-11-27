@@ -136,11 +136,29 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/tenants.v1.ListInvitesReply'
+    /v1/tenants/invites/shown:
+        post:
+            tags:
+                - Invites
+            operationId: Invites_ShownInvite
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.InviteCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/invites/{inviteId}:
         put:
             tags:
                 - Invites
-            operationId: Invites_UpdateInvite
+            operationId: Invites_CancelInvite
             parameters:
                 - name: inviteId
                   in: path
@@ -151,7 +169,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/tenants.v1.UpdateInviteRequest'
+                            $ref: '#/components/schemas/tenants.v1.InviteRequest'
                 required: true
             responses:
                 "200":
@@ -304,9 +322,14 @@ components:
         tenants.v1.InviteCodeRequest:
             type: object
             properties:
-                id:
+                inviteId:
                     type: string
                 code:
+                    type: string
+        tenants.v1.InviteRequest:
+            type: object
+            properties:
+                inviteId:
                     type: string
         tenants.v1.ListInvitesReply:
             type: object
@@ -388,14 +411,6 @@ components:
             properties:
                 tenant:
                     $ref: '#/components/schemas/tenants.v1.Tenant'
-        tenants.v1.UpdateInviteRequest:
-            type: object
-            properties:
-                inviteId:
-                    type: string
-                status:
-                    type: integer
-                    format: enum
         tenants.v1.UpdateTenantRequest:
             type: object
             properties:

@@ -51,22 +51,7 @@ func NewInvitesUsecase(
 	}, nil
 }
 
-func (uc *InvitesUsecase) CreateInvites(ctx context.Context, emails []string) ([]InviteItem, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
-		return nil, v1.ErrorForbidden("only owner can create invites")
-	}
-
+func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string) ([]InviteItem, error) {
 	users, err := uc.iam.GetUsers(ctx, nil, emails)
 	if err != nil {
 		return nil, err
@@ -87,7 +72,7 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, emails []string) ([
 		}
 	}
 
-	invites, err := uc.invitesRepo.CreateInvites(ctx, tenant.ID, dtos)
+	invites, err := uc.invitesRepo.CreateInvites(ctx, tenantId, dtos)
 	if err != nil {
 		return nil, err
 	}
@@ -104,64 +89,27 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, emails []string) ([
 	return invitesItems, nil
 }
 
-func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, status enum.InviteStatus) (*ent.Invite, error) {
-	if status != enum.Canceled {
-		return nil, v1.ErrorInvalidRequest("invalid status")
-	}
-
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
+func (uc *InvitesUsecase) CancelInvite(ctx context.Context, tenantId, inviteId int64) (*ent.Invite, error) {
+	invite, err := uc.invitesRepo.GetInvite(ctx, tenantId, inviteId)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
-		return nil, v1.ErrorForbidden("only owner can remove invites")
+	if invite.Status == enum.Accepted || invite.Status == enum.Declined || invite.Status == enum.Canceled {
+		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
-	invite, err := uc.invitesRepo.GetInvite(ctx, claims.GetTenantId(), inviteId)
-	if err != nil {
-		return nil, err
-	}
-
-	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, status)
+	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, enum.Canceled)
 }
 
-func (uc *InvitesUsecase) DeleteInvite(ctx context.Context, inviteId int64) error {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return v1.ErrorUnauthorized("invalid token")
-	}
-
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
-	if err != nil {
-		return err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
-		return v1.ErrorForbidden("only owner can remove invites")
-	}
-
-	return uc.invitesRepo.DeleteInvite(ctx, tenant.ID, inviteId)
+func (uc *InvitesUsecase) DeleteInvite(ctx context.Context, tenantId, inviteId int64) error {
+	return uc.invitesRepo.DeleteInvite(ctx, tenantId, inviteId)
 }
 
 func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*InvitesList, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
 	if paginate == nil {
 		paginate = &utils_v1.PaginateRequest{}
 	}
-
-	filter.TenantId = claims.GetTenantId()
 
 	invites, err := uc.invitesRepo.ListInvites(ctx, filter, sort, paginate)
 	if err != nil {
@@ -207,45 +155,31 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 	}, nil
 }
 
-func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteId int64, code string) (*ent.Invite, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	uuid, err := uuid.Parse(code)
+func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteId, userId int64, code uuid.UUID) (*ent.Invite, error) {
+	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, code)
 	if err != nil {
-		return nil, v1.ErrorInvalidRequest("invalid code")
-	}
-
-	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, uuid)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, v1.ErrorNotFound("invite not found")
-		}
 		return nil, err
 	}
 
-	return uc.invitesRepo.AcceptInvite(ctx, claims.GetUserId(), invite)
+	if invite.Status == enum.Accepted || invite.Status == enum.Declined || invite.Status == enum.Canceled {
+		return nil, v1.ErrorForbidden("invite is already accepted or declined")
+	}
+
+	return uc.invitesRepo.AcceptInvite(ctx, userId, invite)
 }
 
-func (uc *InvitesUsecase) DeclineInvite(ctx context.Context, inviteId int64, code string) (*ent.Invite, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
+func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code uuid.UUID, status enum.InviteStatus) (*ent.Invite, error) {
+	if status != enum.Shown && status != enum.Declined {
+		return nil, v1.ErrorInvalidRequest("invalid status")
 	}
 
-	uuid, err := uuid.Parse(code)
+	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, code)
 	if err != nil {
-		return nil, v1.ErrorInvalidRequest("invalid code")
-	}
-
-	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, uuid)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, v1.ErrorNotFound("invite not found")
-		}
 		return nil, err
+	}
+
+	if invite.Status == enum.Accepted || invite.Status == enum.Declined || invite.Status == enum.Canceled {
+		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
 	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, enum.Declined)
