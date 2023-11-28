@@ -50,68 +50,26 @@ func NewMembersUsecase(
 	}, nil
 }
 
-func (uc *MembersUsecase) CreateMembers(ctx context.Context, usersIds []int64) ([]*ent.Member, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
+func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
+	return uc.membersRepo.CreateMembers(ctx, tenantId, usersIds)
+}
 
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
+func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId int64, memberUUID uuid.UUID) error {
+	return uc.membersRepo.DeleteMember(ctx, tenantId, memberUUID)
+}
+
+func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
+	member, err := uc.membersRepo.GetMember(ctx, tenantId, userId)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("member not found")
+		}
 		return nil, err
 	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
-		return nil, v1.ErrorForbidden("only owner can add members")
-	}
-
-	return uc.membersRepo.CreateMembers(ctx, tenant.ID, usersIds)
+	return member, nil
 }
 
-func (uc *MembersUsecase) DeleteMember(ctx context.Context, memberId string) error {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return v1.ErrorUnauthorized("invalid token")
-	}
-
-	memberUUID, err := uuid.FromBytes([]byte(memberId))
-	if err != nil {
-		return v1.ErrorInvalidRequest("invalid member id")
-	}
-
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, claims.GetTenantId())
-	if err != nil {
-		return err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
-		return v1.ErrorForbidden("only owner can remove members")
-	}
-
-	return uc.membersRepo.DeleteMember(ctx, tenant.ID, memberUUID)
-}
-
-func (uc *MembersUsecase) GetMember(ctx context.Context, userId int64) (*ent.Member, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	return uc.membersRepo.GetMember(ctx, claims.GetTenantId(), userId)
-}
-
-func (uc *MembersUsecase) ListMembers(ctx context.Context, search string, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
-	claims, ok := uc.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	filter := data.MembersListFilter{
-		TenantId: claims.GetTenantId(),
-	}
-
+func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
 	members, err := uc.membersRepo.ListMembers(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -136,7 +94,7 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, search string, sort *
 
 	reply, err := usersClient.GetUsers(ctx, &iam_v1.GetUsersRequest{
 		Ids:      usersIds,
-		Search:   search,
+		Search:   filter.Search,
 		Sort:     sort,
 		Paginate: paginate,
 	})

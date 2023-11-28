@@ -17,13 +17,13 @@ service Invites {
 			body: "*"
 		};
 	};
-	rpc UpdateInvite (UpdateInviteRequest) returns (utils.v1.EmptyReply) {
+	rpc CancelInvite (InviteRequest) returns (utils.v1.EmptyReply) {
 		option (google.api.http) = {
 			put: "/v1/tenants/invites/{inviteId}"
 			body: "*"
 		};
 	};
-	rpc DeleteInvite (DeleteInviteRequest) returns (utils.v1.EmptyReply) {
+	rpc DeleteInvite (InviteRequest) returns (utils.v1.EmptyReply) {
 		option (google.api.http) = {
 			delete: "/v1/tenants/invites/{inviteId}"
 		};
@@ -34,18 +34,31 @@ service Invites {
 			body: "*"
 		};
 	};
+	rpc AcceptInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites/accept"
+			body: "*"
+		};
+	};
+	rpc ShownInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites/shown"
+			body: "*"
+		};
+	};
+	rpc DeclineInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
+		option (google.api.http) = {
+			post: "/v1/tenants/invites/decline"
+			body: "*"
+		};
+	};
 }
 
 message CreateInvitesRequest {
 	repeated string emails = 1;
 }
 
-message UpdateInviteRequest {
-	int64 inviteId = 1;
-	Status status = 2;
-}
-
-message DeleteInviteRequest {
+message InviteRequest {
 	int64 inviteId = 1;
 }
 
@@ -59,6 +72,11 @@ message ListInvitesRequest {
 message ListInvitesReply {
 	repeated Invite invites = 1;
 	optional utils.v1.PaginateReply paginate = 2;
+}
+
+message InviteCodeRequest {
+	int64 inviteId = 1;
+	string code = 2;
 }
 
 enum Status {

@@ -21,9 +21,12 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Invites_CreateInvites_FullMethodName = "/tenants.v1.Invites/CreateInvites"
-	Invites_UpdateInvite_FullMethodName  = "/tenants.v1.Invites/UpdateInvite"
+	Invites_CancelInvite_FullMethodName  = "/tenants.v1.Invites/CancelInvite"
 	Invites_DeleteInvite_FullMethodName  = "/tenants.v1.Invites/DeleteInvite"
 	Invites_ListInvites_FullMethodName   = "/tenants.v1.Invites/ListInvites"
+	Invites_AcceptInvite_FullMethodName  = "/tenants.v1.Invites/AcceptInvite"
+	Invites_ShownInvite_FullMethodName   = "/tenants.v1.Invites/ShownInvite"
+	Invites_DeclineInvite_FullMethodName = "/tenants.v1.Invites/DeclineInvite"
 )
 
 // InvitesClient is the client API for Invites service.
@@ -31,9 +34,12 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InvitesClient interface {
 	CreateInvites(ctx context.Context, in *CreateInvitesRequest, opts ...grpc.CallOption) (*ListInvitesReply, error)
-	UpdateInvite(ctx context.Context, in *UpdateInviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
-	DeleteInvite(ctx context.Context, in *DeleteInviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	CancelInvite(ctx context.Context, in *InviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	DeleteInvite(ctx context.Context, in *InviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	ListInvites(ctx context.Context, in *ListInvitesRequest, opts ...grpc.CallOption) (*ListInvitesReply, error)
+	AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	DeclineInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 }
 
 type invitesClient struct {
@@ -53,16 +59,16 @@ func (c *invitesClient) CreateInvites(ctx context.Context, in *CreateInvitesRequ
 	return out, nil
 }
 
-func (c *invitesClient) UpdateInvite(ctx context.Context, in *UpdateInviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+func (c *invitesClient) CancelInvite(ctx context.Context, in *InviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
 	out := new(v1.EmptyReply)
-	err := c.cc.Invoke(ctx, Invites_UpdateInvite_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Invites_CancelInvite_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *invitesClient) DeleteInvite(ctx context.Context, in *DeleteInviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+func (c *invitesClient) DeleteInvite(ctx context.Context, in *InviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
 	out := new(v1.EmptyReply)
 	err := c.cc.Invoke(ctx, Invites_DeleteInvite_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -80,14 +86,44 @@ func (c *invitesClient) ListInvites(ctx context.Context, in *ListInvitesRequest,
 	return out, nil
 }
 
+func (c *invitesClient) AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
+	err := c.cc.Invoke(ctx, Invites_AcceptInvite_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *invitesClient) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
+	err := c.cc.Invoke(ctx, Invites_ShownInvite_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *invitesClient) DeclineInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
+	err := c.cc.Invoke(ctx, Invites_DeclineInvite_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // InvitesServer is the server API for Invites service.
 // All implementations must embed UnimplementedInvitesServer
 // for forward compatibility
 type InvitesServer interface {
 	CreateInvites(context.Context, *CreateInvitesRequest) (*ListInvitesReply, error)
-	UpdateInvite(context.Context, *UpdateInviteRequest) (*v1.EmptyReply, error)
-	DeleteInvite(context.Context, *DeleteInviteRequest) (*v1.EmptyReply, error)
+	CancelInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
+	DeleteInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
 	ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error)
+	AcceptInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
+	ShownInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
+	DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
 	mustEmbedUnimplementedInvitesServer()
 }
 
@@ -98,14 +134,23 @@ type UnimplementedInvitesServer struct {
 func (UnimplementedInvitesServer) CreateInvites(context.Context, *CreateInvitesRequest) (*ListInvitesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateInvites not implemented")
 }
-func (UnimplementedInvitesServer) UpdateInvite(context.Context, *UpdateInviteRequest) (*v1.EmptyReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateInvite not implemented")
+func (UnimplementedInvitesServer) CancelInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelInvite not implemented")
 }
-func (UnimplementedInvitesServer) DeleteInvite(context.Context, *DeleteInviteRequest) (*v1.EmptyReply, error) {
+func (UnimplementedInvitesServer) DeleteInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteInvite not implemented")
 }
 func (UnimplementedInvitesServer) ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListInvites not implemented")
+}
+func (UnimplementedInvitesServer) AcceptInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AcceptInvite not implemented")
+}
+func (UnimplementedInvitesServer) ShownInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ShownInvite not implemented")
+}
+func (UnimplementedInvitesServer) DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeclineInvite not implemented")
 }
 func (UnimplementedInvitesServer) mustEmbedUnimplementedInvitesServer() {}
 
@@ -138,26 +183,26 @@ func _Invites_CreateInvites_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Invites_UpdateInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateInviteRequest)
+func _Invites_CancelInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InviteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InvitesServer).UpdateInvite(ctx, in)
+		return srv.(InvitesServer).CancelInvite(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Invites_UpdateInvite_FullMethodName,
+		FullMethod: Invites_CancelInvite_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InvitesServer).UpdateInvite(ctx, req.(*UpdateInviteRequest))
+		return srv.(InvitesServer).CancelInvite(ctx, req.(*InviteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Invites_DeleteInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteInviteRequest)
+	in := new(InviteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -169,7 +214,7 @@ func _Invites_DeleteInvite_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: Invites_DeleteInvite_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InvitesServer).DeleteInvite(ctx, req.(*DeleteInviteRequest))
+		return srv.(InvitesServer).DeleteInvite(ctx, req.(*InviteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -192,6 +237,60 @@ func _Invites_ListInvites_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Invites_AcceptInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InviteCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InvitesServer).AcceptInvite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Invites_AcceptInvite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InvitesServer).AcceptInvite(ctx, req.(*InviteCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Invites_ShownInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InviteCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InvitesServer).ShownInvite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Invites_ShownInvite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InvitesServer).ShownInvite(ctx, req.(*InviteCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Invites_DeclineInvite_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InviteCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InvitesServer).DeclineInvite(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Invites_DeclineInvite_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InvitesServer).DeclineInvite(ctx, req.(*InviteCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Invites_ServiceDesc is the grpc.ServiceDesc for Invites service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -204,8 +303,8 @@ var Invites_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Invites_CreateInvites_Handler,
 		},
 		{
-			MethodName: "UpdateInvite",
-			Handler:    _Invites_UpdateInvite_Handler,
+			MethodName: "CancelInvite",
+			Handler:    _Invites_CancelInvite_Handler,
 		},
 		{
 			MethodName: "DeleteInvite",
@@ -214,6 +313,18 @@ var Invites_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListInvites",
 			Handler:    _Invites_ListInvites_Handler,
+		},
+		{
+			MethodName: "AcceptInvite",
+			Handler:    _Invites_AcceptInvite_Handler,
+		},
+		{
+			MethodName: "ShownInvite",
+			Handler:    _Invites_ShownInvite_Handler,
+		},
+		{
+			MethodName: "DeclineInvite",
+			Handler:    _Invites_DeclineInvite_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

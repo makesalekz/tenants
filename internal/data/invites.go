@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
@@ -27,7 +28,9 @@ type InvitesListFilter struct {
 type InvitesRepo interface {
 	CreateInvites(ctx context.Context, tenantId int64, dtos []InviteDto) ([]*ent.Invite, error)
 	GetInvite(ctx context.Context, tenantId, inviteId int64) (*ent.Invite, error)
+	GetInviteByCode(ctx context.Context, inviteId int64, code uuid.UUID) (*ent.Invite, error)
 	UpdateInviteStatus(ctx context.Context, invite *ent.Invite, status enum.InviteStatus) (*ent.Invite, error)
+	AcceptInvite(ctx context.Context, userId int64, invite *ent.Invite) (*ent.Invite, error)
 	DeleteInvite(ctx context.Context, tenantId, inviteId int64) error
 	ListInvites(ctx context.Context, filter InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) ([]*ent.Invite, error)
 	CountListInvites(ctx context.Context, filter InvitesListFilter) (int32, error)
@@ -74,8 +77,38 @@ func (r *invitesRepo) GetInvite(ctx context.Context, tenantId, inviteId int64) (
 	return r.db.Invite.Query().Where(invite.TenantID(tenantId), invite.ID(inviteId)).First(ctx)
 }
 
+func (r *invitesRepo) GetInviteByCode(ctx context.Context, inviteId int64, code uuid.UUID) (*ent.Invite, error) {
+	return r.db.Invite.Query().Where(invite.ID(inviteId), invite.Code(code)).First(ctx)
+}
+
 func (r *invitesRepo) UpdateInviteStatus(ctx context.Context, invite *ent.Invite, status enum.InviteStatus) (*ent.Invite, error) {
-	return invite.Update().SetStatus(status).Save(ctx)
+	return invite.Update().SetStatus(status).SetUpdatedAt(time.Now()).Save(ctx)
+}
+
+func (r *invitesRepo) AcceptInvite(ctx context.Context, userId int64, invite *ent.Invite) (*ent.Invite, error) {
+	tx, err := r.db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	updated, err := tx.Invite.UpdateOneID(invite.ID).SetUserID(userId).SetStatus(enum.Accepted).SetUpdatedAt(time.Now()).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = tx.Member.Create().SetTenantID(invite.TenantID).SetUserID(userId).SetIdentityID(uuid.New()).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tx.Commit()
+
+	return updated, nil
 }
 
 func (r *invitesRepo) DeleteInvite(ctx context.Context, tenantId, inviteId int64) error {
