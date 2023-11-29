@@ -35,13 +35,13 @@ service Invites {
 			body: "*"
 		};
 	};
-	rpc AcceptInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
+	rpc AcceptInvite (InviteCodeRequest) returns (TenantReply) {
 		option (google.api.http) = {
 			post: "/v1/tenants/invites/accept"
 			body: "*"
 		};
 	};
-	rpc ShownInvite (InviteCodeRequest) returns (InviteShownReply) {
+	rpc ShownInvite (InviteCodeRequest) returns (TenantReply) {
 		option (google.api.http) = {
 			post: "/v1/tenants/invites/shown"
 			body: "*"
@@ -78,10 +78,6 @@ message ListInvitesReply {
 message InviteCodeRequest {
 	int64 inviteId = 1;
 	string code = 2;
-}
-
-message InviteShownReply {
-	Tenant tenant = 1;
 }
 
 enum Status {

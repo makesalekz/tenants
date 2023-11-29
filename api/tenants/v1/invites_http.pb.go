@@ -29,13 +29,13 @@ const OperationInvitesListInvites = "/tenants.v1.Invites/ListInvites"
 const OperationInvitesShownInvite = "/tenants.v1.Invites/ShownInvite"
 
 type InvitesHTTPServer interface {
-	AcceptInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
+	AcceptInvite(context.Context, *InviteCodeRequest) (*TenantReply, error)
 	CancelInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
 	CreateInvites(context.Context, *CreateInvitesRequest) (*ListInvitesReply, error)
 	DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
 	DeleteInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
 	ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error)
-	ShownInvite(context.Context, *InviteCodeRequest) (*InviteShownReply, error)
+	ShownInvite(context.Context, *InviteCodeRequest) (*TenantReply, error)
 }
 
 func RegisterInvitesHTTPServer(s *http.Server, srv InvitesHTTPServer) {
@@ -157,7 +157,7 @@ func _Invites_AcceptInvite0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Co
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.EmptyReply)
+		reply := out.(*TenantReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -179,7 +179,7 @@ func _Invites_ShownInvite0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Con
 		if err != nil {
 			return err
 		}
-		reply := out.(*InviteShownReply)
+		reply := out.(*TenantReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -207,13 +207,13 @@ func _Invites_DeclineInvite0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.C
 }
 
 type InvitesHTTPClient interface {
-	AcceptInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
+	AcceptInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *TenantReply, err error)
 	CancelInvite(ctx context.Context, req *InviteRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	CreateInvites(ctx context.Context, req *CreateInvitesRequest, opts ...http.CallOption) (rsp *ListInvitesReply, err error)
 	DeclineInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	DeleteInvite(ctx context.Context, req *InviteRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	ListInvites(ctx context.Context, req *ListInvitesRequest, opts ...http.CallOption) (rsp *ListInvitesReply, err error)
-	ShownInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *InviteShownReply, err error)
+	ShownInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *TenantReply, err error)
 }
 
 type InvitesHTTPClientImpl struct {
@@ -224,8 +224,8 @@ func NewInvitesHTTPClient(client *http.Client) InvitesHTTPClient {
 	return &InvitesHTTPClientImpl{client}
 }
 
-func (c *InvitesHTTPClientImpl) AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
-	var out v1.EmptyReply
+func (c *InvitesHTTPClientImpl) AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*TenantReply, error) {
+	var out TenantReply
 	pattern := "/v1/tenants/invites/accept"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationInvitesAcceptInvite))
@@ -302,8 +302,8 @@ func (c *InvitesHTTPClientImpl) ListInvites(ctx context.Context, in *ListInvites
 	return &out, err
 }
 
-func (c *InvitesHTTPClientImpl) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*InviteShownReply, error) {
-	var out InviteShownReply
+func (c *InvitesHTTPClientImpl) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*TenantReply, error) {
+	var out TenantReply
 	pattern := "/v1/tenants/invites/shown"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationInvitesShownInvite))

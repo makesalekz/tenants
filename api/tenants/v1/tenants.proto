@@ -49,10 +49,6 @@ message UpdateTenantRequest {
 	string name = 2;
 }
 
-message TenantReply {
-	Tenant tenant = 1;
-}
-
 message ListTenantsRequest {
 	int64 ownerId = 1;
     utils.v1.PaginateRequest paginate = 2;
