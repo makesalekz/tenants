@@ -35,7 +35,7 @@ type InvitesHTTPServer interface {
 	DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
 	DeleteInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
 	ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error)
-	ShownInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
+	ShownInvite(context.Context, *InviteCodeRequest) (*InviteShownReply, error)
 }
 
 func RegisterInvitesHTTPServer(s *http.Server, srv InvitesHTTPServer) {
@@ -179,7 +179,7 @@ func _Invites_ShownInvite0_HTTP_Handler(srv InvitesHTTPServer) func(ctx http.Con
 		if err != nil {
 			return err
 		}
-		reply := out.(*v1.EmptyReply)
+		reply := out.(*InviteShownReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -213,7 +213,7 @@ type InvitesHTTPClient interface {
 	DeclineInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	DeleteInvite(ctx context.Context, req *InviteRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	ListInvites(ctx context.Context, req *ListInvitesRequest, opts ...http.CallOption) (rsp *ListInvitesReply, err error)
-	ShownInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
+	ShownInvite(ctx context.Context, req *InviteCodeRequest, opts ...http.CallOption) (rsp *InviteShownReply, err error)
 }
 
 type InvitesHTTPClientImpl struct {
@@ -302,8 +302,8 @@ func (c *InvitesHTTPClientImpl) ListInvites(ctx context.Context, in *ListInvites
 	return &out, err
 }
 
-func (c *InvitesHTTPClientImpl) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
-	var out v1.EmptyReply
+func (c *InvitesHTTPClientImpl) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...http.CallOption) (*InviteShownReply, error) {
+	var out InviteShownReply
 	pattern := "/v1/tenants/invites/shown"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationInvitesShownInvite))

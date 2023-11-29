@@ -182,5 +182,5 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
-	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, enum.Declined)
+	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, status)
 }
