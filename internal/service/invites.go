@@ -146,7 +146,7 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 	}, nil
 }
 
-func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeRequest) (*utils_v1.EmptyReply, error) {
+func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
 	if req.Code == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
@@ -161,17 +161,31 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	_, err = s.iu.AcceptInvite(ctx, req.InviteId, claims.GetUserId(), code)
+	invite, err := s.iu.AcceptInvite(ctx, req.InviteId, claims.GetUserId(), code)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("invite not found")
 		}
+		if ent.IsConstraintError(err) {
+			return nil, v1.ErrorInvalidRequest("member already exists")
+		}
 		return nil, err
 	}
-	return &utils_v1.EmptyReply{}, nil
+
+	tenant, err := s.tu.GetTenant(ctx, invite.TenantID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("tenant not found")
+		}
+		return nil, err
+	}
+
+	return &v1.TenantReply{
+		Tenant: replyTenant(tenant),
+	}, nil
 }
 
-func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.InviteShownReply, error) {
+func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
 	if req.Code == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
@@ -197,7 +211,7 @@ func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequ
 		return nil, err
 	}
 
-	return &v1.InviteShownReply{
+	return &v1.TenantReply{
 		Tenant: replyTenant(tenant),
 	}, nil
 }

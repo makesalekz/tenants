@@ -17,3 +17,7 @@ message Tenant {
 	string name = 3;
 	string createdAt = 4;
 }
+
+message TenantReply {
+	Tenant tenant = 1;
+}

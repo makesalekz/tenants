@@ -37,8 +37,8 @@ type InvitesClient interface {
 	CancelInvite(ctx context.Context, in *InviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	DeleteInvite(ctx context.Context, in *InviteRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	ListInvites(ctx context.Context, in *ListInvitesRequest, opts ...grpc.CallOption) (*ListInvitesReply, error)
-	AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
-	ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*InviteShownReply, error)
+	AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*TenantReply, error)
+	ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*TenantReply, error)
 	DeclineInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 }
 
@@ -86,8 +86,8 @@ func (c *invitesClient) ListInvites(ctx context.Context, in *ListInvitesRequest,
 	return out, nil
 }
 
-func (c *invitesClient) AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
-	out := new(v1.EmptyReply)
+func (c *invitesClient) AcceptInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*TenantReply, error) {
+	out := new(TenantReply)
 	err := c.cc.Invoke(ctx, Invites_AcceptInvite_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -95,8 +95,8 @@ func (c *invitesClient) AcceptInvite(ctx context.Context, in *InviteCodeRequest,
 	return out, nil
 }
 
-func (c *invitesClient) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*InviteShownReply, error) {
-	out := new(InviteShownReply)
+func (c *invitesClient) ShownInvite(ctx context.Context, in *InviteCodeRequest, opts ...grpc.CallOption) (*TenantReply, error) {
+	out := new(TenantReply)
 	err := c.cc.Invoke(ctx, Invites_ShownInvite_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -121,8 +121,8 @@ type InvitesServer interface {
 	CancelInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
 	DeleteInvite(context.Context, *InviteRequest) (*v1.EmptyReply, error)
 	ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error)
-	AcceptInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
-	ShownInvite(context.Context, *InviteCodeRequest) (*InviteShownReply, error)
+	AcceptInvite(context.Context, *InviteCodeRequest) (*TenantReply, error)
+	ShownInvite(context.Context, *InviteCodeRequest) (*TenantReply, error)
 	DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error)
 	mustEmbedUnimplementedInvitesServer()
 }
@@ -143,10 +143,10 @@ func (UnimplementedInvitesServer) DeleteInvite(context.Context, *InviteRequest) 
 func (UnimplementedInvitesServer) ListInvites(context.Context, *ListInvitesRequest) (*ListInvitesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListInvites not implemented")
 }
-func (UnimplementedInvitesServer) AcceptInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error) {
+func (UnimplementedInvitesServer) AcceptInvite(context.Context, *InviteCodeRequest) (*TenantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AcceptInvite not implemented")
 }
-func (UnimplementedInvitesServer) ShownInvite(context.Context, *InviteCodeRequest) (*InviteShownReply, error) {
+func (UnimplementedInvitesServer) ShownInvite(context.Context, *InviteCodeRequest) (*TenantReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShownInvite not implemented")
 }
 func (UnimplementedInvitesServer) DeclineInvite(context.Context, *InviteCodeRequest) (*v1.EmptyReply, error) {
