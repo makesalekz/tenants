@@ -153,7 +153,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/utils.v1.EmptyReply'
+                                $ref: '#/components/schemas/tenants.v1.InviteShownReply'
     /v1/tenants/invites/{inviteId}:
         put:
             tags:
@@ -331,6 +331,11 @@ components:
             properties:
                 inviteId:
                     type: string
+        tenants.v1.InviteShownReply:
+            type: object
+            properties:
+                tenant:
+                    $ref: '#/components/schemas/tenants.v1.Tenant'
         tenants.v1.ListInvitesReply:
             type: object
             properties:

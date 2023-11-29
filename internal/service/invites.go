@@ -171,7 +171,7 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*utils_v1.EmptyReply, error) {
+func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.InviteShownReply, error) {
 	if req.Code == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
@@ -181,14 +181,25 @@ func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequ
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	_, err = s.iu.UpdateInvite(ctx, req.InviteId, code, enum.Shown)
+	invite, err := s.iu.UpdateInvite(ctx, req.InviteId, code, enum.Shown)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("invite not found")
 		}
 		return nil, err
 	}
-	return &utils_v1.EmptyReply{}, nil
+
+	tenant, err := s.tu.GetTenant(ctx, invite.TenantID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("tenant not found")
+		}
+		return nil, err
+	}
+
+	return &v1.InviteShownReply{
+		Tenant: replyTenant(tenant),
+	}, nil
 }
 
 func (s *InvitesService) DeclineInvite(ctx context.Context, req *v1.InviteCodeRequest) (*utils_v1.EmptyReply, error) {
