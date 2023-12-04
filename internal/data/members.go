@@ -18,7 +18,7 @@ type MembersListFilter struct {
 // MembersRepo
 type MembersRepo interface {
 	CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
-	DeleteMember(ctx context.Context, tenantId int64, memberId uuid.UUID) error
+	DeleteMember(ctx context.Context, tenantId, memberId int64) error
 	GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
 	GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
 	ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error)
@@ -45,8 +45,8 @@ func (r *membersRepo) CreateMembers(ctx context.Context, tenantId int64, usersId
 	return r.db.Member.CreateBulk(membersCreate...).Save(ctx)
 }
 
-func (r *membersRepo) DeleteMember(ctx context.Context, tenantId int64, memberId uuid.UUID) error {
-	_, err := r.db.Member.Delete().Where(member.TenantID(tenantId), member.IdentityID(memberId)).Exec(ctx)
+func (r *membersRepo) DeleteMember(ctx context.Context, tenantId, memberId int64) error {
+	_, err := r.db.Member.Delete().Where(member.TenantID(tenantId), member.ID(memberId)).Exec(ctx)
 
 	return err
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
@@ -54,8 +53,8 @@ func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantId int64, use
 	return uc.membersRepo.CreateMembers(ctx, tenantId, usersIds)
 }
 
-func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId int64, memberUUID uuid.UUID) error {
-	return uc.membersRepo.DeleteMember(ctx, tenantId, memberUUID)
+func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId, memberId int64) error {
+	return uc.membersRepo.DeleteMember(ctx, tenantId, memberId)
 }
 
 func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {

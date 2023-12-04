@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
@@ -53,15 +52,10 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMemberRequest) (*utils_v1.EmptyReply, error) {
+func (s *MembersService) DeleteMember(ctx context.Context, req *v1.DeleteMemberRequest) (*utils_v1.EmptyReply, error) {
 	claims, ok := s.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	memberUUID, err := uuid.Parse(req.MemberId)
-	if err != nil {
-		return nil, v1.ErrorInvalidRequest("invalid member id")
 	}
 
 	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
@@ -74,7 +68,7 @@ func (s *MembersService) DeleteMembers(ctx context.Context, req *v1.DeleteMember
 		return nil, v1.ErrorForbidden("only owner can remove members")
 	}
 
-	err = s.mu.DeleteMember(ctx, claims.GetTenantId(), memberUUID)
+	err = s.mu.DeleteMember(ctx, claims.GetTenantId(), req.MemberId)
 	if err != nil {
 		return nil, err
 	}
