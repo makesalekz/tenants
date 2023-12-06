@@ -7,7 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	jwtv4 "github.com/golang-jwt/jwt/v4"
-	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
@@ -21,6 +21,7 @@ func NewGRPCServer(
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,
 	invitesService *service.InvitesService,
+	groupsService *service.GroupsService,
 ) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -42,9 +43,10 @@ func NewGRPCServer(
 	}
 	srv := grpc.NewServer(opts...)
 
-	tenants_v1.RegisterTenantsServer(srv, tenantsService)
-	tenants_v1.RegisterMembersServer(srv, membersService)
-	tenants_v1.RegisterInvitesServer(srv, invitesService)
+	v1.RegisterTenantsServer(srv, tenantsService)
+	v1.RegisterMembersServer(srv, membersService)
+	v1.RegisterInvitesServer(srv, invitesService)
+	v1.RegisterGroupsServer(srv, groupsService)
 
 	return srv
 }
