@@ -36,6 +36,8 @@ func (Member) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("tenant_id"),
+		edge.From("groups", Group.Type).
+			Ref("members"),
 	}
 }
 

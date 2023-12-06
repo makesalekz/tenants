@@ -141,6 +141,54 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/utils.v1.EmptyReply'
+    /v1/tenants/groups/{groupId}/members:
+        post:
+            tags:
+                - Groups
+            operationId: Groups_AddMembersToGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.GroupMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
+    /v1/tenants/groups/{groupId}/members/remove:
+        post:
+            tags:
+                - Groups
+            operationId: Groups_RemoveMembersFromGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.GroupMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/invites:
         post:
             tags:
@@ -402,6 +450,15 @@ components:
                     type: string
                 updatedAt:
                     type: string
+        tenants.v1.GroupMembersRequest:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                membersIds:
+                    type: array
+                    items:
+                        type: string
         tenants.v1.GroupReply:
             type: object
             properties:
@@ -480,12 +537,14 @@ components:
                 members:
                     type: array
                     items:
-                        $ref: '#/components/schemas/tenants.v1.Member'
+                        $ref: '#/components/schemas/tenants.v1.TenantMember'
                 paginate:
                     $ref: '#/components/schemas/utils.v1.PaginateReply'
         tenants.v1.ListMembersRequest:
             type: object
             properties:
+                groupId:
+                    type: string
                 search:
                     type: string
                 sort:
@@ -508,15 +567,6 @@ components:
                     type: string
                 paginate:
                     $ref: '#/components/schemas/utils.v1.PaginateRequest'
-        tenants.v1.Member:
-            type: object
-            properties:
-                id:
-                    type: string
-                createdAt:
-                    type: string
-                user:
-                    $ref: '#/components/schemas/iam.v1.UserShort'
         tenants.v1.Tenant:
             type: object
             properties:
@@ -528,6 +578,15 @@ components:
                     type: string
                 createdAt:
                     type: string
+        tenants.v1.TenantMember:
+            type: object
+            properties:
+                id:
+                    type: string
+                createdAt:
+                    type: string
+                user:
+                    $ref: '#/components/schemas/iam.v1.UserShort'
         tenants.v1.TenantReply:
             type: object
             properties:

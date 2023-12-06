@@ -4,7 +4,7 @@ package tenants.v1;
 
 import "google/api/annotations.proto";
 import "utils/v1/models.proto";
-import "iam/v1/models.proto";
+import "api/tenants/v1/models.proto";
 
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
 option java_multiple_files = true;
@@ -49,19 +49,8 @@ message GetMemberReply {
 }
 
 message ListMembersRequest {
-	string search = 1;
+	int64 groupId = 1;
+	string search = 2;
 	utils.v1.SortRequest sort = 3;
 	utils.v1.PaginateRequest paginate = 4;
-}
-
-message ListMembersReply {
-	repeated Member members = 1;
-	utils.v1.PaginateReply paginate = 2;
-}
-
-message Member {
-	int64 id = 1;
-	string createdAt = 2;
-
-	iam.v1.UserShort user = 3;
 }
