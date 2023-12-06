@@ -64,6 +64,83 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/utils.v1.EmptyReply'
+    /v1/tenants/groups:
+        post:
+            tags:
+                - Groups
+            operationId: Groups_CreateGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.CreateGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.GroupReply'
+    /v1/tenants/groups/list:
+        post:
+            tags:
+                - Groups
+            operationId: Groups_ListGroups
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.ListGroupsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.ListGroupsReply'
+    /v1/tenants/groups/{groupId}:
+        put:
+            tags:
+                - Groups
+            operationId: Groups_UpdateGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/tenants.v1.UpdateGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.GroupReply'
+        delete:
+            tags:
+                - Groups
+            operationId: Groups_DeleteGroup
+            parameters:
+                - name: groupId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/utils.v1.EmptyReply'
     /v1/tenants/invites:
         post:
             tags:
@@ -284,6 +361,13 @@ components:
                     type: string
                 lastLoginAt:
                     type: string
+        tenants.v1.CreateGroupRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
         tenants.v1.CreateInvitesRequest:
             type: object
             properties:
@@ -303,6 +387,26 @@ components:
             properties:
                 name:
                     type: string
+        tenants.v1.Group:
+            type: object
+            properties:
+                id:
+                    type: string
+                identityId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+        tenants.v1.GroupReply:
+            type: object
+            properties:
+                group:
+                    $ref: '#/components/schemas/tenants.v1.Group'
         tenants.v1.Invite:
             type: object
             properties:
@@ -331,6 +435,24 @@ components:
             properties:
                 inviteId:
                     type: string
+        tenants.v1.ListGroupsReply:
+            type: object
+            properties:
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/tenants.v1.Group'
+                paginate:
+                    $ref: '#/components/schemas/utils.v1.PaginateReply'
+        tenants.v1.ListGroupsRequest:
+            type: object
+            properties:
+                search:
+                    type: string
+                sort:
+                    $ref: '#/components/schemas/utils.v1.SortRequest'
+                paginate:
+                    $ref: '#/components/schemas/utils.v1.PaginateRequest'
         tenants.v1.ListInvitesReply:
             type: object
             properties:
@@ -411,6 +533,15 @@ components:
             properties:
                 tenant:
                     $ref: '#/components/schemas/tenants.v1.Tenant'
+        tenants.v1.UpdateGroupRequest:
+            type: object
+            properties:
+                groupId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
         tenants.v1.UpdateTenantRequest:
             type: object
             properties:
@@ -468,6 +599,7 @@ components:
                 descending:
                     type: boolean
 tags:
+    - name: Groups
     - name: Invites
     - name: Members
     - name: Tenants

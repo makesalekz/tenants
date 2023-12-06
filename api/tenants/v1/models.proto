@@ -21,3 +21,12 @@ message Tenant {
 message TenantReply {
 	Tenant tenant = 1;
 }
+
+message Group {
+	int64 id = 1;
+	string identityId = 2;
+	string name = 3;
+	string description = 4;
+	string createdAt = 5;
+	string updatedAt = 6;
+}

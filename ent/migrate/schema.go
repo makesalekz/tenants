@@ -8,6 +8,38 @@ import (
 )
 
 var (
+	// GroupsColumns holds the columns for the "groups" table.
+	GroupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "identity_id", Type: field.TypeUUID, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_id", Type: field.TypeInt64},
+	}
+	// GroupsTable holds the schema information for the "groups" table.
+	GroupsTable = &schema.Table{
+		Name:       "groups",
+		Columns:    GroupsColumns,
+		PrimaryKey: []*schema.Column{GroupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "groups_tenants_groups",
+				Columns:    []*schema.Column{GroupsColumns[7]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "group_tenant_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{GroupsColumns[7], GroupsColumns[3]},
+			},
+		},
+	}
 	// InvitesColumns holds the columns for the "invites" table.
 	InvitesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -44,7 +76,7 @@ var (
 	MembersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "identity_id", Type: field.TypeUUID},
+		{Name: "identity_id", Type: field.TypeUUID, Unique: true},
 		{Name: "user_id", Type: field.TypeInt64},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "tenant_id", Type: field.TypeInt64},
@@ -87,6 +119,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		GroupsTable,
 		InvitesTable,
 		MembersTable,
 		TenantsTable,
@@ -94,6 +127,7 @@ var (
 )
 
 func init() {
+	GroupsTable.ForeignKeys[0].RefTable = TenantsTable
 	InvitesTable.ForeignKeys[0].RefTable = TenantsTable
 	MembersTable.ForeignKeys[0].RefTable = TenantsTable
 }
