@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
@@ -99,6 +100,21 @@ func (tu *TenantUpdate) AddMembers(m ...*Member) *TenantUpdate {
 	return tu.AddMemberIDs(ids...)
 }
 
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (tu *TenantUpdate) AddGroupIDs(ids ...int64) *TenantUpdate {
+	tu.mutation.AddGroupIDs(ids...)
+	return tu
+}
+
+// AddGroups adds the "groups" edges to the Group entity.
+func (tu *TenantUpdate) AddGroups(g ...*Group) *TenantUpdate {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tu.AddGroupIDs(ids...)
+}
+
 // AddInviteIDs adds the "invites" edge to the Invite entity by IDs.
 func (tu *TenantUpdate) AddInviteIDs(ids ...int64) *TenantUpdate {
 	tu.mutation.AddInviteIDs(ids...)
@@ -138,6 +154,27 @@ func (tu *TenantUpdate) RemoveMembers(m ...*Member) *TenantUpdate {
 		ids[i] = m[i].ID
 	}
 	return tu.RemoveMemberIDs(ids...)
+}
+
+// ClearGroups clears all "groups" edges to the Group entity.
+func (tu *TenantUpdate) ClearGroups() *TenantUpdate {
+	tu.mutation.ClearGroups()
+	return tu
+}
+
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
+func (tu *TenantUpdate) RemoveGroupIDs(ids ...int64) *TenantUpdate {
+	tu.mutation.RemoveGroupIDs(ids...)
+	return tu
+}
+
+// RemoveGroups removes "groups" edges to Group entities.
+func (tu *TenantUpdate) RemoveGroups(g ...*Group) *TenantUpdate {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tu.RemoveGroupIDs(ids...)
 }
 
 // ClearInvites clears all "invites" edges to the Invite entity.
@@ -259,6 +296,51 @@ func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !tu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -401,6 +483,21 @@ func (tuo *TenantUpdateOne) AddMembers(m ...*Member) *TenantUpdateOne {
 	return tuo.AddMemberIDs(ids...)
 }
 
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (tuo *TenantUpdateOne) AddGroupIDs(ids ...int64) *TenantUpdateOne {
+	tuo.mutation.AddGroupIDs(ids...)
+	return tuo
+}
+
+// AddGroups adds the "groups" edges to the Group entity.
+func (tuo *TenantUpdateOne) AddGroups(g ...*Group) *TenantUpdateOne {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tuo.AddGroupIDs(ids...)
+}
+
 // AddInviteIDs adds the "invites" edge to the Invite entity by IDs.
 func (tuo *TenantUpdateOne) AddInviteIDs(ids ...int64) *TenantUpdateOne {
 	tuo.mutation.AddInviteIDs(ids...)
@@ -440,6 +537,27 @@ func (tuo *TenantUpdateOne) RemoveMembers(m ...*Member) *TenantUpdateOne {
 		ids[i] = m[i].ID
 	}
 	return tuo.RemoveMemberIDs(ids...)
+}
+
+// ClearGroups clears all "groups" edges to the Group entity.
+func (tuo *TenantUpdateOne) ClearGroups() *TenantUpdateOne {
+	tuo.mutation.ClearGroups()
+	return tuo
+}
+
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
+func (tuo *TenantUpdateOne) RemoveGroupIDs(ids ...int64) *TenantUpdateOne {
+	tuo.mutation.RemoveGroupIDs(ids...)
+	return tuo
+}
+
+// RemoveGroups removes "groups" edges to Group entities.
+func (tuo *TenantUpdateOne) RemoveGroups(g ...*Group) *TenantUpdateOne {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tuo.RemoveGroupIDs(ids...)
 }
 
 // ClearInvites clears all "invites" edges to the Invite entity.
@@ -591,6 +709,51 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !tuo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

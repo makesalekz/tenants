@@ -12,26 +12,28 @@ import (
 	"github.com/google/uuid"
 )
 
-// Member holds the schema definition for the Member entity.
-type Member struct {
+// Group holds the schema definition for the Group entity.
+type Group struct {
 	ent.Schema
 }
 
-// Fields of the Member.
-func (Member) Fields() []ent.Field {
+// Fields of the Group.
+func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("identity_id", uuid.New()).Immutable().Unique(),
 		field.Int64("tenant_id").Immutable(),
-		field.Int64("user_id").Immutable(),
+		field.String("name"),
+		field.String("description"),
 		field.Time("created_at").Immutable().Default(time.Now),
+		field.Time("updated_at").Default(time.Now),
 	}
 }
 
-// Edges of the Member.
-func (Member) Edges() []ent.Edge {
+// Edges of the Group.
+func (Group) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("tenant", Tenant.Type).
-			Ref("members").
+			Ref("groups").
 			Immutable().
 			Required().
 			Unique().
@@ -39,13 +41,13 @@ func (Member) Edges() []ent.Edge {
 	}
 }
 
-func (Member) Indexes() []ent.Index {
+func (Group) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("tenant_id", "user_id").Unique(),
+		index.Fields("tenant_id", "name").Unique(),
 	}
 }
 
-func (Member) Mixin() []ent.Mixin {
+func (Group) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixins.SoftDeleteMixin{},
 	}

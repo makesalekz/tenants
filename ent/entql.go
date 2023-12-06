@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
@@ -16,8 +17,28 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 4)}
 	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   group.Table,
+			Columns: group.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt64,
+				Column: group.FieldID,
+			},
+		},
+		Type: "Group",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			group.FieldDeletedAt:   {Type: field.TypeTime, Column: group.FieldDeletedAt},
+			group.FieldIdentityID:  {Type: field.TypeUUID, Column: group.FieldIdentityID},
+			group.FieldTenantID:    {Type: field.TypeInt64, Column: group.FieldTenantID},
+			group.FieldName:        {Type: field.TypeString, Column: group.FieldName},
+			group.FieldDescription: {Type: field.TypeString, Column: group.FieldDescription},
+			group.FieldCreatedAt:   {Type: field.TypeTime, Column: group.FieldCreatedAt},
+			group.FieldUpdatedAt:   {Type: field.TypeTime, Column: group.FieldUpdatedAt},
+		},
+	}
+	graph.Nodes[1] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   invite.Table,
 			Columns: invite.Columns,
@@ -37,7 +58,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			invite.FieldUpdatedAt: {Type: field.TypeTime, Column: invite.FieldUpdatedAt},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{
+	graph.Nodes[2] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   member.Table,
 			Columns: member.Columns,
@@ -55,7 +76,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			member.FieldCreatedAt:  {Type: field.TypeTime, Column: member.FieldCreatedAt},
 		},
 	}
-	graph.Nodes[2] = &sqlgraph.Node{
+	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
@@ -73,6 +94,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldUpdatedAt: {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
 		},
 	}
+	graph.MustAddE(
+		"tenant",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   group.TenantTable,
+			Columns: []string{group.TenantColumn},
+			Bidi:    false,
+		},
+		"Group",
+		"Tenant",
+	)
 	graph.MustAddE(
 		"tenant",
 		&sqlgraph.EdgeSpec{
@@ -110,6 +143,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"Member",
 	)
 	graph.MustAddE(
+		"groups",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+		},
+		"Tenant",
+		"Group",
+	)
+	graph.MustAddE(
 		"invites",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -128,6 +173,95 @@ var schemaGraph = func() *sqlgraph.Schema {
 // All update, update-one and query builders implement this interface.
 type predicateAdder interface {
 	addPredicate(func(s *sql.Selector))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
+	gq.predicates = append(gq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the GroupQuery builder.
+func (gq *GroupQuery) Filter() *GroupFilter {
+	return &GroupFilter{config: gq.config, predicateAdder: gq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *GroupMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the GroupMutation builder.
+func (m *GroupMutation) Filter() *GroupFilter {
+	return &GroupFilter{config: m.config, predicateAdder: m}
+}
+
+// GroupFilter provides a generic filtering capability at runtime for GroupQuery.
+type GroupFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *GroupFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[0].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int64 predicate on the id field.
+func (f *GroupFilter) WhereID(p entql.Int64P) {
+	f.Where(p.Field(group.FieldID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *GroupFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(group.FieldDeletedAt))
+}
+
+// WhereIdentityID applies the entql [16]byte predicate on the identity_id field.
+func (f *GroupFilter) WhereIdentityID(p entql.ValueP) {
+	f.Where(p.Field(group.FieldIdentityID))
+}
+
+// WhereTenantID applies the entql int64 predicate on the tenant_id field.
+func (f *GroupFilter) WhereTenantID(p entql.Int64P) {
+	f.Where(p.Field(group.FieldTenantID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *GroupFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(group.FieldName))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *GroupFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(group.FieldDescription))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *GroupFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(group.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *GroupFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(group.FieldUpdatedAt))
+}
+
+// WhereHasTenant applies a predicate to check if query has an edge tenant.
+func (f *GroupFilter) WhereHasTenant() {
+	f.Where(entql.HasEdge("tenant"))
+}
+
+// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
+func (f *GroupFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
+	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -159,7 +293,7 @@ type InviteFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *InviteFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[0].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -248,7 +382,7 @@ type MemberFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *MemberFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -327,7 +461,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -371,6 +505,20 @@ func (f *TenantFilter) WhereHasMembers() {
 // WhereHasMembersWith applies a predicate to check if query has an edge members with a given conditions (other predicates).
 func (f *TenantFilter) WhereHasMembersWith(preds ...predicate.Member) {
 	f.Where(entql.HasEdgeWith("members", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasGroups applies a predicate to check if query has an edge groups.
+func (f *TenantFilter) WhereHasGroups() {
+	f.Where(entql.HasEdge("groups"))
+}
+
+// WhereHasGroupsWith applies a predicate to check if query has an edge groups with a given conditions (other predicates).
+func (f *TenantFilter) WhereHasGroupsWith(preds ...predicate.Group) {
+	f.Where(entql.HasEdgeWith("groups", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

@@ -5,6 +5,7 @@ package runtime
 import (
 	"time"
 
+	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/schema"
@@ -15,6 +16,21 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	groupMixin := schema.Group{}.Mixin()
+	groupMixinHooks0 := groupMixin[0].Hooks()
+	group.Hooks[0] = groupMixinHooks0[0]
+	groupMixinInters0 := groupMixin[0].Interceptors()
+	group.Interceptors[0] = groupMixinInters0[0]
+	groupFields := schema.Group{}.Fields()
+	_ = groupFields
+	// groupDescCreatedAt is the schema descriptor for created_at field.
+	groupDescCreatedAt := groupFields[4].Descriptor()
+	// group.DefaultCreatedAt holds the default value on creation for the created_at field.
+	group.DefaultCreatedAt = groupDescCreatedAt.Default.(func() time.Time)
+	// groupDescUpdatedAt is the schema descriptor for updated_at field.
+	groupDescUpdatedAt := groupFields[5].Descriptor()
+	// group.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	group.DefaultUpdatedAt = groupDescUpdatedAt.Default.(func() time.Time)
 	inviteFields := schema.Invite{}.Fields()
 	_ = inviteFields
 	// inviteDescCreatedAt is the schema descriptor for created_at field.

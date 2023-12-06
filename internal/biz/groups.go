@@ -1,0 +1,89 @@
+package biz
+
+import (
+	"context"
+
+	"github.com/go-kratos/kratos/v2/log"
+	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/internal/data"
+	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
+)
+
+type GroupsList struct {
+	Groups   []*ent.Group
+	Paginate *utils_v1.PaginateReply
+}
+
+// GroupsUsecase is a Greeter usecase.
+type GroupsUsecase struct {
+	log         *log.Helper
+	jwt         *jwt.JwtProcessor
+	dialer      *data.Dialer
+	tenantsRepo data.TenantsRepo
+	groupsRepo  data.GroupsRepo
+}
+
+// NewGreeterUsecase new a Greeter usecase.
+func NewGroupsUsecase(
+	logger log.Logger,
+	jwt *jwt.JwtProcessor,
+	dialer *data.Dialer,
+	tenantsRepo data.TenantsRepo,
+	groupsRepo data.GroupsRepo,
+) (*GroupsUsecase, error) {
+	return &GroupsUsecase{
+		log:         log.NewHelper(logger),
+		jwt:         jwt,
+		dialer:      dialer,
+		tenantsRepo: tenantsRepo,
+		groupsRepo:  groupsRepo,
+	}, nil
+}
+
+func (uc *GroupsUsecase) CreateGroup(ctx context.Context, dto data.CreateGroupDto) (*ent.Group, error) {
+	return uc.groupsRepo.CreateGroup(ctx, dto)
+}
+
+func (uc *GroupsUsecase) UpdateGroup(ctx context.Context, group *ent.Group, dto data.UpdateGroupDto) (*ent.Group, error) {
+	return uc.groupsRepo.UpdateGroup(ctx, group, dto)
+}
+
+func (uc *GroupsUsecase) DeleteGroup(ctx context.Context, group *ent.Group) error {
+	return uc.groupsRepo.DeleteGroup(ctx, group)
+}
+
+func (uc *GroupsUsecase) GetGroup(ctx context.Context, tenantId, groupId int64) (*ent.Group, error) {
+	group, err := uc.groupsRepo.GetGroup(ctx, tenantId, groupId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("group not found")
+		}
+		return nil, err
+	}
+	return group, nil
+}
+
+func (uc *GroupsUsecase) ListGroups(ctx context.Context, filter data.GroupsListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*GroupsList, error) {
+	if paginate == nil {
+		paginate = &utils_v1.PaginateRequest{}
+	}
+
+	groups, err := uc.groupsRepo.ListGroups(ctx, filter, sort, paginate)
+	if err != nil {
+		return nil, err
+	}
+
+	total, err := uc.groupsRepo.CountListGroups(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GroupsList{
+		Groups: groups,
+		Paginate: &utils_v1.PaginateReply{
+			Total: &total,
+		},
+	}, nil
+}

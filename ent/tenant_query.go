@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
@@ -25,6 +26,7 @@ type TenantQuery struct {
 	inters      []Interceptor
 	predicates  []predicate.Tenant
 	withMembers *MemberQuery
+	withGroups  *GroupQuery
 	withInvites *InviteQuery
 	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
@@ -78,6 +80,28 @@ func (tq *TenantQuery) QueryMembers() *MemberQuery {
 			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
 			sqlgraph.To(member.Table, member.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, tenant.MembersTable, tenant.MembersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroups chains the current query on the "groups" edge.
+func (tq *TenantQuery) QueryGroups() *GroupQuery {
+	query := (&GroupClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.GroupsTable, tenant.GroupsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +324,7 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 		inters:      append([]Interceptor{}, tq.inters...),
 		predicates:  append([]predicate.Tenant{}, tq.predicates...),
 		withMembers: tq.withMembers.Clone(),
+		withGroups:  tq.withGroups.Clone(),
 		withInvites: tq.withInvites.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
@@ -315,6 +340,17 @@ func (tq *TenantQuery) WithMembers(opts ...func(*MemberQuery)) *TenantQuery {
 		opt(query)
 	}
 	tq.withMembers = query
+	return tq
+}
+
+// WithGroups tells the query-builder to eager-load the nodes that are connected to
+// the "groups" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TenantQuery) WithGroups(opts ...func(*GroupQuery)) *TenantQuery {
+	query := (&GroupClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withGroups = query
 	return tq
 }
 
@@ -407,8 +443,9 @@ func (tq *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 	var (
 		nodes       = []*Tenant{}
 		_spec       = tq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			tq.withMembers != nil,
+			tq.withGroups != nil,
 			tq.withInvites != nil,
 		}
 	)
@@ -440,6 +477,13 @@ func (tq *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 			return nil, err
 		}
 	}
+	if query := tq.withGroups; query != nil {
+		if err := tq.loadGroups(ctx, query, nodes,
+			func(n *Tenant) { n.Edges.Groups = []*Group{} },
+			func(n *Tenant, e *Group) { n.Edges.Groups = append(n.Edges.Groups, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := tq.withInvites; query != nil {
 		if err := tq.loadInvites(ctx, query, nodes,
 			func(n *Tenant) { n.Edges.Invites = []*Invite{} },
@@ -465,6 +509,36 @@ func (tq *TenantQuery) loadMembers(ctx context.Context, query *MemberQuery, node
 	}
 	query.Where(predicate.Member(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(tenant.MembersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.TenantID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tenant_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (tq *TenantQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Group)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*Tenant)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(group.FieldTenantID)
+	}
+	query.Where(predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tenant.GroupsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
