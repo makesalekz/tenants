@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
 )
@@ -49,9 +50,45 @@ func (mu *MemberUpdate) ClearDeletedAt() *MemberUpdate {
 	return mu
 }
 
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (mu *MemberUpdate) AddGroupIDs(ids ...int64) *MemberUpdate {
+	mu.mutation.AddGroupIDs(ids...)
+	return mu
+}
+
+// AddGroups adds the "groups" edges to the Group entity.
+func (mu *MemberUpdate) AddGroups(g ...*Group) *MemberUpdate {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return mu.AddGroupIDs(ids...)
+}
+
 // Mutation returns the MemberMutation object of the builder.
 func (mu *MemberUpdate) Mutation() *MemberMutation {
 	return mu.mutation
+}
+
+// ClearGroups clears all "groups" edges to the Group entity.
+func (mu *MemberUpdate) ClearGroups() *MemberUpdate {
+	mu.mutation.ClearGroups()
+	return mu
+}
+
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
+func (mu *MemberUpdate) RemoveGroupIDs(ids ...int64) *MemberUpdate {
+	mu.mutation.RemoveGroupIDs(ids...)
+	return mu
+}
+
+// RemoveGroups removes "groups" edges to Group entities.
+func (mu *MemberUpdate) RemoveGroups(g ...*Group) *MemberUpdate {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return mu.RemoveGroupIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -113,6 +150,51 @@ func (mu *MemberUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if mu.mutation.DeletedAtCleared() {
 		_spec.ClearField(member.FieldDeletedAt, field.TypeTime)
 	}
+	if mu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   member.GroupsTable,
+			Columns: member.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !mu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   member.GroupsTable,
+			Columns: member.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   member.GroupsTable,
+			Columns: member.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.AddModifiers(mu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -155,9 +237,45 @@ func (muo *MemberUpdateOne) ClearDeletedAt() *MemberUpdateOne {
 	return muo
 }
 
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
+func (muo *MemberUpdateOne) AddGroupIDs(ids ...int64) *MemberUpdateOne {
+	muo.mutation.AddGroupIDs(ids...)
+	return muo
+}
+
+// AddGroups adds the "groups" edges to the Group entity.
+func (muo *MemberUpdateOne) AddGroups(g ...*Group) *MemberUpdateOne {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return muo.AddGroupIDs(ids...)
+}
+
 // Mutation returns the MemberMutation object of the builder.
 func (muo *MemberUpdateOne) Mutation() *MemberMutation {
 	return muo.mutation
+}
+
+// ClearGroups clears all "groups" edges to the Group entity.
+func (muo *MemberUpdateOne) ClearGroups() *MemberUpdateOne {
+	muo.mutation.ClearGroups()
+	return muo
+}
+
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
+func (muo *MemberUpdateOne) RemoveGroupIDs(ids ...int64) *MemberUpdateOne {
+	muo.mutation.RemoveGroupIDs(ids...)
+	return muo
+}
+
+// RemoveGroups removes "groups" edges to Group entities.
+func (muo *MemberUpdateOne) RemoveGroups(g ...*Group) *MemberUpdateOne {
+	ids := make([]int64, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return muo.RemoveGroupIDs(ids...)
 }
 
 // Where appends a list predicates to the MemberUpdate builder.
@@ -248,6 +366,51 @@ func (muo *MemberUpdateOne) sqlSave(ctx context.Context) (_node *Member, err err
 	}
 	if muo.mutation.DeletedAtCleared() {
 		_spec.ClearField(member.FieldDeletedAt, field.TypeTime)
+	}
+	if muo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   member.GroupsTable,
+			Columns: member.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !muo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   member.GroupsTable,
+			Columns: member.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   member.GroupsTable,
+			Columns: member.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(muo.modifiers...)
 	_node = &Member{config: muo.config}

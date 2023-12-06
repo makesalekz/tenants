@@ -39,9 +39,11 @@ type Member struct {
 type MemberEdges struct {
 	// Tenant holds the value of the tenant edge.
 	Tenant *Tenant `json:"tenant,omitempty"`
+	// Groups holds the value of the groups edge.
+	Groups []*Group `json:"groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // TenantOrErr returns the Tenant value or an error if the edge
@@ -55,6 +57,15 @@ func (e MemberEdges) TenantOrErr() (*Tenant, error) {
 		return e.Tenant, nil
 	}
 	return nil, &NotLoadedError{edge: "tenant"}
+}
+
+// GroupsOrErr returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e MemberEdges) GroupsOrErr() ([]*Group, error) {
+	if e.loadedTypes[1] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -136,6 +147,11 @@ func (m *Member) Value(name string) (ent.Value, error) {
 // QueryTenant queries the "tenant" edge of the Member entity.
 func (m *Member) QueryTenant() *TenantQuery {
 	return NewMemberClient(m.config).QueryTenant(m)
+}
+
+// QueryGroups queries the "groups" edge of the Member entity.
+func (m *Member) QueryGroups() *GroupQuery {
+	return NewMemberClient(m.config).QueryGroups(m)
 }
 
 // Update returns a builder for updating this Member.

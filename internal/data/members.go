@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 
 	_ "github.com/lib/pq"
@@ -12,6 +13,7 @@ import (
 
 type MembersListFilter struct {
 	TenantId int64
+	GroupId  int64
 	Search   string
 }
 
@@ -60,11 +62,19 @@ func (r *membersRepo) GetMember(ctx context.Context, tenantId, userId int64) (*e
 }
 
 func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error) {
-	return r.db.Member.Query().Where(member.TenantID(filter.TenantId)).All(ctx)
+	query := r.db.Member.Query().
+		Where(member.TenantID(filter.TenantId))
+
+	if filter.GroupId != 0 {
+		query.Where(member.HasGroupsWith(group.ID(filter.GroupId)))
+	}
+
+	return query.All(ctx)
 }
 
 func (r *membersRepo) CountListMembers(ctx context.Context, filter MembersListFilter) (int32, error) {
-	query := r.db.Member.Query().Where(member.TenantID(filter.TenantId))
+	query := r.db.Member.Query().
+		Where(member.TenantID(filter.TenantId))
 
 	count, err := query.Count(ctx)
 

@@ -35,6 +35,8 @@ type GroupsRepo interface {
 	GetGroup(ctx context.Context, tenantId, groupId int64) (*ent.Group, error)
 	ListGroups(ctx context.Context, filter GroupsListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) ([]*ent.Group, error)
 	CountListGroups(ctx context.Context, filter GroupsListFilter) (int32, error)
+	AddMembersToGroup(ctx context.Context, group *ent.Group, membersIds []int64) error
+	RemoveMembersFromGroup(ctx context.Context, group *ent.Group, membersIds []int64) error
 }
 
 type groupsRepo struct {
@@ -125,4 +127,12 @@ func (r *groupsRepo) CountListGroups(ctx context.Context, filter GroupsListFilte
 	count, err := query.Count(ctx)
 
 	return int32(count), err
+}
+
+func (r *groupsRepo) AddMembersToGroup(ctx context.Context, group *ent.Group, membersIds []int64) error {
+	return group.Update().AddMemberIDs(membersIds...).Exec(ctx)
+}
+
+func (r *groupsRepo) RemoveMembersFromGroup(ctx context.Context, group *ent.Group, membersIds []int64) error {
+	return group.Update().RemoveMemberIDs(membersIds...).Exec(ctx)
 }

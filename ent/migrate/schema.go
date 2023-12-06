@@ -117,12 +117,38 @@ var (
 		Columns:    TenantsColumns,
 		PrimaryKey: []*schema.Column{TenantsColumns[0]},
 	}
+	// GroupMembersColumns holds the columns for the "group_members" table.
+	GroupMembersColumns = []*schema.Column{
+		{Name: "group_id", Type: field.TypeInt},
+		{Name: "member_id", Type: field.TypeInt},
+	}
+	// GroupMembersTable holds the schema information for the "group_members" table.
+	GroupMembersTable = &schema.Table{
+		Name:       "group_members",
+		Columns:    GroupMembersColumns,
+		PrimaryKey: []*schema.Column{GroupMembersColumns[0], GroupMembersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "group_members_group_id",
+				Columns:    []*schema.Column{GroupMembersColumns[0]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "group_members_member_id",
+				Columns:    []*schema.Column{GroupMembersColumns[1]},
+				RefColumns: []*schema.Column{MembersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		GroupsTable,
 		InvitesTable,
 		MembersTable,
 		TenantsTable,
+		GroupMembersTable,
 	}
 )
 
@@ -130,4 +156,6 @@ func init() {
 	GroupsTable.ForeignKeys[0].RefTable = TenantsTable
 	InvitesTable.ForeignKeys[0].RefTable = TenantsTable
 	MembersTable.ForeignKeys[0].RefTable = TenantsTable
+	GroupMembersTable.ForeignKeys[0].RefTable = GroupsTable
+	GroupMembersTable.ForeignKeys[1].RefTable = MembersTable
 }

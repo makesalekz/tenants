@@ -20,11 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Groups_CreateGroup_FullMethodName = "/tenants.v1.Groups/CreateGroup"
-	Groups_UpdateGroup_FullMethodName = "/tenants.v1.Groups/UpdateGroup"
-	Groups_DeleteGroup_FullMethodName = "/tenants.v1.Groups/DeleteGroup"
-	Groups_GetGroup_FullMethodName    = "/tenants.v1.Groups/GetGroup"
-	Groups_ListGroups_FullMethodName  = "/tenants.v1.Groups/ListGroups"
+	Groups_CreateGroup_FullMethodName            = "/tenants.v1.Groups/CreateGroup"
+	Groups_UpdateGroup_FullMethodName            = "/tenants.v1.Groups/UpdateGroup"
+	Groups_DeleteGroup_FullMethodName            = "/tenants.v1.Groups/DeleteGroup"
+	Groups_GetGroup_FullMethodName               = "/tenants.v1.Groups/GetGroup"
+	Groups_ListGroups_FullMethodName             = "/tenants.v1.Groups/ListGroups"
+	Groups_AddMembersToGroup_FullMethodName      = "/tenants.v1.Groups/AddMembersToGroup"
+	Groups_RemoveMembersFromGroup_FullMethodName = "/tenants.v1.Groups/RemoveMembersFromGroup"
 )
 
 // GroupsClient is the client API for Groups service.
@@ -36,6 +38,8 @@ type GroupsClient interface {
 	DeleteGroup(ctx context.Context, in *GroupRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	GetGroup(ctx context.Context, in *GroupRequest, opts ...grpc.CallOption) (*GroupReply, error)
 	ListGroups(ctx context.Context, in *ListGroupsRequest, opts ...grpc.CallOption) (*ListGroupsReply, error)
+	AddMembersToGroup(ctx context.Context, in *GroupMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	RemoveMembersFromGroup(ctx context.Context, in *GroupMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 }
 
 type groupsClient struct {
@@ -91,6 +95,24 @@ func (c *groupsClient) ListGroups(ctx context.Context, in *ListGroupsRequest, op
 	return out, nil
 }
 
+func (c *groupsClient) AddMembersToGroup(ctx context.Context, in *GroupMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
+	err := c.cc.Invoke(ctx, Groups_AddMembersToGroup_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupsClient) RemoveMembersFromGroup(ctx context.Context, in *GroupMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+	out := new(v1.EmptyReply)
+	err := c.cc.Invoke(ctx, Groups_RemoveMembersFromGroup_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupsServer is the server API for Groups service.
 // All implementations must embed UnimplementedGroupsServer
 // for forward compatibility
@@ -100,6 +122,8 @@ type GroupsServer interface {
 	DeleteGroup(context.Context, *GroupRequest) (*v1.EmptyReply, error)
 	GetGroup(context.Context, *GroupRequest) (*GroupReply, error)
 	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsReply, error)
+	AddMembersToGroup(context.Context, *GroupMembersRequest) (*v1.EmptyReply, error)
+	RemoveMembersFromGroup(context.Context, *GroupMembersRequest) (*v1.EmptyReply, error)
 	mustEmbedUnimplementedGroupsServer()
 }
 
@@ -121,6 +145,12 @@ func (UnimplementedGroupsServer) GetGroup(context.Context, *GroupRequest) (*Grou
 }
 func (UnimplementedGroupsServer) ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListGroups not implemented")
+}
+func (UnimplementedGroupsServer) AddMembersToGroup(context.Context, *GroupMembersRequest) (*v1.EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddMembersToGroup not implemented")
+}
+func (UnimplementedGroupsServer) RemoveMembersFromGroup(context.Context, *GroupMembersRequest) (*v1.EmptyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveMembersFromGroup not implemented")
 }
 func (UnimplementedGroupsServer) mustEmbedUnimplementedGroupsServer() {}
 
@@ -225,6 +255,42 @@ func _Groups_ListGroups_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Groups_AddMembersToGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GroupMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupsServer).AddMembersToGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Groups_AddMembersToGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupsServer).AddMembersToGroup(ctx, req.(*GroupMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Groups_RemoveMembersFromGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GroupMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupsServer).RemoveMembersFromGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Groups_RemoveMembersFromGroup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupsServer).RemoveMembersFromGroup(ctx, req.(*GroupMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Groups_ServiceDesc is the grpc.ServiceDesc for Groups service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -251,6 +317,14 @@ var Groups_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListGroups",
 			Handler:    _Groups_ListGroups_Handler,
+		},
+		{
+			MethodName: "AddMembersToGroup",
+			Handler:    _Groups_AddMembersToGroup_Handler,
+		},
+		{
+			MethodName: "RemoveMembersFromGroup",
+			Handler:    _Groups_RemoveMembersFromGroup_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

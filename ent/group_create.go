@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent/group"
+	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -93,6 +94,21 @@ func (gc *GroupCreate) SetNillableUpdatedAt(t *time.Time) *GroupCreate {
 // SetTenant sets the "tenant" edge to the Tenant entity.
 func (gc *GroupCreate) SetTenant(t *Tenant) *GroupCreate {
 	return gc.SetTenantID(t.ID)
+}
+
+// AddMemberIDs adds the "members" edge to the Member entity by IDs.
+func (gc *GroupCreate) AddMemberIDs(ids ...int64) *GroupCreate {
+	gc.mutation.AddMemberIDs(ids...)
+	return gc
+}
+
+// AddMembers adds the "members" edges to the Member entity.
+func (gc *GroupCreate) AddMembers(m ...*Member) *GroupCreate {
+	ids := make([]int64, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return gc.AddMemberIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -238,6 +254,22 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.TenantID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.MembersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   group.MembersTable,
+			Columns: group.MembersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(member.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -20,15 +20,19 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationGroupsAddMembersToGroup = "/tenants.v1.Groups/AddMembersToGroup"
 const OperationGroupsCreateGroup = "/tenants.v1.Groups/CreateGroup"
 const OperationGroupsDeleteGroup = "/tenants.v1.Groups/DeleteGroup"
 const OperationGroupsListGroups = "/tenants.v1.Groups/ListGroups"
+const OperationGroupsRemoveMembersFromGroup = "/tenants.v1.Groups/RemoveMembersFromGroup"
 const OperationGroupsUpdateGroup = "/tenants.v1.Groups/UpdateGroup"
 
 type GroupsHTTPServer interface {
+	AddMembersToGroup(context.Context, *GroupMembersRequest) (*v1.EmptyReply, error)
 	CreateGroup(context.Context, *CreateGroupRequest) (*GroupReply, error)
 	DeleteGroup(context.Context, *GroupRequest) (*v1.EmptyReply, error)
 	ListGroups(context.Context, *ListGroupsRequest) (*ListGroupsReply, error)
+	RemoveMembersFromGroup(context.Context, *GroupMembersRequest) (*v1.EmptyReply, error)
 	UpdateGroup(context.Context, *UpdateGroupRequest) (*GroupReply, error)
 }
 
@@ -38,6 +42,8 @@ func RegisterGroupsHTTPServer(s *http.Server, srv GroupsHTTPServer) {
 	r.PUT("/v1/tenants/groups/{groupId}", _Groups_UpdateGroup0_HTTP_Handler(srv))
 	r.DELETE("/v1/tenants/groups/{groupId}", _Groups_DeleteGroup0_HTTP_Handler(srv))
 	r.POST("/v1/tenants/groups/list", _Groups_ListGroups0_HTTP_Handler(srv))
+	r.POST("/v1/tenants/groups/{groupId}/members", _Groups_AddMembersToGroup0_HTTP_Handler(srv))
+	r.POST("/v1/tenants/groups/{groupId}/members/remove", _Groups_RemoveMembersFromGroup0_HTTP_Handler(srv))
 }
 
 func _Groups_CreateGroup0_HTTP_Handler(srv GroupsHTTPServer) func(ctx http.Context) error {
@@ -131,10 +137,62 @@ func _Groups_ListGroups0_HTTP_Handler(srv GroupsHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _Groups_AddMembersToGroup0_HTTP_Handler(srv GroupsHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GroupMembersRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGroupsAddMembersToGroup)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AddMembersToGroup(ctx, req.(*GroupMembersRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.EmptyReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Groups_RemoveMembersFromGroup0_HTTP_Handler(srv GroupsHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GroupMembersRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGroupsRemoveMembersFromGroup)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.RemoveMembersFromGroup(ctx, req.(*GroupMembersRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*v1.EmptyReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type GroupsHTTPClient interface {
+	AddMembersToGroup(ctx context.Context, req *GroupMembersRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	CreateGroup(ctx context.Context, req *CreateGroupRequest, opts ...http.CallOption) (rsp *GroupReply, err error)
 	DeleteGroup(ctx context.Context, req *GroupRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	ListGroups(ctx context.Context, req *ListGroupsRequest, opts ...http.CallOption) (rsp *ListGroupsReply, err error)
+	RemoveMembersFromGroup(ctx context.Context, req *GroupMembersRequest, opts ...http.CallOption) (rsp *v1.EmptyReply, err error)
 	UpdateGroup(ctx context.Context, req *UpdateGroupRequest, opts ...http.CallOption) (rsp *GroupReply, err error)
 }
 
@@ -144,6 +202,19 @@ type GroupsHTTPClientImpl struct {
 
 func NewGroupsHTTPClient(client *http.Client) GroupsHTTPClient {
 	return &GroupsHTTPClientImpl{client}
+}
+
+func (c *GroupsHTTPClientImpl) AddMembersToGroup(ctx context.Context, in *GroupMembersRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
+	var out v1.EmptyReply
+	pattern := "/v1/tenants/groups/{groupId}/members"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationGroupsAddMembersToGroup))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
 }
 
 func (c *GroupsHTTPClientImpl) CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...http.CallOption) (*GroupReply, error) {
@@ -177,6 +248,19 @@ func (c *GroupsHTTPClientImpl) ListGroups(ctx context.Context, in *ListGroupsReq
 	pattern := "/v1/tenants/groups/list"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationGroupsListGroups))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *GroupsHTTPClientImpl) RemoveMembersFromGroup(ctx context.Context, in *GroupMembersRequest, opts ...http.CallOption) (*v1.EmptyReply, error) {
+	var out v1.EmptyReply
+	pattern := "/v1/tenants/groups/{groupId}/members/remove"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationGroupsRemoveMembersFromGroup))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

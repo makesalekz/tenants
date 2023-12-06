@@ -134,6 +134,46 @@ func (s *GroupsService) ListGroups(ctx context.Context, req *v1.ListGroupsReques
 	}, nil
 }
 
+func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMembersRequest) (*utils_v1.EmptyReply, error) {
+	claims, ok := s.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+	// TODO: check permissions
+
+	group, err := s.mu.GetGroup(ctx, claims.GetTenantId(), req.GetGroupId())
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.mu.AddMembersToGroup(ctx, group, req.GetMembersIds())
+	if err != nil {
+		return nil, err
+	}
+
+	return &utils_v1.EmptyReply{}, nil
+}
+
+func (s *GroupsService) RemoveMembersFromGroup(ctx context.Context, req *v1.GroupMembersRequest) (*utils_v1.EmptyReply, error) {
+	claims, ok := s.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+	// TODO: check permissions
+
+	group, err := s.mu.GetGroup(ctx, claims.GetTenantId(), req.GetGroupId())
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.mu.RemoveMembersFromGroup(ctx, group, req.GetMembersIds())
+	if err != nil {
+		return nil, err
+	}
+
+	return &utils_v1.EmptyReply{}, nil
+}
+
 func groupReply(group *ent.Group) *v1.Group {
 	return &v1.Group{
 		Id:          group.ID,

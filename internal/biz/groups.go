@@ -87,3 +87,11 @@ func (uc *GroupsUsecase) ListGroups(ctx context.Context, filter data.GroupsListF
 		},
 	}, nil
 }
+
+func (uc *GroupsUsecase) AddMembersToGroup(ctx context.Context, group *ent.Group, membersIds []int64) error {
+	return uc.groupsRepo.AddMembersToGroup(ctx, group, membersIds)
+}
+
+func (uc *GroupsUsecase) RemoveMembersFromGroup(ctx context.Context, group *ent.Group, membersIds []int64) error {
+	return uc.groupsRepo.RemoveMembersFromGroup(ctx, group, membersIds)
+}

@@ -35,6 +35,19 @@ service Groups {
 			body: "*"
 		};
 	};
+
+	rpc AddMembersToGroup (GroupMembersRequest) returns (utils.v1.EmptyReply){
+	  option (google.api.http) = {
+		post: "/v1/tenants/groups/{groupId}/members"
+		body: "*"
+	  };
+	};
+	rpc RemoveMembersFromGroup (GroupMembersRequest) returns (utils.v1.EmptyReply){
+	  option (google.api.http) = {
+		post: "/v1/tenants/groups/{groupId}/members/remove"
+		body: "*"
+	  };
+	};
 }
 
 message CreateGroupRequest {
@@ -65,4 +78,9 @@ message ListGroupsRequest {
 message ListGroupsReply {
 	repeated Group groups = 1;
 	utils.v1.PaginateReply paginate = 2;
+}
+
+message GroupMembersRequest {
+	int64 groupId = 1;
+	repeated int64 membersIds = 2;
 }

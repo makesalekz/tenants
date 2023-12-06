@@ -99,7 +99,8 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 
 	filter := data.MembersListFilter{
 		TenantId: claims.GetTenantId(),
-		Search:   req.Search,
+		GroupId:  req.GetGroupId(),
+		Search:   req.GetSearch(),
 	}
 
 	list, err := s.mu.ListMembers(ctx, filter, req.Sort, req.Paginate)
@@ -112,16 +113,16 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 	}, nil
 }
 
-func replyMember(member biz.MemberItem) *v1.Member {
-	return &v1.Member{
+func replyMember(member biz.MemberItem) *v1.TenantMember {
+	return &v1.TenantMember{
 		Id:        member.ID,
 		CreatedAt: member.CreatedAt.Format(time.RFC3339),
 		User:      member.User,
 	}
 }
 
-func replyMembers(members []biz.MemberItem) []*v1.Member {
-	reply := make([]*v1.Member, len(members))
+func replyMembers(members []biz.MemberItem) []*v1.TenantMember {
+	reply := make([]*v1.TenantMember, len(members))
 	for i, member := range members {
 		reply[i] = replyMember(member)
 	}

@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package tenants.v1;
 
+import "utils/v1/models.proto";
+import "iam/v1/models.proto";
+
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
 option java_multiple_files = true;
 option java_package = "tenants.v1";
@@ -29,4 +32,16 @@ message Group {
 	string description = 4;
 	string createdAt = 5;
 	string updatedAt = 6;
+}
+
+message TenantMember {
+	int64 id = 1;
+	string createdAt = 2;
+
+	iam.v1.UserShort user = 3;
+}
+
+message ListMembersReply {
+	repeated TenantMember members = 1;
+	utils.v1.PaginateReply paginate = 2;
 }

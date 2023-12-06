@@ -1,0 +1,2 @@
+-- Create "group_members" table
+CREATE TABLE "group_members" ("group_id" bigint NOT NULL, "member_id" bigint NOT NULL, PRIMARY KEY ("group_id", "member_id"), CONSTRAINT "group_members_group_id" FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON UPDATE NO ACTION ON DELETE CASCADE, CONSTRAINT "group_members_member_id" FOREIGN KEY ("member_id") REFERENCES "members" ("id") ON UPDATE NO ACTION ON DELETE CASCADE);
