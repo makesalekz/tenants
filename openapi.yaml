@@ -607,6 +607,8 @@ components:
                     type: string
                 createdAt:
                     type: string
+                identityId:
+                    type: string
                 user:
                     $ref: '#/components/schemas/iam.v1.UserShort'
                 groups:
