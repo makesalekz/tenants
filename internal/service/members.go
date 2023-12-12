@@ -142,10 +142,12 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 }
 
 func replyMember(member *biz.MemberItem) *v1.TenantMember {
+	identityId := member.IdentityID.String()
 	result := v1.TenantMember{
-		Id:        member.ID,
-		CreatedAt: member.CreatedAt.Format(time.RFC3339),
-		User:      member.User,
+		Id:         member.ID,
+		IdentityId: &identityId,
+		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
+		User:       member.User,
 	}
 
 	if len(member.Edges.Groups) > 0 {

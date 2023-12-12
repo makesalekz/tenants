@@ -37,9 +37,10 @@ message Group {
 message TenantMember {
 	int64 id = 1;
 	string createdAt = 2;
+	optional string identityId = 3;
 
-	iam.v1.UserShort user = 3;
-	repeated int64 groups = 4;
+	iam.v1.UserShort user = 4;
+	repeated int64 groups = 5;
 }
 
 message ListMembersReply {
