@@ -375,6 +375,23 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/tenants.v1.ListMembersReply'
     /v1/tenants/members/{memberId}:
+        get:
+            tags:
+                - Members
+            operationId: Members_GetMember
+            parameters:
+                - name: memberId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/tenants.v1.MemberReply'
         delete:
             tags:
                 - Members
@@ -567,6 +584,11 @@ components:
                     type: string
                 paginate:
                     $ref: '#/components/schemas/utils.v1.PaginateRequest'
+        tenants.v1.MemberReply:
+            type: object
+            properties:
+                member:
+                    $ref: '#/components/schemas/tenants.v1.TenantMember'
         tenants.v1.Tenant:
             type: object
             properties:
@@ -587,6 +609,10 @@ components:
                     type: string
                 user:
                     $ref: '#/components/schemas/iam.v1.UserShort'
+                groups:
+                    type: array
+                    items:
+                        type: string
         tenants.v1.TenantReply:
             type: object
             properties:

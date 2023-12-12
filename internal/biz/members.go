@@ -9,6 +9,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/dialer"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
@@ -19,7 +20,7 @@ type MemberItem struct {
 }
 
 type MembersList struct {
-	Members  []MemberItem
+	Members  []*MemberItem
 	Paginate *utils_v1.PaginateReply
 }
 
@@ -27,18 +28,20 @@ type MembersList struct {
 type MembersUsecase struct {
 	log         *log.Helper
 	jwt         *jwt.JwtProcessor
-	dialer      *data.Dialer
+	dialer      *dialer.Dialer
 	tenantsRepo data.TenantsRepo
 	membersRepo data.MembersRepo
+	iam         *data.IamRemote
 }
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewMembersUsecase(
 	logger log.Logger,
 	jwt *jwt.JwtProcessor,
-	dialer *data.Dialer,
+	dialer *dialer.Dialer,
 	tenantsRepo data.TenantsRepo,
 	membersRepo data.MembersRepo,
+	iam *data.IamRemote,
 ) (*MembersUsecase, error) {
 	return &MembersUsecase{
 		log:         log.NewHelper(logger),
@@ -46,6 +49,7 @@ func NewMembersUsecase(
 		dialer:      dialer,
 		tenantsRepo: tenantsRepo,
 		membersRepo: membersRepo,
+		iam:         iam,
 	}, nil
 }
 
@@ -57,8 +61,28 @@ func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId, memberId i
 	return uc.membersRepo.DeleteMember(ctx, tenantId, memberId)
 }
 
-func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
-	member, err := uc.membersRepo.GetMember(ctx, tenantId, userId)
+func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, memberId int64) (*MemberItem, error) {
+	member, err := uc.membersRepo.GetMember(ctx, tenantId, memberId)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("member not found")
+		}
+		return nil, err
+	}
+
+	user, err := uc.iam.GetUser(ctx, member.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MemberItem{
+		Member: member,
+		User:   user,
+	}, nil
+}
+
+func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
+	member, err := uc.membersRepo.GetMemberByUserId(ctx, tenantId, userId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("member not found")
@@ -86,24 +110,19 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersLi
 		membersMap[member.UserID] = member
 	}
 
-	usersClient, err := uc.dialer.Users(ctx)
-	if err != nil {
-		return nil, v1.ErrorGrpcConnection("iam: %s", err.Error())
-	}
-
-	reply, err := usersClient.GetUsers(ctx, &iam_v1.GetUsersRequest{
+	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{
 		Ids:      usersIds,
 		Search:   filter.Search,
 		Sort:     sort,
 		Paginate: paginate,
 	})
 	if err != nil {
-		return nil, v1.ErrorServiceFailed("iam: %s", err.Error())
+		return nil, err
 	}
 
-	membersItems := make([]MemberItem, len(reply.Users))
+	membersItems := make([]*MemberItem, len(reply.Users))
 	for i, user := range reply.Users {
-		membersItems[i] = MemberItem{
+		membersItems[i] = &MemberItem{
 			Member: membersMap[user.Id],
 			User:   user,
 		}

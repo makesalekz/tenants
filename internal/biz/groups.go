@@ -8,6 +8,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/dialer"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
@@ -20,7 +21,7 @@ type GroupsList struct {
 type GroupsUsecase struct {
 	log         *log.Helper
 	jwt         *jwt.JwtProcessor
-	dialer      *data.Dialer
+	dialer      *dialer.Dialer
 	tenantsRepo data.TenantsRepo
 	groupsRepo  data.GroupsRepo
 }
@@ -29,7 +30,7 @@ type GroupsUsecase struct {
 func NewGroupsUsecase(
 	logger log.Logger,
 	jwt *jwt.JwtProcessor,
-	dialer *data.Dialer,
+	dialer *dialer.Dialer,
 	tenantsRepo data.TenantsRepo,
 	groupsRepo data.GroupsRepo,
 ) (*GroupsUsecase, error) {

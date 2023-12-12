@@ -15,6 +15,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/server"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/dialer"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
@@ -44,13 +45,18 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	dialer, err := data.NewDialer(configConfig, bootstrap, jwtProcessor)
+	dialerDialer, err := dialer.NewDialer(configConfig, jwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	membersRepo := data.NewMembersRepo(dataData)
-	membersUsecase, err := biz.NewMembersUsecase(logger, jwtProcessor, dialer, tenantsRepo, membersRepo)
+	iamRemote, err := data.NewIamRemote(dialerDialer, bootstrap)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	membersUsecase, err := biz.NewMembersUsecase(logger, jwtProcessor, dialerDialer, tenantsRepo, membersRepo, iamRemote)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -58,11 +64,6 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	tenantsService := service.NewTenantsService(jwtProcessor, tenantsUsecase, membersUsecase)
 	membersService := service.NewMembersService(jwtProcessor, tenantsUsecase, membersUsecase)
 	invitesRepo := data.NewInvitesRepo(dataData)
-	iamRemote, err := data.NewIamRemote(dialer)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
 	invitesUsecase, err := biz.NewInvitesUsecase(logger, jwtProcessor, tenantsRepo, invitesRepo, iamRemote)
 	if err != nil {
 		cleanup()
@@ -70,7 +71,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	}
 	invitesService := service.NewInvitesService(jwtProcessor, tenantsUsecase, invitesUsecase)
 	groupsRepo := data.NewGroupsRepo(dataData)
-	groupsUsecase, err := biz.NewGroupsUsecase(logger, jwtProcessor, dialer, tenantsRepo, groupsRepo)
+	groupsUsecase, err := biz.NewGroupsUsecase(logger, jwtProcessor, dialerDialer, tenantsRepo, groupsRepo)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
