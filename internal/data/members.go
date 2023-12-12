@@ -22,7 +22,8 @@ type MembersRepo interface {
 	CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
 	DeleteMember(ctx context.Context, tenantId, memberId int64) error
 	GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
-	GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
+	GetMember(ctx context.Context, tenantId, memberId int64) (*ent.Member, error)
+	GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
 	ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error)
 	CountListMembers(ctx context.Context, filter MembersListFilter) (int32, error)
 }
@@ -57,8 +58,12 @@ func (r *membersRepo) GetMembers(ctx context.Context, tenantId int64, usersIds [
 	return r.db.Member.Query().Where(member.TenantID(tenantId), member.UserIDIn(usersIds...)).All(ctx)
 }
 
-func (r *membersRepo) GetMember(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
-	return r.db.Member.Query().Where(member.TenantID(tenantId), member.UserID(userId)).Only(ctx)
+func (r *membersRepo) GetMember(ctx context.Context, tenantId, memberId int64) (*ent.Member, error) {
+	return r.db.Member.Query().Where(member.TenantID(tenantId), member.ID(memberId)).WithGroups().Only(ctx)
+}
+
+func (r *membersRepo) GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
+	return r.db.Member.Query().Where(member.TenantID(tenantId), member.UserID(userId)).WithGroups().Only(ctx)
 }
 
 func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error) {

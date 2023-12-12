@@ -52,7 +52,7 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *MembersService) DeleteMember(ctx context.Context, req *v1.DeleteMemberRequest) (*utils_v1.EmptyReply, error) {
+func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest) (*utils_v1.EmptyReply, error) {
 	claims, ok := s.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("invalid token")
@@ -75,20 +75,47 @@ func (s *MembersService) DeleteMember(ctx context.Context, req *v1.DeleteMemberR
 	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *MembersService) GetMember(ctx context.Context, req *v1.GetMemberRequest) (*v1.GetMemberReply, error) {
+func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (*v1.MemberReply, error) {
 	claims, ok := s.jwt.GetClaimsFromContext(ctx)
 	if !ok || !claims.IsUserTenantRequest() {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	member, err := s.mu.GetMember(ctx, claims.GetTenantId(), req.UserId)
+	member, err := s.mu.GetMember(ctx, claims.GetTenantId(), req.MemberId)
 	if err != nil {
 		return nil, err
 	}
-	return &v1.GetMemberReply{
-		Member: member.IdentityID.String(),
-		Groups: []string{},
+
+	return &v1.MemberReply{
+		Member: replyMember(member),
 	}, nil
+}
+
+func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMemberIdentitiesRequest) (*v1.GetMemberIdentitiesReply, error) {
+	claims, ok := s.jwt.GetClaimsFromContext(ctx)
+	if !ok || !claims.IsUserTenantRequest() {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	member, err := s.mu.GetMemberByUserId(ctx, claims.GetTenantId(), req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	result := v1.GetMemberIdentitiesReply{
+		Member: member.IdentityID.String(),
+	}
+
+	if len(member.Edges.Groups) > 0 {
+		groups := make([]string, len(member.Edges.Groups))
+		for i, group := range member.Edges.Groups {
+			groups[i] = group.IdentityID.String()
+		}
+
+		result.Groups = groups
+	}
+
+	return &result, nil
 }
 
 func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
@@ -107,21 +134,33 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 	if err != nil {
 		return nil, err
 	}
+
 	return &v1.ListMembersReply{
 		Members:  replyMembers(list.Members),
 		Paginate: list.Paginate,
 	}, nil
 }
 
-func replyMember(member biz.MemberItem) *v1.TenantMember {
-	return &v1.TenantMember{
+func replyMember(member *biz.MemberItem) *v1.TenantMember {
+	result := v1.TenantMember{
 		Id:        member.ID,
 		CreatedAt: member.CreatedAt.Format(time.RFC3339),
 		User:      member.User,
 	}
+
+	if len(member.Edges.Groups) > 0 {
+		groups := make([]int64, len(member.Edges.Groups))
+		for i, group := range member.Edges.Groups {
+			groups[i] = group.ID
+		}
+
+		result.Groups = groups
+	}
+
+	return &result
 }
 
-func replyMembers(members []biz.MemberItem) []*v1.TenantMember {
+func replyMembers(members []*biz.MemberItem) []*v1.TenantMember {
 	reply := make([]*v1.TenantMember, len(members))
 	for i, member := range members {
 		reply[i] = replyMember(member)

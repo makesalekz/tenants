@@ -12,7 +12,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.31.0
 	gitlab.calendaria.team/services/iam v0.1.2
-	gitlab.calendaria.team/services/utils v0.0.3
+	gitlab.calendaria.team/services/utils v0.0.5
 	go.uber.org/automaxprocs v1.5.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20231030173426-d783a09b4405
 	google.golang.org/grpc v1.59.0

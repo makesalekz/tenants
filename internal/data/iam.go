@@ -5,21 +5,32 @@ import (
 
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"gitlab.calendaria.team/services/utils/v1/dialer"
 )
 
 type IamRemote struct {
-	dialer *Dialer
+	dialer *dialer.Dialer
+	conf   *conf.Bootstrap
 }
 
-func NewIamRemote(dialer *Dialer) (*IamRemote, error) {
+func NewIamRemote(d *dialer.Dialer, conf *conf.Bootstrap) (*IamRemote, error) {
 	return &IamRemote{
-		dialer: dialer,
+		dialer: d,
+		conf:   conf,
 	}, nil
+}
+
+func (r *IamRemote) GetUsersClient(ctx context.Context) (iam_v1.UsersClient, error) {
+	return dialer.NewDialerBuilder(r.dialer, iam_v1.NewUsersClient).
+		SetEndpoint(r.conf.Discovery.Iam).
+		SetTimeout(r.conf.Discovery.IamTimeout.AsDuration()).
+		Conn(ctx, nil)
 }
 
 // GetUser returns userShort from iam service by userId.
 func (r *IamRemote) GetUser(ctx context.Context, userId int64) (*iam_v1.UserShort, error) {
-	usersClient, err := r.dialer.Users(ctx)
+	usersClient, err := r.GetUsersClient(ctx)
 	if err != nil {
 		return nil, tenants_v1.ErrorGrpcConnection("iam: %s", err.Error())
 	}
@@ -36,20 +47,16 @@ func (r *IamRemote) GetUser(ctx context.Context, userId int64) (*iam_v1.UserShor
 }
 
 // GetUsers returns userShorts map from iam service by mapUsersIds.
-func (r *IamRemote) GetUsers(ctx context.Context, usersIds []int64, emails []string) ([]*iam_v1.UserShort, error) {
-	if len(usersIds) == 0 && len(emails) == 0 {
-		return nil, nil
-	}
-
-	usersClient, err := r.dialer.Users(ctx)
+func (r *IamRemote) GetUsers(ctx context.Context, req *iam_v1.GetUsersRequest) (*iam_v1.GetUsersReply, error) {
+	usersClient, err := r.GetUsersClient(ctx)
 	if err != nil {
 		return nil, tenants_v1.ErrorGrpcConnection("iam: %s", err.Error())
 	}
 
-	reply, err := usersClient.GetUsers(ctx, &iam_v1.GetUsersRequest{Ids: usersIds, Emails: emails})
+	reply, err := usersClient.GetUsers(ctx, req)
 	if err != nil {
 		return nil, tenants_v1.ErrorServiceFailed("iam: %s", err.Error())
 	}
 
-	return reply.Users, nil
+	return reply, nil
 }

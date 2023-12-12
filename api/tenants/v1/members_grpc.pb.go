@@ -20,10 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Members_CreateMembers_FullMethodName = "/tenants.v1.Members/CreateMembers"
-	Members_DeleteMember_FullMethodName  = "/tenants.v1.Members/DeleteMember"
-	Members_GetMember_FullMethodName     = "/tenants.v1.Members/GetMember"
-	Members_ListMembers_FullMethodName   = "/tenants.v1.Members/ListMembers"
+	Members_CreateMembers_FullMethodName       = "/tenants.v1.Members/CreateMembers"
+	Members_DeleteMember_FullMethodName        = "/tenants.v1.Members/DeleteMember"
+	Members_GetMember_FullMethodName           = "/tenants.v1.Members/GetMember"
+	Members_GetMemberIdentities_FullMethodName = "/tenants.v1.Members/GetMemberIdentities"
+	Members_ListMembers_FullMethodName         = "/tenants.v1.Members/ListMembers"
 )
 
 // MembersClient is the client API for Members service.
@@ -31,8 +32,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MembersClient interface {
 	CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
-	DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
-	GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error)
+	DeleteMember(ctx context.Context, in *MemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
+	GetMember(ctx context.Context, in *MemberRequest, opts ...grpc.CallOption) (*MemberReply, error)
+	GetMemberIdentities(ctx context.Context, in *GetMemberIdentitiesRequest, opts ...grpc.CallOption) (*GetMemberIdentitiesReply, error)
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersReply, error)
 }
 
@@ -53,7 +55,7 @@ func (c *membersClient) CreateMembers(ctx context.Context, in *CreateMembersRequ
 	return out, nil
 }
 
-func (c *membersClient) DeleteMember(ctx context.Context, in *DeleteMemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
+func (c *membersClient) DeleteMember(ctx context.Context, in *MemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error) {
 	out := new(v1.EmptyReply)
 	err := c.cc.Invoke(ctx, Members_DeleteMember_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -62,9 +64,18 @@ func (c *membersClient) DeleteMember(ctx context.Context, in *DeleteMemberReques
 	return out, nil
 }
 
-func (c *membersClient) GetMember(ctx context.Context, in *GetMemberRequest, opts ...grpc.CallOption) (*GetMemberReply, error) {
-	out := new(GetMemberReply)
+func (c *membersClient) GetMember(ctx context.Context, in *MemberRequest, opts ...grpc.CallOption) (*MemberReply, error) {
+	out := new(MemberReply)
 	err := c.cc.Invoke(ctx, Members_GetMember_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *membersClient) GetMemberIdentities(ctx context.Context, in *GetMemberIdentitiesRequest, opts ...grpc.CallOption) (*GetMemberIdentitiesReply, error) {
+	out := new(GetMemberIdentitiesReply)
+	err := c.cc.Invoke(ctx, Members_GetMemberIdentities_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +96,9 @@ func (c *membersClient) ListMembers(ctx context.Context, in *ListMembersRequest,
 // for forward compatibility
 type MembersServer interface {
 	CreateMembers(context.Context, *CreateMembersRequest) (*v1.EmptyReply, error)
-	DeleteMember(context.Context, *DeleteMemberRequest) (*v1.EmptyReply, error)
-	GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error)
+	DeleteMember(context.Context, *MemberRequest) (*v1.EmptyReply, error)
+	GetMember(context.Context, *MemberRequest) (*MemberReply, error)
+	GetMemberIdentities(context.Context, *GetMemberIdentitiesRequest) (*GetMemberIdentitiesReply, error)
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
 	mustEmbedUnimplementedMembersServer()
 }
@@ -98,11 +110,14 @@ type UnimplementedMembersServer struct {
 func (UnimplementedMembersServer) CreateMembers(context.Context, *CreateMembersRequest) (*v1.EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMembers not implemented")
 }
-func (UnimplementedMembersServer) DeleteMember(context.Context, *DeleteMemberRequest) (*v1.EmptyReply, error) {
+func (UnimplementedMembersServer) DeleteMember(context.Context, *MemberRequest) (*v1.EmptyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMember not implemented")
 }
-func (UnimplementedMembersServer) GetMember(context.Context, *GetMemberRequest) (*GetMemberReply, error) {
+func (UnimplementedMembersServer) GetMember(context.Context, *MemberRequest) (*MemberReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMember not implemented")
+}
+func (UnimplementedMembersServer) GetMemberIdentities(context.Context, *GetMemberIdentitiesRequest) (*GetMemberIdentitiesReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMemberIdentities not implemented")
 }
 func (UnimplementedMembersServer) ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMembers not implemented")
@@ -139,7 +154,7 @@ func _Members_CreateMembers_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 func _Members_DeleteMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteMemberRequest)
+	in := new(MemberRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -151,13 +166,13 @@ func _Members_DeleteMember_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: Members_DeleteMember_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MembersServer).DeleteMember(ctx, req.(*DeleteMemberRequest))
+		return srv.(MembersServer).DeleteMember(ctx, req.(*MemberRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Members_GetMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMemberRequest)
+	in := new(MemberRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -169,7 +184,25 @@ func _Members_GetMember_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: Members_GetMember_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MembersServer).GetMember(ctx, req.(*GetMemberRequest))
+		return srv.(MembersServer).GetMember(ctx, req.(*MemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Members_GetMemberIdentities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMemberIdentitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MembersServer).GetMemberIdentities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Members_GetMemberIdentities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MembersServer).GetMemberIdentities(ctx, req.(*GetMemberIdentitiesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -210,6 +243,10 @@ var Members_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMember",
 			Handler:    _Members_GetMember_Handler,
+		},
+		{
+			MethodName: "GetMemberIdentities",
+			Handler:    _Members_GetMemberIdentities_Handler,
 		},
 		{
 			MethodName: "ListMembers",

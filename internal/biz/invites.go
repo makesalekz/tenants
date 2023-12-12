@@ -52,13 +52,13 @@ func NewInvitesUsecase(
 }
 
 func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string) ([]InviteItem, error) {
-	users, err := uc.iam.GetUsers(ctx, nil, emails)
+	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
 		return nil, err
 	}
 
 	usersMap := make(map[string]*iam_v1.UserShort)
-	for _, user := range users {
+	for _, user := range reply.Users {
 		usersMap[user.Email] = user
 	}
 
@@ -128,13 +128,13 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 		}
 	}
 
-	users, err := uc.iam.GetUsers(ctx, usersIds, nil)
+	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Ids: usersIds})
 	if err != nil {
 		return nil, err
 	}
 
 	usersMap := make(map[int64]*iam_v1.UserShort)
-	for _, user := range users {
+	for _, user := range reply.Users {
 		usersMap[user.Id] = user
 	}
 

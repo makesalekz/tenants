@@ -39,6 +39,7 @@ message TenantMember {
 	string createdAt = 2;
 
 	iam.v1.UserShort user = 3;
+	repeated int64 groups = 4;
 }
 
 message ListMembersReply {
