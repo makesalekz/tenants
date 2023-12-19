@@ -28,6 +28,7 @@ var ProviderSet = wire.NewSet(
 	NewGroupsRepo,
 	dialer.NewDialer,
 	NewIamRemote,
+	NewRbacRemote,
 )
 
 // Data .
