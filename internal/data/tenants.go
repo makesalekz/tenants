@@ -25,7 +25,7 @@ type TenantsListFilter struct {
 
 // TenantsRepo
 type TenantsRepo interface {
-	CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error)
+	CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, *ent.Member, error)
 	UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error)
 	DeleteTenant(ctx context.Context, dto TenantDto) error
 	GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error)
@@ -44,10 +44,10 @@ func NewTenantsRepo(d *Data) TenantsRepo {
 	}
 }
 
-func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error) {
+func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, *ent.Member, error) {
 	tx, err := r.db.Tx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer func() {
 		if err != nil {
@@ -60,17 +60,17 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 		SetName(dto.Name).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	_, err = tx.Member.Create().SetTenantID(tenant.ID).SetUserID(dto.OwnerId).SetIdentityID(uuid.New()).Save(ctx)
+	member, err := tx.Member.Create().SetTenantID(tenant.ID).SetUserID(dto.OwnerId).SetIdentityID(uuid.New()).Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	tx.Commit()
 
-	return tenant, nil
+	return tenant, member, nil
 }
 
 func (r *tenantsRepo) UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error) {

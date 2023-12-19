@@ -40,12 +40,17 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	tenantsRepo := data.NewTenantsRepo(dataData)
-	tenantsUsecase, err := biz.NewTenantsUsecase(logger, configConfig, jwtProcessor, tenantsRepo)
+	dialerDialer, err := dialer.NewDialer(configConfig, jwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	dialerDialer, err := dialer.NewDialer(configConfig, jwtProcessor)
+	rbacRemote, err := data.NewRbacRemote(dialerDialer, bootstrap)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	tenantsUsecase, err := biz.NewTenantsUsecase(logger, tenantsRepo, rbacRemote)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

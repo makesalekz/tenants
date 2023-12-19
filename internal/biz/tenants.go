@@ -3,15 +3,15 @@ package biz
 import (
 	"context"
 
-	consul "github.com/go-kratos/consul/registry"
 	"github.com/go-kratos/kratos/v2/log"
 	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
+
+const ADMIN_ROLE_ID = 1
+const BASIC_ROLE_ID = 2
 
 type TenantsList struct {
 	Tenants  []*ent.Tenant
@@ -20,24 +20,41 @@ type TenantsList struct {
 
 // TenantsUsecase is a Greeter usecase.
 type TenantsUsecase struct {
-	log       *log.Helper
-	discovery *consul.Registry
-	jwt       *jwt.JwtProcessor
-	repo      data.TenantsRepo
+	log  *log.Helper
+	repo data.TenantsRepo
+	rbac *data.RbacRemote
 }
 
 // NewGreeterUsecase new a Greeter usecase.
-func NewTenantsUsecase(logger log.Logger, c *config.Config, jwt *jwt.JwtProcessor, repo data.TenantsRepo) (*TenantsUsecase, error) {
+func NewTenantsUsecase(
+	logger log.Logger,
+	repo data.TenantsRepo,
+	rbac *data.RbacRemote,
+) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
-		log:       log.NewHelper(logger),
-		discovery: c.GetRegistry(),
-		jwt:       jwt,
-		repo:      repo,
+		log:  log.NewHelper(logger),
+		repo: repo,
+		rbac: rbac,
 	}, nil
 }
 
 func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
-	return uc.repo.CreateTenant(ctx, dto)
+	tenant, member, err := uc.repo.CreateTenant(ctx, dto)
+	if err != nil {
+		return nil, err
+	}
+
+	err = uc.rbac.AssignRole(ctx, member.IdentityID.String(), tenant.ID, tenant.OwnerID, ADMIN_ROLE_ID)
+	if err != nil {
+		uc.log.Errorf("CreateTenant.AssignRole (admin): %s", err.Error())
+	}
+
+	err = uc.rbac.AssignRole(ctx, "", tenant.ID, tenant.OwnerID, BASIC_ROLE_ID)
+	if err != nil {
+		uc.log.Errorf("CreateTenant.AssignRole (basic): %s", err.Error())
+	}
+
+	return tenant, nil
 }
 
 func (uc *TenantsUsecase) UpdateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
