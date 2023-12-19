@@ -32,7 +32,7 @@ func (r *RbacRemote) GetAssignsClient(ctx context.Context, claims *jwt.TenantCla
 	return dialer.NewDialerBuilder(r.dialer, rbac_v1.NewAssignsClient).
 		SetEndpoint(r.conf.Discovery.Rbac).
 		SetTimeout(r.conf.Discovery.RbacTimeout.AsDuration()).
-		Conn(ctx, nil)
+		Conn(ctx, claims)
 }
 
 func (r *RbacRemote) AssignRole(ctx context.Context, identityId string, tenantId, ownerId, roleId int64) error {
