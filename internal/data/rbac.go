@@ -49,7 +49,7 @@ func (r *RbacRemote) AssignRole(ctx context.Context, identityId string, tenantId
 
 	client, err := r.GetAssignsClient(ctx, claims)
 	if err != nil {
-		return tenants_v1.ErrorGrpcConnection("iam: %s", err.Error())
+		return tenants_v1.ErrorGrpcConnection("rbac: %s", err.Error())
 	}
 
 	_, err = client.AssignRole(ctx, &rbac_v1.AssignRoleRequest{
