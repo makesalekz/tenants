@@ -79,7 +79,6 @@ migrations:
 # generate api proto
 api:
 	go mod vendor;
-	find vendor/gitlab.calendaria.team -name 'models.proto' -exec sh -c 'f="{}"; d="third_party/$$(dirname "$$f" | awk -F/ "{print \$$(NF-1)\"/\"\$$NF}")"; mkdir -p "$$d"; rsync -a "$$f" "$$d"' \;
 	protoc --proto_path=. \
 			--proto_path=./third_party \
 			--go_out=paths=source_relative:. \
@@ -88,6 +87,12 @@ api:
 			--go-grpc_out=paths=source_relative:. \
 			--openapi_out=fq_schema_naming=true,default_response=false:. \
 			$(API_PROTO_FILES);
+		
+.PHONY: proto
+# proto
+proto:
+	go mod vendor;
+	find vendor/gitlab.calendaria.team -name 'models.proto' -exec sh -c 'f="{}"; d="third_party/api/$$(dirname "$$f" | awk -F/ "{print \$$(NF-1)\"/\"\$$NF}")"; mkdir -p "$$d"; rsync -a "$$f" "$$d"' \;
 
 .PHONY: build
 # build

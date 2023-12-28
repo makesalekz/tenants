@@ -3,8 +3,8 @@ syntax = "proto3";
 package tenants.v1;
 
 import "google/api/annotations.proto";
-import "utils/v1/models.proto";
-import "iam/v1/models.proto";
+import "api/utils/v1/models.proto";
+import "api/iam/v1/models.proto";
 import "api/tenants/v1/models.proto";
 
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
@@ -12,90 +12,90 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Invites {
-	rpc CreateInvites (CreateInvitesRequest) returns (ListInvitesReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/invites"
-			body: "*"
-		};
-	};
-	rpc CancelInvite (InviteRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			put: "/v1/tenants/invites/{inviteId}"
-			body: "*"
-		};
-	};
-	rpc DeleteInvite (InviteRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			delete: "/v1/tenants/invites/{inviteId}"
-		};
-	};
-	rpc ListInvites (ListInvitesRequest) returns (ListInvitesReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/invites/list"
-			body: "*"
-		};
-	};
-	rpc AcceptInvite (InviteCodeRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/invites/accept"
-			body: "*"
-		};
-	};
-	rpc ShownInvite (InviteCodeRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/invites/shown"
-			body: "*"
-		};
-	};	
-	rpc DeclineInvite (InviteCodeRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/invites/decline"
-			body: "*"
-		};
-	};
+  rpc CreateInvites(CreateInvitesRequest) returns (ListInvitesReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/invites"
+      body: "*"
+    };
+  };
+  rpc CancelInvite(InviteRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      put: "/v1/tenants/invites/{inviteId}"
+      body: "*"
+    };
+  };
+  rpc DeleteInvite(InviteRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      delete: "/v1/tenants/invites/{inviteId}"
+    };
+  };
+  rpc ListInvites(ListInvitesRequest) returns (ListInvitesReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/invites/list"
+      body: "*"
+    };
+  };
+  rpc AcceptInvite(InviteCodeRequest) returns (TenantReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/invites/accept"
+      body: "*"
+    };
+  };
+  rpc ShownInvite(InviteCodeRequest) returns (TenantReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/invites/shown"
+      body: "*"
+    };
+  };
+  rpc DeclineInvite(InviteCodeRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/invites/decline"
+      body: "*"
+    };
+  };
 }
 
 message CreateInvitesRequest {
-	repeated string emails = 1;
+  repeated string emails = 1;
 }
 
 message InviteRequest {
-	int64 inviteId = 1;
+  int64 inviteId = 1;
 }
 
 message ListInvitesRequest {
-	string search = 1;
-	Status status = 2;
-	utils.v1.SortRequest sort = 3;
-	utils.v1.PaginateRequest paginate = 4;
+  string search = 1;
+  Status status = 2;
+  utils.v1.SortRequest sort = 3;
+  utils.v1.PaginateRequest paginate = 4;
 }
 
 message ListInvitesReply {
-	repeated Invite invites = 1;
-	optional utils.v1.PaginateReply paginate = 2;
+  repeated Invite invites = 1;
+  optional utils.v1.PaginateReply paginate = 2;
 }
 
 message InviteCodeRequest {
-	int64 inviteId = 1;
-	string code = 2;
+  int64 inviteId = 1;
+  string code = 2;
 }
 
 enum Status {
-	UNSPECIFIED = 0;
-	NEW = 1;
-	SENT = 2;
-	SHOWN = 3;
-	ACCEPTED = 4;
-	DECLINED = 5;
-	CANCELED = 6;
+  UNSPECIFIED = 0;
+  NEW = 1;
+  SENT = 2;
+  SHOWN = 3;
+  ACCEPTED = 4;
+  DECLINED = 5;
+  CANCELED = 6;
 }
 
 message Invite {
-	int64 id = 1;
-	string email = 2;
-	Status status = 3;
-	string createdAt = 4;
-	string updatedAt = 5;
-	
-	iam.v1.UserShort user = 6;
+  int64 id = 1;
+  string email = 2;
+  Status status = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+
+  iam.v1.UserShort user = 6;
 }
