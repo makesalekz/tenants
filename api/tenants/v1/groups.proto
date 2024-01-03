@@ -3,7 +3,7 @@ syntax = "proto3";
 package tenants.v1;
 
 import "google/api/annotations.proto";
-import "utils/v1/models.proto";
+import "api/utils/v1/models.proto";
 import "api/tenants/v1/models.proto";
 
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
@@ -11,76 +11,77 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Groups {
-	rpc CreateGroup (CreateGroupRequest) returns (GroupReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/groups"
-			body: "*"
-		};
-	};
-	rpc UpdateGroup (UpdateGroupRequest) returns (GroupReply) {
-		option (google.api.http) = {
-			put: "/v1/tenants/groups/{groupId}"
-			body: "*"
-		};
-	};
-	rpc DeleteGroup (GroupRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			delete: "/v1/tenants/groups/{groupId}"
-		};
-	};
-	rpc GetGroup (GroupRequest) returns (GroupReply);
-	rpc ListGroups (ListGroupsRequest) returns (ListGroupsReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/groups/list"
-			body: "*"
-		};
-	};
+  rpc CreateGroup(CreateGroupRequest) returns (GroupReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/groups"
+      body: "*"
+    };
+  };
+  rpc UpdateGroup(UpdateGroupRequest) returns (GroupReply) {
+    option (google.api.http) = {
+      put: "/v1/tenants/groups/{groupId}"
+      body: "*"
+    };
+  };
+  rpc DeleteGroup(GroupRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      delete: "/v1/tenants/groups/{groupId}"
+    };
+  };
+  rpc GetGroup(GroupRequest) returns (GroupReply);
+  rpc ListGroups(ListGroupsRequest) returns (ListGroupsReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/groups/list"
+      body: "*"
+    };
+  };
 
-	rpc AddMembersToGroup (GroupMembersRequest) returns (utils.v1.EmptyReply){
-	  option (google.api.http) = {
-		post: "/v1/tenants/groups/{groupId}/members"
-		body: "*"
-	  };
-	};
-	rpc RemoveMembersFromGroup (GroupMembersRequest) returns (utils.v1.EmptyReply){
-	  option (google.api.http) = {
-		post: "/v1/tenants/groups/{groupId}/members/remove"
-		body: "*"
-	  };
-	};
+  rpc AddMembersToGroup(GroupMembersRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/groups/{groupId}/members"
+      body: "*"
+    };
+  };
+  rpc RemoveMembersFromGroup(GroupMembersRequest)
+      returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/groups/{groupId}/members/remove"
+      body: "*"
+    };
+  };
 }
 
 message CreateGroupRequest {
-	string name = 1;
-	string description = 2;
+  string name = 1;
+  string description = 2;
 }
 
 message UpdateGroupRequest {
-	int64 groupId = 1;
-	string name = 2;
-	string description = 3;
+  int64 groupId = 1;
+  string name = 2;
+  string description = 3;
 }
 
 message GroupRequest {
-	int64 groupId = 1;
+  int64 groupId = 1;
 }
 
 message GroupReply {
-	Group group = 1;
+  Group group = 1;
 }
 
 message ListGroupsRequest {
-	string search = 1;
-	utils.v1.SortRequest sort = 2;
-	utils.v1.PaginateRequest paginate = 3;
+  string search = 1;
+  utils.v1.SortRequest sort = 2;
+  utils.v1.PaginateRequest paginate = 3;
 }
 
 message ListGroupsReply {
-	repeated Group groups = 1;
-	utils.v1.PaginateReply paginate = 2;
+  repeated Group groups = 1;
+  utils.v1.PaginateReply paginate = 2;
 }
 
 message GroupMembersRequest {
-	int64 groupId = 1;
-	repeated int64 membersIds = 2;
+  int64 groupId = 1;
+  repeated int64 membersIds = 2;
 }

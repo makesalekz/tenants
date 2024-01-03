@@ -3,7 +3,7 @@ syntax = "proto3";
 package tenants.v1;
 
 import "google/api/annotations.proto";
-import "utils/v1/models.proto";
+import "api/utils/v1/models.proto";
 import "api/tenants/v1/models.proto";
 
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
@@ -11,55 +11,56 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Members {
-	rpc CreateMembers (CreateMembersRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/members"
-			body: "*"
-		};
-	};
-	rpc DeleteMember (MemberRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			delete: "/v1/tenants/members/{memberId}"
-		};
-	};
-	rpc GetMember (MemberRequest) returns (MemberReply) {
-		option (google.api.http) = {
-			get: "/v1/tenants/members/{memberId}"
-		};
-	};
-	rpc GetMemberIdentities (GetMemberIdentitiesRequest) returns (GetMemberIdentitiesReply);
-	rpc ListMembers (ListMembersRequest) returns (ListMembersReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants/members/list"
-			body: "*"
-		};
-	};
+  rpc CreateMembers(CreateMembersRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/members"
+      body: "*"
+    };
+  };
+  rpc DeleteMember(MemberRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      delete: "/v1/tenants/members/{memberId}"
+    };
+  };
+  rpc GetMember(MemberRequest) returns (MemberReply) {
+    option (google.api.http) = {
+      get: "/v1/tenants/members/{memberId}"
+    };
+  };
+  rpc GetMemberIdentities(GetMemberIdentitiesRequest)
+      returns (GetMemberIdentitiesReply);
+  rpc ListMembers(ListMembersRequest) returns (ListMembersReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/members/list"
+      body: "*"
+    };
+  };
 }
 
 message CreateMembersRequest {
-	repeated int64 usersIds = 1;
+  repeated int64 usersIds = 1;
 }
 
 message MemberRequest {
-	int64 memberId = 1;
+  int64 memberId = 1;
 }
 
 message MemberReply {
-	TenantMember member = 1;
+  TenantMember member = 1;
 }
 
 message GetMemberIdentitiesRequest {
-	int64 userId = 1;
+  int64 userId = 1;
 }
 
 message GetMemberIdentitiesReply {
-	string member = 1;
-	repeated string groups = 2;
+  string member = 1;
+  repeated string groups = 2;
 }
 
 message ListMembersRequest {
-	int64 groupId = 1;
-	string search = 2;
-	utils.v1.SortRequest sort = 3;
-	utils.v1.PaginateRequest paginate = 4;
+  int64 groupId = 1;
+  string search = 2;
+  utils.v1.SortRequest sort = 3;
+  utils.v1.PaginateRequest paginate = 4;
 }
