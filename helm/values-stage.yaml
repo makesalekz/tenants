@@ -22,7 +22,7 @@ configmap:
 
 server:
   replicaCount: 1
-  command: ["./iam", "-conf", "./config.yaml"]
+  command: ["./tenants", "-conf", "./config.yaml"]
   podSecurityContext: {}
   securityContext: {}
   serviceAccount:
