@@ -56,9 +56,25 @@ func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	return gu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
+	if s != nil {
+		gu.SetName(*s)
+	}
+	return gu
+}
+
 // SetDescription sets the "description" field.
 func (gu *GroupUpdate) SetDescription(s string) *GroupUpdate {
 	gu.mutation.SetDescription(s)
+	return gu
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableDescription(s *string) *GroupUpdate {
+	if s != nil {
+		gu.SetDescription(*s)
+	}
 	return gu
 }
 
@@ -278,9 +294,25 @@ func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	return guo
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
+	if s != nil {
+		guo.SetName(*s)
+	}
+	return guo
+}
+
 // SetDescription sets the "description" field.
 func (guo *GroupUpdateOne) SetDescription(s string) *GroupUpdateOne {
 	guo.mutation.SetDescription(s)
+	return guo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableDescription(s *string) *GroupUpdateOne {
+	if s != nil {
+		guo.SetDescription(*s)
+	}
 	return guo
 }
 

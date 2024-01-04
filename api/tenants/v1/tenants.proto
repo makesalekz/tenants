@@ -3,7 +3,7 @@ syntax = "proto3";
 package tenants.v1;
 
 import "google/api/annotations.proto";
-import "utils/v1/models.proto";
+import "api/utils/v1/models.proto";
 import "api/tenants/v1/models.proto";
 
 option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
@@ -11,50 +11,50 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Tenants {
-	rpc CreateTenant (CreateTenantRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			post: "/v1/tenants"
-			body: "*"
-		};
-	};
-	rpc UpdateCurrentTenant (UpdateTenantRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			put: "/v1/tenants/current"
-			body: "*"
-		};
-	};
-	rpc DeleteCurrentTenant (utils.v1.EmptyRequest) returns (utils.v1.EmptyReply) {
-		option (google.api.http) = {
-			delete: "/v1/tenants/current"
-		};
-	};
-	rpc GetCurrentTenant (utils.v1.EmptyRequest) returns (TenantReply) {
-		option (google.api.http) = {
-			get: "/v1/tenants/current"
-		};
-	};
-	rpc ListTenants (ListTenantsRequest) returns (ListTenantsReply) {
-		option (google.api.http) = {
-		  post: "/v1/tenants/list"
-		  body: "*"
-		};
-	};
+  rpc CreateTenant(CreateTenantRequest) returns (TenantReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants"
+      body: "*"
+    };
+  };
+  rpc UpdateCurrentTenant(UpdateTenantRequest) returns (TenantReply) {
+    option (google.api.http) = {
+      put: "/v1/tenants/current"
+      body: "*"
+    };
+  };
+  rpc DeleteCurrentTenant(utils.v1.EmptyRequest) returns (utils.v1.EmptyReply) {
+    option (google.api.http) = {
+      delete: "/v1/tenants/current"
+    };
+  };
+  rpc GetCurrentTenant(utils.v1.EmptyRequest) returns (TenantReply) {
+    option (google.api.http) = {
+      get: "/v1/tenants/current"
+    };
+  };
+  rpc ListTenants(ListTenantsRequest) returns (ListTenantsReply) {
+    option (google.api.http) = {
+      post: "/v1/tenants/list"
+      body: "*"
+    };
+  };
 }
 
 message CreateTenantRequest {
-	string name = 1;
+  string name = 1;
 }
 
 message UpdateTenantRequest {
-	string name = 2;
+  string name = 2;
 }
 
 message ListTenantsRequest {
-	int64 ownerId = 1;
-    utils.v1.PaginateRequest paginate = 2;
+  int64 ownerId = 1;
+  utils.v1.PaginateRequest paginate = 2;
 }
 
 message ListTenantsReply {
-	repeated Tenant tenants = 1;
-	utils.v1.PaginateReply paginate = 2;
+  repeated Tenant tenants = 1;
+  utils.v1.PaginateReply paginate = 2;
 }
