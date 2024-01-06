@@ -3,7 +3,6 @@ image:
   repository: 
   tag: 
   pullPolicy: IfNotPresent
-  imagePullSecrets:
 
 fullnameOverride: tenants
 nameOverride: tenants
@@ -57,4 +56,8 @@ server:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+migrateJob:
+  enabled: true
+  command: ["/atlas", "migrate", "apply", "--url", "postgres://tenants:oow6uya6aeX=oto@10.2.8.175:5432/tenants?search_path=public"]
 
