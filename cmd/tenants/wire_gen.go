@@ -62,7 +62,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	membersUsecase, err := biz.NewMembersUsecase(logger, jwtProcessor, dialerDialer, tenantsRepo, membersRepo, iamRemote)
+	membersUsecase, err := biz.NewMembersUsecase(logger, tenantsRepo, membersRepo, iamRemote)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -70,14 +70,14 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	tenantsService := service.NewTenantsService(serviceHelper, tenantsUsecase, membersUsecase)
 	membersService := service.NewMembersService(serviceHelper, tenantsUsecase, membersUsecase)
 	invitesRepo := data.NewInvitesRepo(dataData)
-	invitesUsecase, err := biz.NewInvitesUsecase(logger, jwtProcessor, tenantsRepo, invitesRepo, iamRemote)
+	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iamRemote)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	invitesService := service.NewInvitesService(serviceHelper, tenantsUsecase, invitesUsecase)
 	groupsRepo := data.NewGroupsRepo(dataData)
-	groupsUsecase, err := biz.NewGroupsUsecase(logger, jwtProcessor, dialerDialer, tenantsRepo, groupsRepo)
+	groupsUsecase, err := biz.NewGroupsUsecase(logger, tenantsRepo, groupsRepo)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

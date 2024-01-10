@@ -20,7 +20,8 @@ type TenantsList struct {
 
 // TenantsUsecase is a Greeter usecase.
 type TenantsUsecase struct {
-	log  *log.Helper
+	log *log.Helper
+
 	repo data.TenantsRepo
 	rbac *data.RbacRemote
 }
