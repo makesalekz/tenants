@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
@@ -26,8 +25,6 @@ type InvitesList struct {
 
 // InvitesUsecase is a Greeter usecase.
 type InvitesUsecase struct {
-	log *log.Helper
-
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
 	iam         *data.IamRemote
@@ -35,13 +32,11 @@ type InvitesUsecase struct {
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewInvitesUsecase(
-	logger log.Logger,
 	tenantsRepo data.TenantsRepo,
 	invitesRepo data.InvitesRepo,
 	iam *data.IamRemote,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
-		log:         log.NewHelper(logger),
 		tenantsRepo: tenantsRepo,
 		invitesRepo: invitesRepo,
 		iam:         iam,

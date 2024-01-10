@@ -21,9 +21,9 @@ func NewServiceHelper(
 
 func (s *ServiceHelper) GetActorId(ctx context.Context, reqActorId int64) (int64, error) {
 	// TODO: remove getting from context
-	actorId := s.jwt.GetUserIdFromContext(ctx)
-	if actorId != 0 {
-		return actorId, nil
+	claims, ok := s.jwt.GetClaimsFromContext(ctx)
+	if ok && claims.IsUserTenantRequest() {
+		return claims.GetUserId(), nil
 	}
 
 	if reqActorId != 0 {
