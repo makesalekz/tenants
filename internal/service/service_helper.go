@@ -29,7 +29,7 @@ func (s *ServiceHelper) GetActorId(ctx context.Context, reqActorId int64) (int64
 	if reqActorId != 0 {
 		return reqActorId, nil
 	}
-	return 0, v1.ErrorInvalidRequest("empty actor id")
+	return 0, v1.ErrorUnauthorized("invalid token")
 }
 
 func (s *ServiceHelper) GetTenantId(ctx context.Context, reqTenantId int64) (int64, error) {
