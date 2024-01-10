@@ -9,33 +9,36 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type TenantsService struct {
 	v1.UnimplementedTenantsServer
 
-	jwt *jwt.JwtProcessor
-	tu  *biz.TenantsUsecase
-	mu  *biz.MembersUsecase
+	sh *ServiceHelper
+	tu *biz.TenantsUsecase
+	mu *biz.MembersUsecase
 }
 
-func NewTenantsService(jwt *jwt.JwtProcessor, tu *biz.TenantsUsecase, mu *biz.MembersUsecase) *TenantsService {
+func NewTenantsService(
+	sh *ServiceHelper,
+	tu *biz.TenantsUsecase,
+	mu *biz.MembersUsecase,
+) *TenantsService {
 	return &TenantsService{
-		jwt: jwt,
-		tu:  tu,
-		mu:  mu,
+		sh: sh,
+		tu: tu,
+		mu: mu,
 	}
 }
 
 func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantRequest) (*v1.TenantReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	tenant, err := s.tu.CreateTenant(ctx, data.TenantDto{
-		OwnerId: claims.GetUserId(),
+		OwnerId: actorId,
 		Name:    req.Name,
 	})
 	if err != nil {
@@ -47,15 +50,20 @@ func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantR
 }
 
 func (s *TenantsService) UpdateCurrentTenant(ctx context.Context, req *v1.UpdateTenantRequest) (*v1.TenantReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
 	tenant, err := s.tu.UpdateTenant(ctx, data.TenantDto{
-		TenantId: claims.GetTenantId(),
-		OwnerId:  claims.GetUserId(),
+		TenantId: tenantId,
+		OwnerId:  actorId,
 		Name:     req.Name,
 	})
 	if err != nil {
@@ -66,16 +74,21 @@ func (s *TenantsService) UpdateCurrentTenant(ctx context.Context, req *v1.Update
 	}, nil
 }
 
-func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *utils_v1.EmptyRequest) (*utils_v1.EmptyReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *utils_v1.ActorRequest) (*utils_v1.EmptyReply, error) {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
-	err := s.tu.DeleteTenant(ctx, data.TenantDto{
-		TenantId: claims.GetTenantId(),
-		OwnerId:  claims.GetUserId(),
+	err = s.tu.DeleteTenant(ctx, data.TenantDto{
+		TenantId: tenantId,
+		OwnerId:  actorId,
 	})
 	if err != nil {
 		return nil, err
@@ -83,14 +96,14 @@ func (s *TenantsService) DeleteCurrentTenant(ctx context.Context, req *utils_v1.
 	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *TenantsService) GetCurrentTenant(ctx context.Context, req *utils_v1.EmptyRequest) (*v1.TenantReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+func (s *TenantsService) GetCurrentTenant(ctx context.Context, req *utils_v1.ActorRequest) (*v1.TenantReply, error) {
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	// TODO: check permissions
-	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
+	tenant, err := s.tu.GetTenant(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
@@ -101,13 +114,13 @@ func (s *TenantsService) GetCurrentTenant(ctx context.Context, req *utils_v1.Emp
 
 func (s *TenantsService) ListTenants(ctx context.Context, req *v1.ListTenantsRequest) (*v1.ListTenantsReply, error) {
 	// TODO: check permissions to get all tenants
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	list, err := s.tu.ListTenants(ctx, data.TenantsListFilter{
-		UserId:  claims.GetUserId(),
+		UserId:  actorId,
 		OwnerId: req.OwnerId,
 	}, req.Paginate)
 	if err != nil {

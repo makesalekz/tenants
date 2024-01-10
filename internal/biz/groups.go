@@ -3,13 +3,10 @@ package biz
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/log"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v1/dialer"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type GroupsList struct {
@@ -19,25 +16,16 @@ type GroupsList struct {
 
 // GroupsUsecase is a Greeter usecase.
 type GroupsUsecase struct {
-	log         *log.Helper
-	jwt         *jwt.JwtProcessor
-	dialer      *dialer.Dialer
 	tenantsRepo data.TenantsRepo
 	groupsRepo  data.GroupsRepo
 }
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewGroupsUsecase(
-	logger log.Logger,
-	jwt *jwt.JwtProcessor,
-	dialer *dialer.Dialer,
 	tenantsRepo data.TenantsRepo,
 	groupsRepo data.GroupsRepo,
 ) (*GroupsUsecase, error) {
 	return &GroupsUsecase{
-		log:         log.NewHelper(logger),
-		jwt:         jwt,
-		dialer:      dialer,
 		tenantsRepo: tenantsRepo,
 		groupsRepo:  groupsRepo,
 	}, nil

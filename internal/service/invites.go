@@ -11,46 +11,54 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type InvitesService struct {
 	v1.UnimplementedInvitesServer
 
-	jwt *jwt.JwtProcessor
-	tu  *biz.TenantsUsecase
-	iu  *biz.InvitesUsecase
+	sh *ServiceHelper
+	tu *biz.TenantsUsecase
+	iu *biz.InvitesUsecase
 }
 
-func NewInvitesService(jwt *jwt.JwtProcessor, tu *biz.TenantsUsecase, iu *biz.InvitesUsecase) *InvitesService {
+func NewInvitesService(
+	sh *ServiceHelper,
+	tu *biz.TenantsUsecase,
+	iu *biz.InvitesUsecase,
+) *InvitesService {
 	return &InvitesService{
-		jwt: jwt,
-		tu:  tu,
-		iu:  iu,
+		sh: sh,
+		tu: tu,
+		iu: iu,
 	}
 }
 
 func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvitesRequest) (*v1.ListInvitesReply, error) {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
 	if len(req.Emails) == 0 {
 		return nil, v1.ErrorInvalidRequest("emails is empty")
 	}
 
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
+	tenant, err := s.tu.GetTenant(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
+	if tenant.OwnerID != actorId {
 		return nil, v1.ErrorForbidden("only owner can create invites")
 	}
 
-	invites, err := s.iu.CreateInvites(ctx, claims.GetTenantId(), req.Emails)
+	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails)
 	if err != nil {
 		return nil, err
 	}
@@ -61,26 +69,31 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 }
 
 func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
 	if req.InviteId == 0 {
 		return nil, v1.ErrorInvalidRequest("invite_id is empty")
 	}
 
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
+	tenant, err := s.tu.GetTenant(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
+	if tenant.OwnerID != actorId {
 		return nil, v1.ErrorForbidden("only owner can update invites")
 	}
 
-	_, err = s.iu.CancelInvite(ctx, claims.GetTenantId(), req.InviteId)
+	_, err = s.iu.CancelInvite(ctx, tenantId, req.InviteId)
 	if err != nil {
 		return nil, err
 	}
@@ -88,16 +101,21 @@ func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
 	if req.InviteId == 0 {
 		return nil, v1.ErrorInvalidRequest("invite_id is empty")
 	}
 
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
-	}
-
-	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
+	tenant, err := s.tu.GetTenant(ctx, tenantId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("tenant not found")
@@ -106,7 +124,7 @@ func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
+	if tenant.OwnerID != actorId {
 		return nil, v1.ErrorForbidden("only owner can remove invites")
 	}
 
@@ -118,8 +136,8 @@ func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesRequest) (*v1.ListInvitesReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
@@ -133,7 +151,7 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 	}
 
 	list, err := s.iu.ListInvites(ctx, data.InvitesListFilter{
-		TenantId: claims.GetTenantId(),
+		TenantId: tenantId,
 		Status:   status,
 		Search:   req.Search,
 	}, req.Sort, req.Paginate)
@@ -147,13 +165,13 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 }
 
 func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
-	if req.Code == "" {
-		return nil, v1.ErrorInvalidRequest("code is empty")
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserRequest() {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	if req.Code == "" {
+		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
 
 	code, err := uuid.Parse(req.Code)
@@ -161,7 +179,7 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	invite, err := s.iu.AcceptInvite(ctx, req.InviteId, claims.GetUserId(), code)
+	invite, err := s.iu.AcceptInvite(ctx, req.InviteId, actorId, code)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("invite not found")
