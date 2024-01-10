@@ -370,8 +370,8 @@ gitlab.calendaria.team/services/iam v1.1.0 h1:AxnvDjoxAyb+1uY+yk3d6ZSVJlUgvhhiZg
 gitlab.calendaria.team/services/iam v1.1.0/go.mod h1:ujUOffDBL0UYqObKEgz5CWlSpoczv41mEmlQJYqZBRA=
 gitlab.calendaria.team/services/rbac v0.1.1 h1:MZFoHSKtf8Ld1GeqRv4nvRAm2KpS7YJiTMCgvi1mV3Q=
 gitlab.calendaria.team/services/rbac v0.1.1/go.mod h1:Gs/weCbMmA7Jju2LWo3yVyETnqAcXtB/Qs46n5+PuMQ=
-gitlab.calendaria.team/services/utils v0.0.8 h1:f1PiRzt0xZAdiKtqi5pCTNnoiJPRT46ESkItn5c5T0o=
-gitlab.calendaria.team/services/utils v0.0.8/go.mod h1:4ZTX7fE6sXMLfvjUXctOf+fbo7NAaS96s0Wwsr1m5EQ=
+gitlab.calendaria.team/services/utils v0.0.10 h1:fjuRvhOXHhn+7PrKnkstSbaimdCEROOcy54TEkPfLuc=
+gitlab.calendaria.team/services/utils v0.0.10/go.mod h1:4ZTX7fE6sXMLfvjUXctOf+fbo7NAaS96s0Wwsr1m5EQ=
 go.opentelemetry.io/otel v1.0.0-RC1/go.mod h1:x9tRa9HK4hSSq7jf2TKbqFbtt58/TGk0f9XiEYISI1I=
 go.opentelemetry.io/otel v1.16.0 h1:Z7GVAX/UkAXPKsy94IU+i6thsQS4nb7LviLpnaNeW8s=
 go.opentelemetry.io/otel v1.16.0/go.mod h1:vl0h9NUa1D5s1nv3A5vZOYWn8av4K8Ml6JDeHrT/bx4=

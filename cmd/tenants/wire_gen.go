@@ -35,6 +35,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	if err != nil {
 		return nil, nil, err
 	}
+	serviceHelper := service.NewServiceHelper(jwtProcessor)
 	dataData, cleanup, err := data.NewData(bootstrap, logger)
 	if err != nil {
 		return nil, nil, err
@@ -66,22 +67,22 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	tenantsService := service.NewTenantsService(jwtProcessor, tenantsUsecase, membersUsecase)
-	membersService := service.NewMembersService(jwtProcessor, tenantsUsecase, membersUsecase)
+	tenantsService := service.NewTenantsService(serviceHelper, tenantsUsecase, membersUsecase)
+	membersService := service.NewMembersService(serviceHelper, tenantsUsecase, membersUsecase)
 	invitesRepo := data.NewInvitesRepo(dataData)
 	invitesUsecase, err := biz.NewInvitesUsecase(logger, jwtProcessor, tenantsRepo, invitesRepo, iamRemote)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	invitesService := service.NewInvitesService(jwtProcessor, tenantsUsecase, invitesUsecase)
+	invitesService := service.NewInvitesService(serviceHelper, tenantsUsecase, invitesUsecase)
 	groupsRepo := data.NewGroupsRepo(dataData)
 	groupsUsecase, err := biz.NewGroupsUsecase(logger, jwtProcessor, dialerDialer, tenantsRepo, groupsRepo)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	groupsService := service.NewGroupsService(jwtProcessor, tenantsUsecase, groupsUsecase)
+	groupsService := service.NewGroupsService(serviceHelper, tenantsUsecase, groupsUsecase)
 	grpcServer := server.NewGRPCServer(bootstrap, logger, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
 	httpServer := server.NewHTTPServer(bootstrap, logger, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
 	app := newApp(logger, configConfig, grpcServer, httpServer)

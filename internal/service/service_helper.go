@@ -1,0 +1,46 @@
+package service
+
+import (
+	"context"
+
+	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
+	"gitlab.calendaria.team/services/utils/v1/jwt"
+)
+
+type ServiceHelper struct {
+	jwt *jwt.JwtProcessor
+}
+
+func NewServiceHelper(
+	jwt *jwt.JwtProcessor,
+) *ServiceHelper {
+	return &ServiceHelper{
+		jwt: jwt,
+	}
+}
+
+func (s *ServiceHelper) GetActorId(ctx context.Context, reqActorId int64) (int64, error) {
+	// TODO: remove getting from context
+	actorId := s.jwt.GetUserIdFromContext(ctx)
+	if actorId != 0 {
+		return actorId, nil
+	}
+
+	if reqActorId != 0 {
+		return reqActorId, nil
+	}
+	return 0, v1.ErrorInvalidRequest("empty actor id")
+}
+
+func (s *ServiceHelper) GetTenantId(ctx context.Context, reqTenantId int64) (int64, error) {
+	// TODO: remove getting from context
+	claims, ok := s.jwt.GetClaimsFromContext(ctx)
+	if ok && claims.IsUserTenantRequest() {
+		return claims.GetTenantId(), nil
+	}
+
+	if reqTenantId != 0 {
+		return reqTenantId, nil
+	}
+	return 0, v1.ErrorUnauthorized("invalid token")
+}
