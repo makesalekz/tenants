@@ -83,8 +83,8 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	groupsService := service.NewGroupsService(serviceHelper, tenantsUsecase, groupsUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, logger, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
-	httpServer := server.NewHTTPServer(bootstrap, logger, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
+	grpcServer := server.NewGRPCServer(bootstrap, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
+	httpServer := server.NewHTTPServer(bootstrap, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
 	app := newApp(logger, configConfig, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

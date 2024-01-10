@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
@@ -58,7 +57,6 @@ func NewWhiteListMatcher() selector.MatchFunc {
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(
 	c *conf.Bootstrap,
-	logger log.Logger,
 	jwtp *jwt.JwtProcessor,
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,
