@@ -60,6 +60,6 @@ server:
   affinity: {}
 
 migrateJob:
-  enabled: true
+  enabled: false
   command: ["/atlas", "migrate", "apply", "--url", "postgres://calendaria:test@10.2.8.175:5432/calendaria?search_path=public", "--allow-dirty"]
 
