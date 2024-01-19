@@ -1,6 +1,15 @@
 include:
-  - project: "qcloudy/ci-cd/calendaria-pipelines"
-    file: "golang-pipeline.yaml"
+  - project: 'deploy/dev'
+    file: '/go-microservice.yml'
+    ref: 'main'
+  
+build dev:
+  extends: .build-dev
+
+deploy dev:
+  extends: .deploy-dev
+  variables:
+    DB_PORT: 54407
   
 build:
   extends: .build
