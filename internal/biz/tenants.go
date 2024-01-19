@@ -20,7 +20,8 @@ type TenantsList struct {
 
 // TenantsUsecase is a Greeter usecase.
 type TenantsUsecase struct {
-	log  *log.Helper
+	log *log.Helper
+
 	repo data.TenantsRepo
 	rbac *data.RbacRemote
 }
@@ -44,12 +45,12 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		return nil, err
 	}
 
-	err = uc.rbac.AssignRole(ctx, member.IdentityID.String(), tenant.ID, tenant.OwnerID, ADMIN_ROLE_ID)
+	err = uc.rbac.AssignRole(ctx, member.IdentityID.String(), tenant.ID, ADMIN_ROLE_ID)
 	if err != nil {
 		uc.log.Errorf("CreateTenant.AssignRole (admin): %s", err.Error())
 	}
 
-	err = uc.rbac.AssignRole(ctx, "", tenant.ID, tenant.OwnerID, BASIC_ROLE_ID)
+	err = uc.rbac.AssignRole(ctx, "", tenant.ID, BASIC_ROLE_ID)
 	if err != nil {
 		uc.log.Errorf("CreateTenant.AssignRole (basic): %s", err.Error())
 	}

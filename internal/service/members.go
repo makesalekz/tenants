@@ -9,42 +9,50 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
 type MembersService struct {
 	v1.UnimplementedMembersServer
 
-	jwt *jwt.JwtProcessor
-	tu  *biz.TenantsUsecase
-	mu  *biz.MembersUsecase
+	sh *ServiceHelper
+	tu *biz.TenantsUsecase
+	mu *biz.MembersUsecase
 }
 
-func NewMembersService(jwt *jwt.JwtProcessor, tu *biz.TenantsUsecase, mu *biz.MembersUsecase) *MembersService {
+func NewMembersService(
+	sh *ServiceHelper,
+	tu *biz.TenantsUsecase,
+	mu *biz.MembersUsecase,
+) *MembersService {
 	return &MembersService{
-		jwt: jwt,
-		tu:  tu,
-		mu:  mu,
+		sh: sh,
+		tu: tu,
+		mu: mu,
 	}
 }
 
 func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*utils_v1.EmptyReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenant, err := s.tu.GetTenant(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
+	if tenant.OwnerID != actorId {
 		return nil, v1.ErrorForbidden("only owner can add members")
 	}
 
-	_, err = s.mu.CreateMembers(ctx, claims.GetTenantId(), req.UsersIds)
+	_, err = s.mu.CreateMembers(ctx, tenantId, req.UsersIds)
 	if err != nil {
 		return nil, err
 	}
@@ -53,22 +61,27 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 }
 
 func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest) (*utils_v1.EmptyReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	tenant, err := s.tu.GetTenant(ctx, claims.GetTenantId())
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
+		return nil, v1.ErrorUnauthorized("invalid token")
+	}
+
+	tenant, err := s.tu.GetTenant(ctx, tenantId)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: check permissions
-	if tenant.OwnerID != claims.GetUserId() {
+	if tenant.OwnerID != actorId {
 		return nil, v1.ErrorForbidden("only owner can remove members")
 	}
 
-	err = s.mu.DeleteMember(ctx, claims.GetTenantId(), req.MemberId)
+	err = s.mu.DeleteMember(ctx, tenantId, req.MemberId)
 	if err != nil {
 		return nil, err
 	}
@@ -76,12 +89,12 @@ func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest
 }
 
 func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (*v1.MemberReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	member, err := s.mu.GetMember(ctx, claims.GetTenantId(), req.MemberId)
+	member, err := s.mu.GetMember(ctx, tenantId, req.MemberId)
 	if err != nil {
 		return nil, err
 	}
@@ -92,12 +105,12 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (
 }
 
 func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMemberIdentitiesRequest) (*v1.GetMemberIdentitiesReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
-	member, err := s.mu.GetMemberByUserId(ctx, claims.GetTenantId(), req.UserId)
+	member, err := s.mu.GetMemberByUserId(ctx, tenantId, req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -119,13 +132,13 @@ func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMem
 }
 
 func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
-	claims, ok := s.jwt.GetClaimsFromContext(ctx)
-	if !ok || !claims.IsUserTenantRequest() {
+	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
+	if err != nil {
 		return nil, v1.ErrorUnauthorized("invalid token")
 	}
 
 	filter := data.MembersListFilter{
-		TenantId: claims.GetTenantId(),
+		TenantId: tenantId,
 		GroupId:  req.GetGroupId(),
 		Search:   req.GetSearch(),
 	}
