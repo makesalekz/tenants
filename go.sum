@@ -357,8 +357,8 @@ github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/zclconf/go-cty v1.8.0 h1:s4AvqaeQzJIu3ndv4gVIhplVD0krU+bgrcLSVUnaWuA=
 github.com/zclconf/go-cty v1.8.0/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
-gitlab.calendaria.team/services/iam v1.4.0-dev h1:d0DyyAdxcEO+ZhoWFHy9KPxxYvDv5ZXdHavMbqmxmBM=
-gitlab.calendaria.team/services/iam v1.4.0-dev/go.mod h1:9O9rtut6rJ/Cw54uZCEl8LiP0D80A8iBwbaVUbDu3IA=
+gitlab.calendaria.team/services/iam v1.4.0-dev2 h1:tHaLaqlkrO791rFIX/o38xylJmYCpCXnrCW1tC3a4Jw=
+gitlab.calendaria.team/services/iam v1.4.0-dev2/go.mod h1:9O9rtut6rJ/Cw54uZCEl8LiP0D80A8iBwbaVUbDu3IA=
 gitlab.calendaria.team/services/rbac v0.2.0 h1:XLMyqzkOLZct3yMJf3/lqkJGBzGqbYk1AM9LAvwYp3U=
 gitlab.calendaria.team/services/rbac v0.2.0/go.mod h1:qjbJSx+IPmeJz0hxxo7x5pnXVIm8zSYrq4v8DP4ZACo=
 gitlab.calendaria.team/services/utils v0.0.11 h1:FP8YMOr+S6RD6X+fjlYi+PdRRRL8vB7kxuzrOeLFw1I=
