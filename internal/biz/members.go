@@ -98,7 +98,7 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersLi
 		membersMap[member.UserID] = member
 	}
 
-	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{
+	reply, err := uc.iam.ListUsers(ctx, &iam_v1.ListUsersRequest{
 		Ids:      usersIds,
 		Search:   filter.Search,
 		Sort:     sort,

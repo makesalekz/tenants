@@ -19,6 +19,8 @@ message User {
   optional string email = 10;
   optional string avatar = 11;
   optional string bioUpdatedAt = 12;
+  optional bool isPhoneVerified = 13;
+  optional bool isEmailVerified = 14;
 }
 
 message UserShort {
@@ -28,9 +30,12 @@ message UserShort {
   string name = 4;
   string avatar = 6;
   string lastLoginAt = 7;
+  optional bool isPhoneVerified = 10;
+  optional bool isEmailVerified = 11;
 
+  // Deprecated. Marked for deletion
   optional Relation relation = 8;
-  map<string, string>  privacies = 9;
+  map<string, string> privacies = 9;
 }
 
 message Relation {
