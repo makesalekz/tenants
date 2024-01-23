@@ -47,13 +47,28 @@ func (r *IamRemote) GetUser(ctx context.Context, userId int64) (*iam_v1.UserShor
 }
 
 // GetUsers returns userShorts map from iam service by mapUsersIds.
-func (r *IamRemote) GetUsers(ctx context.Context, req *iam_v1.GetUsersRequest) (*iam_v1.GetUsersReply, error) {
+func (r *IamRemote) GetUsers(ctx context.Context, req *iam_v1.GetUsersRequest) (*iam_v1.UsersReply, error) {
 	usersClient, err := r.GetUsersClient(ctx)
 	if err != nil {
 		return nil, tenants_v1.ErrorGrpcConnection("iam: %s", err.Error())
 	}
 
 	reply, err := usersClient.GetUsers(ctx, req)
+	if err != nil {
+		return nil, tenants_v1.ErrorServiceFailed("iam: %s", err.Error())
+	}
+
+	return reply, nil
+}
+
+// GetUsers returns userShorts map from iam service by mapUsersIds.
+func (r *IamRemote) ListUsers(ctx context.Context, req *iam_v1.ListUsersRequest) (*iam_v1.UsersReply, error) {
+	usersClient, err := r.GetUsersClient(ctx)
+	if err != nil {
+		return nil, tenants_v1.ErrorGrpcConnection("iam: %s", err.Error())
+	}
+
+	reply, err := usersClient.ListUsers(ctx, req)
 	if err != nil {
 		return nil, tenants_v1.ErrorServiceFailed("iam: %s", err.Error())
 	}
