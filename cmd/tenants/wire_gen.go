@@ -36,7 +36,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	serviceHelper := service.NewServiceHelper(jwtProcessor)
-	dataData, cleanup, err := data.NewData(bootstrap, logger)
+	dataData, cleanup, err := data.NewData(bootstrap, configConfig, logger)
 	if err != nil {
 		return nil, nil, err
 	}
