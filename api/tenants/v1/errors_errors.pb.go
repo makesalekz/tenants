@@ -108,3 +108,15 @@ func IsInvalidRequest(err error) bool {
 func ErrorInvalidRequest(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_INVALID_REQUEST.String(), fmt.Sprintf(format, args...))
 }
+
+func IsResourceAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_RESOURCE_ALREADY_EXISTS.String() && e.Code == 409
+}
+
+func ErrorResourceAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(409, ErrorReason_RESOURCE_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}

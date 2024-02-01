@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.18.0
 	gitlab.calendaria.team/services/iam v1.4.0-dev2
 	gitlab.calendaria.team/services/rbac v0.2.0
-	gitlab.calendaria.team/services/utils v0.0.11
+	gitlab.calendaria.team/services/utils v0.2.6
 	go.uber.org/automaxprocs v1.5.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917
 	google.golang.org/grpc v1.60.1

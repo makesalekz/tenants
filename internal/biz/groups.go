@@ -7,6 +7,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	u_error "gitlab.calendaria.team/services/utils/v1/error"
 )
 
 type GroupsList struct {
@@ -32,7 +33,18 @@ func NewGroupsUsecase(
 }
 
 func (uc *GroupsUsecase) CreateGroup(ctx context.Context, dto data.CreateGroupDto) (*ent.Group, error) {
-	return uc.groupsRepo.CreateGroup(ctx, dto)
+	group, err := uc.groupsRepo.CreateGroup(ctx, dto)
+	if err != nil {
+		if u_error.IsUniqueViolation(err) {
+			return nil, v1.ErrorResourceAlreadyExists("group with the same name already exists")
+		}
+		if ent.IsValidationError(err) {
+			return nil, v1.ErrorInvalidRequest(err.Error())
+		}
+		return nil, err
+	}
+
+	return group, nil
 }
 
 func (uc *GroupsUsecase) UpdateGroup(ctx context.Context, group *ent.Group, dto data.UpdateGroupDto) (*ent.Group, error) {

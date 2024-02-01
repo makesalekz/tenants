@@ -5,6 +5,7 @@ import (
 
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
+	"gitlab.calendaria.team/services/utils/v2/auth"
 )
 
 type ServiceHelper struct {
@@ -20,6 +21,11 @@ func NewServiceHelper(
 }
 
 func (s *ServiceHelper) GetActorId(ctx context.Context, reqActorId int64) (int64, error) {
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId != 0 {
+		return actorId, nil
+	}
+
 	// TODO: remove getting from context
 	claims, ok := s.jwt.GetClaimsFromContext(ctx)
 	if ok && claims.IsUserTenantRequest() {
@@ -33,6 +39,11 @@ func (s *ServiceHelper) GetActorId(ctx context.Context, reqActorId int64) (int64
 }
 
 func (s *ServiceHelper) GetTenantId(ctx context.Context, reqTenantId int64) (int64, error) {
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId != 0 {
+		return tenantId, nil
+	}
+
 	// TODO: remove getting from context
 	claims, ok := s.jwt.GetClaimsFromContext(ctx)
 	if ok && claims.IsUserTenantRequest() {

@@ -23,4 +23,5 @@ enum ErrorReason {
   FORBIDDEN = 12 [(errors.code) = 403];
 
   INVALID_REQUEST = 20 [(errors.code) = 400];
+  RESOURCE_ALREADY_EXISTS = 21 [(errors.code) = 409];
 }
