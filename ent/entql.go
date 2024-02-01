@@ -29,13 +29,13 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Group",
 		Fields: map[string]*sqlgraph.FieldSpec{
+			group.FieldCreatedAt:   {Type: field.TypeTime, Column: group.FieldCreatedAt},
+			group.FieldUpdatedAt:   {Type: field.TypeTime, Column: group.FieldUpdatedAt},
 			group.FieldDeletedAt:   {Type: field.TypeTime, Column: group.FieldDeletedAt},
 			group.FieldIdentityID:  {Type: field.TypeUUID, Column: group.FieldIdentityID},
 			group.FieldTenantID:    {Type: field.TypeInt64, Column: group.FieldTenantID},
 			group.FieldName:        {Type: field.TypeString, Column: group.FieldName},
 			group.FieldDescription: {Type: field.TypeString, Column: group.FieldDescription},
-			group.FieldCreatedAt:   {Type: field.TypeTime, Column: group.FieldCreatedAt},
-			group.FieldUpdatedAt:   {Type: field.TypeTime, Column: group.FieldUpdatedAt},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -239,6 +239,16 @@ func (f *GroupFilter) WhereID(p entql.Int64P) {
 	f.Where(p.Field(group.FieldID))
 }
 
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *GroupFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(group.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *GroupFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(group.FieldUpdatedAt))
+}
+
 // WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
 func (f *GroupFilter) WhereDeletedAt(p entql.TimeP) {
 	f.Where(p.Field(group.FieldDeletedAt))
@@ -262,16 +272,6 @@ func (f *GroupFilter) WhereName(p entql.StringP) {
 // WhereDescription applies the entql string predicate on the description field.
 func (f *GroupFilter) WhereDescription(p entql.StringP) {
 	f.Where(p.Field(group.FieldDescription))
-}
-
-// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
-func (f *GroupFilter) WhereCreatedAt(p entql.TimeP) {
-	f.Where(p.Field(group.FieldCreatedAt))
-}
-
-// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
-func (f *GroupFilter) WhereUpdatedAt(p entql.TimeP) {
-	f.Where(p.Field(group.FieldUpdatedAt))
 }
 
 // WhereHasTenant applies a predicate to check if query has an edge tenant.

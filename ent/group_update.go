@@ -30,6 +30,12 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (gu *GroupUpdate) SetUpdatedAt(t time.Time) *GroupUpdate {
+	gu.mutation.SetUpdatedAt(t)
+	return gu
+}
+
 // SetDeletedAt sets the "deleted_at" field.
 func (gu *GroupUpdate) SetDeletedAt(t time.Time) *GroupUpdate {
 	gu.mutation.SetDeletedAt(t)
@@ -78,20 +84,6 @@ func (gu *GroupUpdate) SetNillableDescription(s *string) *GroupUpdate {
 	return gu
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (gu *GroupUpdate) SetUpdatedAt(t time.Time) *GroupUpdate {
-	gu.mutation.SetUpdatedAt(t)
-	return gu
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (gu *GroupUpdate) SetNillableUpdatedAt(t *time.Time) *GroupUpdate {
-	if t != nil {
-		gu.SetUpdatedAt(*t)
-	}
-	return gu
-}
-
 // AddMemberIDs adds the "members" edge to the Member entity by IDs.
 func (gu *GroupUpdate) AddMemberIDs(ids ...int64) *GroupUpdate {
 	gu.mutation.AddMemberIDs(ids...)
@@ -135,6 +127,9 @@ func (gu *GroupUpdate) RemoveMembers(m ...*Member) *GroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
+	if err := gu.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, gu.sqlSave, gu.mutation, gu.hooks)
 }
 
@@ -158,6 +153,18 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 	if err := gu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// defaults sets the default values of the builder before save.
+func (gu *GroupUpdate) defaults() error {
+	if _, ok := gu.mutation.UpdatedAt(); !ok {
+		if group.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized group.UpdateDefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
+		v := group.UpdateDefaultUpdatedAt()
+		gu.mutation.SetUpdatedAt(v)
+	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -191,6 +198,9 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := gu.mutation.UpdatedAt(); ok {
+		_spec.SetField(group.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := gu.mutation.DeletedAt(); ok {
 		_spec.SetField(group.FieldDeletedAt, field.TypeTime, value)
 	}
@@ -202,9 +212,6 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := gu.mutation.Description(); ok {
 		_spec.SetField(group.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := gu.mutation.UpdatedAt(); ok {
-		_spec.SetField(group.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if gu.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -273,6 +280,12 @@ type GroupUpdateOne struct {
 	modifiers []func(*sql.UpdateBuilder)
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (guo *GroupUpdateOne) SetUpdatedAt(t time.Time) *GroupUpdateOne {
+	guo.mutation.SetUpdatedAt(t)
+	return guo
+}
+
 // SetDeletedAt sets the "deleted_at" field.
 func (guo *GroupUpdateOne) SetDeletedAt(t time.Time) *GroupUpdateOne {
 	guo.mutation.SetDeletedAt(t)
@@ -317,20 +330,6 @@ func (guo *GroupUpdateOne) SetDescription(s string) *GroupUpdateOne {
 func (guo *GroupUpdateOne) SetNillableDescription(s *string) *GroupUpdateOne {
 	if s != nil {
 		guo.SetDescription(*s)
-	}
-	return guo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (guo *GroupUpdateOne) SetUpdatedAt(t time.Time) *GroupUpdateOne {
-	guo.mutation.SetUpdatedAt(t)
-	return guo
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (guo *GroupUpdateOne) SetNillableUpdatedAt(t *time.Time) *GroupUpdateOne {
-	if t != nil {
-		guo.SetUpdatedAt(*t)
 	}
 	return guo
 }
@@ -391,6 +390,9 @@ func (guo *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOn
 
 // Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
+	if err := guo.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, guo.sqlSave, guo.mutation, guo.hooks)
 }
 
@@ -414,6 +416,18 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 	if err := guo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// defaults sets the default values of the builder before save.
+func (guo *GroupUpdateOne) defaults() error {
+	if _, ok := guo.mutation.UpdatedAt(); !ok {
+		if group.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("ent: uninitialized group.UpdateDefaultUpdatedAt (forgotten import ent/runtime?)")
+		}
+		v := group.UpdateDefaultUpdatedAt()
+		guo.mutation.SetUpdatedAt(v)
+	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -464,6 +478,9 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			}
 		}
 	}
+	if value, ok := guo.mutation.UpdatedAt(); ok {
+		_spec.SetField(group.FieldUpdatedAt, field.TypeTime, value)
+	}
 	if value, ok := guo.mutation.DeletedAt(); ok {
 		_spec.SetField(group.FieldDeletedAt, field.TypeTime, value)
 	}
@@ -475,9 +492,6 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if value, ok := guo.mutation.Description(); ok {
 		_spec.SetField(group.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := guo.mutation.UpdatedAt(); ok {
-		_spec.SetField(group.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if guo.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
