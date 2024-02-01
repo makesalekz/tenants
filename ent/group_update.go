@@ -162,6 +162,11 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gu *GroupUpdate) check() error {
+	if v, ok := gu.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
+		}
+	}
 	if _, ok := gu.mutation.TenantID(); gu.mutation.TenantCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Group.tenant"`)
 	}
@@ -413,6 +418,11 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (guo *GroupUpdateOne) check() error {
+	if v, ok := guo.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
+		}
+	}
 	if _, ok := guo.mutation.TenantID(); guo.mutation.TenantCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Group.tenant"`)
 	}

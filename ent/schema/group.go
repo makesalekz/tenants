@@ -22,7 +22,7 @@ func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("identity_id", uuid.New()).Immutable().Unique(),
 		field.Int64("tenant_id").Immutable(),
-		field.String("name"),
+		field.String("name").NotEmpty(),
 		field.String("description"),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now),

@@ -479,8 +479,14 @@ components:
                     type: string
                 lastLoginAt:
                     type: string
+                isPhoneVerified:
+                    type: boolean
+                isEmailVerified:
+                    type: boolean
                 relation:
-                    $ref: '#/components/schemas/iam.v1.Relation'
+                    allOf:
+                        - $ref: '#/components/schemas/iam.v1.Relation'
+                    description: Deprecated. Marked for deletion
                 privacies:
                     type: object
                     additionalProperties:

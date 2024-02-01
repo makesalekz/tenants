@@ -182,6 +182,7 @@ func groupReply(group *ent.Group) *v1.Group {
 		Id:          group.ID,
 		Name:        group.Name,
 		Description: group.Description,
+		IdentityId:  group.IdentityID.String(),
 		CreatedAt:   group.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   group.UpdatedAt.Format(time.RFC3339),
 	}
