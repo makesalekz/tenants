@@ -25,6 +25,34 @@ type GroupCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (gc *GroupCreate) SetCreatedAt(t time.Time) *GroupCreate {
+	gc.mutation.SetCreatedAt(t)
+	return gc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (gc *GroupCreate) SetNillableCreatedAt(t *time.Time) *GroupCreate {
+	if t != nil {
+		gc.SetCreatedAt(*t)
+	}
+	return gc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (gc *GroupCreate) SetUpdatedAt(t time.Time) *GroupCreate {
+	gc.mutation.SetUpdatedAt(t)
+	return gc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (gc *GroupCreate) SetNillableUpdatedAt(t *time.Time) *GroupCreate {
+	if t != nil {
+		gc.SetUpdatedAt(*t)
+	}
+	return gc
+}
+
 // SetDeletedAt sets the "deleted_at" field.
 func (gc *GroupCreate) SetDeletedAt(t time.Time) *GroupCreate {
 	gc.mutation.SetDeletedAt(t)
@@ -60,34 +88,6 @@ func (gc *GroupCreate) SetName(s string) *GroupCreate {
 // SetDescription sets the "description" field.
 func (gc *GroupCreate) SetDescription(s string) *GroupCreate {
 	gc.mutation.SetDescription(s)
-	return gc
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (gc *GroupCreate) SetCreatedAt(t time.Time) *GroupCreate {
-	gc.mutation.SetCreatedAt(t)
-	return gc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (gc *GroupCreate) SetNillableCreatedAt(t *time.Time) *GroupCreate {
-	if t != nil {
-		gc.SetCreatedAt(*t)
-	}
-	return gc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (gc *GroupCreate) SetUpdatedAt(t time.Time) *GroupCreate {
-	gc.mutation.SetUpdatedAt(t)
-	return gc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (gc *GroupCreate) SetNillableUpdatedAt(t *time.Time) *GroupCreate {
-	if t != nil {
-		gc.SetUpdatedAt(*t)
-	}
 	return gc
 }
 
@@ -167,6 +167,12 @@ func (gc *GroupCreate) defaults() error {
 
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Group.created_at"`)}
+	}
+	if _, ok := gc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Group.updated_at"`)}
+	}
 	if _, ok := gc.mutation.IdentityID(); !ok {
 		return &ValidationError{Name: "identity_id", err: errors.New(`ent: missing required field "Group.identity_id"`)}
 	}
@@ -183,12 +189,6 @@ func (gc *GroupCreate) check() error {
 	}
 	if _, ok := gc.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Group.description"`)}
-	}
-	if _, ok := gc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Group.created_at"`)}
-	}
-	if _, ok := gc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Group.updated_at"`)}
 	}
 	if _, ok := gc.mutation.TenantID(); !ok {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Group.tenant"`)}
@@ -220,6 +220,14 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = gc.conflict
+	if value, ok := gc.mutation.CreatedAt(); ok {
+		_spec.SetField(group.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := gc.mutation.UpdatedAt(); ok {
+		_spec.SetField(group.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
 	if value, ok := gc.mutation.DeletedAt(); ok {
 		_spec.SetField(group.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
@@ -235,14 +243,6 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	if value, ok := gc.mutation.Description(); ok {
 		_spec.SetField(group.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if value, ok := gc.mutation.CreatedAt(); ok {
-		_spec.SetField(group.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := gc.mutation.UpdatedAt(); ok {
-		_spec.SetField(group.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
 	}
 	if nodes := gc.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -284,7 +284,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Group.Create().
-//		SetDeletedAt(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -293,7 +293,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.GroupUpsert) {
-//			SetDeletedAt(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (gc *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
@@ -328,6 +328,18 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *GroupUpsert) SetUpdatedAt(v time.Time) *GroupUpsert {
+	u.Set(group.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateUpdatedAt() *GroupUpsert {
+	u.SetExcluded(group.FieldUpdatedAt)
+	return u
+}
 
 // SetDeletedAt sets the "deleted_at" field.
 func (u *GroupUpsert) SetDeletedAt(v time.Time) *GroupUpsert {
@@ -371,18 +383,6 @@ func (u *GroupUpsert) UpdateDescription() *GroupUpsert {
 	return u
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (u *GroupUpsert) SetUpdatedAt(v time.Time) *GroupUpsert {
-	u.Set(group.FieldUpdatedAt, v)
-	return u
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *GroupUpsert) UpdateUpdatedAt() *GroupUpsert {
-	u.SetExcluded(group.FieldUpdatedAt)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -394,14 +394,14 @@ func (u *GroupUpsert) UpdateUpdatedAt() *GroupUpsert {
 func (u *GroupUpsertOne) UpdateNewValues() *GroupUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(group.FieldCreatedAt)
+		}
 		if _, exists := u.create.mutation.IdentityID(); exists {
 			s.SetIgnore(group.FieldIdentityID)
 		}
 		if _, exists := u.create.mutation.TenantID(); exists {
 			s.SetIgnore(group.FieldTenantID)
-		}
-		if _, exists := u.create.mutation.CreatedAt(); exists {
-			s.SetIgnore(group.FieldCreatedAt)
 		}
 	}))
 	return u
@@ -432,6 +432,20 @@ func (u *GroupUpsertOne) Update(set func(*GroupUpsert)) *GroupUpsertOne {
 		set(&GroupUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *GroupUpsertOne) SetUpdatedAt(v time.Time) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateUpdatedAt() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -480,20 +494,6 @@ func (u *GroupUpsertOne) SetDescription(v string) *GroupUpsertOne {
 func (u *GroupUpsertOne) UpdateDescription() *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateDescription()
-	})
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *GroupUpsertOne) SetUpdatedAt(v time.Time) *GroupUpsertOne {
-	return u.Update(func(s *GroupUpsert) {
-		s.SetUpdatedAt(v)
-	})
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *GroupUpsertOne) UpdateUpdatedAt() *GroupUpsertOne {
-	return u.Update(func(s *GroupUpsert) {
-		s.UpdateUpdatedAt()
 	})
 }
 
@@ -632,7 +632,7 @@ func (gcb *GroupCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.GroupUpsert) {
-//			SetDeletedAt(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (gcb *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertBulk {
@@ -673,14 +673,14 @@ func (u *GroupUpsertBulk) UpdateNewValues() *GroupUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(group.FieldCreatedAt)
+			}
 			if _, exists := b.mutation.IdentityID(); exists {
 				s.SetIgnore(group.FieldIdentityID)
 			}
 			if _, exists := b.mutation.TenantID(); exists {
 				s.SetIgnore(group.FieldTenantID)
-			}
-			if _, exists := b.mutation.CreatedAt(); exists {
-				s.SetIgnore(group.FieldCreatedAt)
 			}
 		}
 	}))
@@ -712,6 +712,20 @@ func (u *GroupUpsertBulk) Update(set func(*GroupUpsert)) *GroupUpsertBulk {
 		set(&GroupUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *GroupUpsertBulk) SetUpdatedAt(v time.Time) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateUpdatedAt() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateUpdatedAt()
+	})
 }
 
 // SetDeletedAt sets the "deleted_at" field.
@@ -760,20 +774,6 @@ func (u *GroupUpsertBulk) SetDescription(v string) *GroupUpsertBulk {
 func (u *GroupUpsertBulk) UpdateDescription() *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateDescription()
-	})
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *GroupUpsertBulk) SetUpdatedAt(v time.Time) *GroupUpsertBulk {
-	return u.Update(func(s *GroupUpsert) {
-		s.SetUpdatedAt(v)
-	})
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *GroupUpsertBulk) UpdateUpdatedAt() *GroupUpsertBulk {
-	return u.Update(func(s *GroupUpsert) {
-		s.UpdateUpdatedAt()
 	})
 }
 

@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"time"
-
 	"gitlab.calendaria.team/services/tenants/ent/mixins"
 
 	"entgo.io/ent"
@@ -24,8 +22,6 @@ func (Group) Fields() []ent.Field {
 		field.Int64("tenant_id").Immutable(),
 		field.String("name").NotEmpty(),
 		field.String("description"),
-		field.Time("created_at").Immutable().Default(time.Now),
-		field.Time("updated_at").Default(time.Now),
 	}
 }
 
@@ -50,6 +46,7 @@ func (Group) Indexes() []ent.Index {
 
 func (Group) Mixin() []ent.Mixin {
 	return []ent.Mixin{
+		mixins.CreateUpdateMixin{},
 		mixins.SoftDeleteMixin{},
 	}
 }
