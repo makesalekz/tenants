@@ -9,8 +9,8 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
-	auth "gitlab.calendaria.team/services/utils/v1/middlewares/auth"
 	metrics "gitlab.calendaria.team/services/utils/v1/middlewares/metrics"
+	auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 )
 
 // NewGRPCServer new a gRPC server.

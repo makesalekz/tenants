@@ -4,44 +4,43 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v2/auth"
+
+	"github.com/google/uuid"
 )
 
 type InvitesService struct {
 	v1.UnimplementedInvitesServer
 
-	sh *ServiceHelper
 	tu *biz.TenantsUsecase
 	iu *biz.InvitesUsecase
 }
 
 func NewInvitesService(
-	sh *ServiceHelper,
 	tu *biz.TenantsUsecase,
 	iu *biz.InvitesUsecase,
 ) *InvitesService {
 	return &InvitesService{
-		sh: sh,
 		tu: tu,
 		iu: iu,
 	}
 }
 
 func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvitesRequest) (*v1.ListInvitesReply, error) {
-	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	if len(req.Emails) == 0 {
@@ -69,14 +68,14 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 }
 
 func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
-	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	if req.InviteId == 0 {
@@ -101,14 +100,14 @@ func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
-	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	if req.InviteId == 0 {
@@ -136,9 +135,9 @@ func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesRequest) (*v1.ListInvitesReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	var status *enum.InviteStatus
@@ -165,9 +164,9 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 }
 
 func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
-	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
 	if req.Code == "" {

@@ -23,12 +23,12 @@ service Tenants {
       body: "*"
     };
   };
-  rpc DeleteCurrentTenant(utils.v1.ActorRequest) returns (utils.v1.EmptyReply) {
+  rpc DeleteCurrentTenant(utils.v1.EmptyRequest) returns (utils.v1.EmptyReply) {
     option (google.api.http) = {
       delete: "/v1/tenants/current"
     };
   };
-  rpc GetCurrentTenant(utils.v1.ActorRequest) returns (TenantReply) {
+  rpc GetCurrentTenant(utils.v1.EmptyRequest) returns (TenantReply) {
     option (google.api.http) = {
       get: "/v1/tenants/current"
     };
@@ -42,18 +42,14 @@ service Tenants {
 }
 
 message CreateTenantRequest {
-  int64 actorId = 2;
   string name = 1;
 }
 
 message UpdateTenantRequest {
-  int64 actorId = 1;
-  int64 tenantId = 3;
   string name = 2;
 }
 
 message ListTenantsRequest {
-  int64 actorId = 3;
   int64 ownerId = 1;
   utils.v1.PaginateRequest paginate = 2;
 }

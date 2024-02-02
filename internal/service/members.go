@@ -9,37 +9,35 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v2/auth"
 )
 
 type MembersService struct {
 	v1.UnimplementedMembersServer
 
-	sh *ServiceHelper
 	tu *biz.TenantsUsecase
 	mu *biz.MembersUsecase
 }
 
 func NewMembersService(
-	sh *ServiceHelper,
 	tu *biz.TenantsUsecase,
 	mu *biz.MembersUsecase,
 ) *MembersService {
 	return &MembersService{
-		sh: sh,
 		tu: tu,
 		mu: mu,
 	}
 }
 
 func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*utils_v1.EmptyReply, error) {
-	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	tenant, err := s.tu.GetTenant(ctx, tenantId)
@@ -61,14 +59,14 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 }
 
 func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest) (*utils_v1.EmptyReply, error) {
-	actorId, err := s.sh.GetActorId(ctx, req.ActorId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	actorId := auth.GetActorIdFromContext(ctx)
+	if actorId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	tenant, err := s.tu.GetTenant(ctx, tenantId)
@@ -89,9 +87,9 @@ func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest
 }
 
 func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (*v1.MemberReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	member, err := s.mu.GetMember(ctx, tenantId, req.MemberId)
@@ -105,9 +103,9 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (
 }
 
 func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMemberIdentitiesRequest) (*v1.GetMemberIdentitiesReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	member, err := s.mu.GetMemberByUserId(ctx, tenantId, req.UserId)
@@ -132,9 +130,9 @@ func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMem
 }
 
 func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	filter := data.MembersListFilter{

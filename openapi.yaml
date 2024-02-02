@@ -29,15 +29,6 @@ paths:
             tags:
                 - Tenants
             operationId: Tenants_GetCurrentTenant
-            parameters:
-                - name: actorId
-                  in: query
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -66,15 +57,6 @@ paths:
             tags:
                 - Tenants
             operationId: Tenants_DeleteCurrentTenant
-            parameters:
-                - name: actorId
-                  in: query
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -150,10 +132,6 @@ paths:
                 - name: groupId
                   in: path
                   required: true
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
                   schema:
                     type: string
             responses:
@@ -335,14 +313,6 @@ paths:
                   required: true
                   schema:
                     type: string
-                - name: actorId
-                  in: query
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -415,14 +385,6 @@ paths:
                   required: true
                   schema:
                     type: string
-                - name: actorId
-                  in: query
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
-                  schema:
-                    type: string
             responses:
                 "200":
                     description: OK
@@ -438,14 +400,6 @@ paths:
                 - name: memberId
                   in: path
                   required: true
-                  schema:
-                    type: string
-                - name: actorId
-                  in: query
-                  schema:
-                    type: string
-                - name: tenantId
-                  in: query
                   schema:
                     type: string
             responses:
@@ -494,8 +448,6 @@ components:
         tenants.v1.CreateGroupRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 name:
                     type: string
                 description:
@@ -503,10 +455,6 @@ components:
         tenants.v1.CreateInvitesRequest:
             type: object
             properties:
-                actorId:
-                    type: string
-                tenantId:
-                    type: string
                 emails:
                     type: array
                     items:
@@ -514,10 +462,6 @@ components:
         tenants.v1.CreateMembersRequest:
             type: object
             properties:
-                actorId:
-                    type: string
-                tenantId:
-                    type: string
                 usersIds:
                     type: array
                     items:
@@ -525,8 +469,6 @@ components:
         tenants.v1.CreateTenantRequest:
             type: object
             properties:
-                actorId:
-                    type: string
                 name:
                     type: string
         tenants.v1.Group:
@@ -547,8 +489,6 @@ components:
         tenants.v1.GroupMembersRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 groupId:
                     type: string
                 membersIds:
@@ -579,8 +519,6 @@ components:
         tenants.v1.InviteCodeRequest:
             type: object
             properties:
-                actorId:
-                    type: string
                 inviteId:
                     type: string
                 code:
@@ -588,10 +526,6 @@ components:
         tenants.v1.InviteRequest:
             type: object
             properties:
-                actorId:
-                    type: string
-                tenantId:
-                    type: string
                 inviteId:
                     type: string
         tenants.v1.ListGroupsReply:
@@ -606,8 +540,6 @@ components:
         tenants.v1.ListGroupsRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 search:
                     type: string
                 sort:
@@ -626,8 +558,6 @@ components:
         tenants.v1.ListInvitesRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 search:
                     type: string
                 status:
@@ -649,8 +579,6 @@ components:
         tenants.v1.ListMembersRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 groupId:
                     type: string
                 search:
@@ -671,8 +599,6 @@ components:
         tenants.v1.ListTenantsRequest:
             type: object
             properties:
-                actorId:
-                    type: string
                 ownerId:
                     type: string
                 paginate:
@@ -716,8 +642,6 @@ components:
         tenants.v1.UpdateGroupRequest:
             type: object
             properties:
-                tenantId:
-                    type: string
                 groupId:
                     type: string
                 name:
@@ -727,10 +651,6 @@ components:
         tenants.v1.UpdateTenantRequest:
             type: object
             properties:
-                actorId:
-                    type: string
-                tenantId:
-                    type: string
                 name:
                     type: string
         utils.v1.EmptyReply:

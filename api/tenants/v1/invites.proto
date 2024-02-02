@@ -56,19 +56,14 @@ service Invites {
 }
 
 message CreateInvitesRequest {
-  int64 actorId = 2;
-  int64 tenantId = 3;
   repeated string emails = 1;
 }
 
 message InviteRequest {
-  int64 actorId = 2;
-  int64 tenantId = 3;
   int64 inviteId = 1;
 }
 
 message ListInvitesRequest {
-  int64 tenantId = 5;
   string search = 1;
   Status status = 2;
   utils.v1.SortRequest sort = 3;
@@ -81,7 +76,6 @@ message ListInvitesReply {
 }
 
 message InviteCodeRequest {
-  int64 actorId = 3;
   int64 inviteId = 1;
   string code = 2;
 }

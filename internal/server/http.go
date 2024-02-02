@@ -3,21 +3,20 @@ package server
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/middleware/metadata"
-	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/selector"
-	khttp "github.com/go-kratos/kratos/v2/transport/http"
-
-	prom "github.com/go-kratos/kratos/contrib/metrics/prometheus/v2"
-
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
-	auth "gitlab.calendaria.team/services/utils/v1/middlewares/auth"
 	metrics "gitlab.calendaria.team/services/utils/v1/middlewares/metrics"
+	auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
+
+	prom "github.com/go-kratos/kratos/contrib/metrics/prometheus/v2"
+	"github.com/go-kratos/kratos/v2/middleware/metadata"
+	"github.com/go-kratos/kratos/v2/middleware/recovery"
+	"github.com/go-kratos/kratos/v2/middleware/selector"
+	khttp "github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var _metricSeconds = prometheus.NewHistogramVec(prometheus.HistogramOpts{
@@ -46,7 +45,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]struct{})
 	whiteList["/tenants.v1.Invites/ShownInvite"] = struct{}{}
 	whiteList["/tenants.v1.Invites/DeclineInvite"] = struct{}{}
-	return func(ctx context.Context, operation string) bool {
+	return func(_ context.Context, operation string) bool {
 		if _, ok := whiteList[operation]; ok {
 			return false
 		}
@@ -69,6 +68,7 @@ func NewHTTPServer(
 			metadata.Server(),
 			selector.Server(
 				auth.Server(jwtp),
+				auth.BffMetaServer(jwtp),
 			).
 				Match(NewWhiteListMatcher()).
 				Build(),
