@@ -38,14 +38,10 @@ service Members {
 }
 
 message CreateMembersRequest {
-  int64 actorId = 2;
-  int64 tenantId = 3;
   repeated int64 usersIds = 1;
 }
 
 message MemberRequest {
-  int64 actorId = 2;
-  int64 tenantId = 3;
   int64 memberId = 1;
 }
 
@@ -54,7 +50,6 @@ message MemberReply {
 }
 
 message GetMemberIdentitiesRequest {
-  int64 tenantId = 2;
   int64 userId = 1;
 }
 
@@ -64,7 +59,6 @@ message GetMemberIdentitiesReply {
 }
 
 message ListMembersRequest {
-  int64 tenantId = 5;
   int64 groupId = 1;
   string search = 2;
   utils.v1.SortRequest sort = 3;

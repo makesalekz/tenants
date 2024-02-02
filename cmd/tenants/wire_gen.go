@@ -15,7 +15,6 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/server"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v1/dialer"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
 )
 
@@ -35,18 +34,12 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	if err != nil {
 		return nil, nil, err
 	}
-	serviceHelper := service.NewServiceHelper(jwtProcessor)
 	dataData, cleanup, err := data.NewData(bootstrap, configConfig, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 	tenantsRepo := data.NewTenantsRepo(dataData)
-	dialerDialer, err := dialer.NewDialer(configConfig, jwtProcessor)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	rbacRemote, err := data.NewRbacRemote(dialerDialer, bootstrap)
+	rbacRemote, err := data.NewRbacRemote(bootstrap, configConfig, jwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -57,7 +50,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	membersRepo := data.NewMembersRepo(dataData)
-	iamRemote, err := data.NewIamRemote(dialerDialer, bootstrap)
+	iamRemote, err := data.NewIamRemote(bootstrap, configConfig, jwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -67,22 +60,22 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	tenantsService := service.NewTenantsService(serviceHelper, tenantsUsecase, membersUsecase)
-	membersService := service.NewMembersService(serviceHelper, tenantsUsecase, membersUsecase)
+	tenantsService := service.NewTenantsService(tenantsUsecase, membersUsecase)
+	membersService := service.NewMembersService(tenantsUsecase, membersUsecase)
 	invitesRepo := data.NewInvitesRepo(dataData)
 	invitesUsecase, err := biz.NewInvitesUsecase(tenantsRepo, invitesRepo, iamRemote)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	invitesService := service.NewInvitesService(serviceHelper, tenantsUsecase, invitesUsecase)
+	invitesService := service.NewInvitesService(tenantsUsecase, invitesUsecase)
 	groupsRepo := data.NewGroupsRepo(dataData)
 	groupsUsecase, err := biz.NewGroupsUsecase(tenantsRepo, groupsRepo)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	groupsService := service.NewGroupsService(serviceHelper, tenantsUsecase, groupsUsecase)
+	groupsService := service.NewGroupsService(tenantsUsecase, groupsUsecase)
 	grpcServer := server.NewGRPCServer(bootstrap, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
 	httpServer := server.NewHTTPServer(bootstrap, jwtProcessor, tenantsService, membersService, invitesService, groupsService)
 	app := newApp(logger, configConfig, grpcServer, httpServer)

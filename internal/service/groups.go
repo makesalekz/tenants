@@ -9,32 +9,30 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v2/auth"
 )
 
 type GroupsService struct {
 	v1.UnimplementedGroupsServer
 
-	sh *ServiceHelper
 	tu *biz.TenantsUsecase
 	mu *biz.GroupsUsecase
 }
 
 func NewGroupsService(
-	sh *ServiceHelper,
 	tu *biz.TenantsUsecase,
 	mu *biz.GroupsUsecase,
 ) *GroupsService {
 	return &GroupsService{
-		sh: sh,
 		tu: tu,
 		mu: mu,
 	}
 }
 
 func (s *GroupsService) CreateGroup(ctx context.Context, req *v1.CreateGroupRequest) (*v1.GroupReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 	// TODO: check permissions
 
@@ -53,11 +51,10 @@ func (s *GroupsService) CreateGroup(ctx context.Context, req *v1.CreateGroupRequ
 }
 
 func (s *GroupsService) UpdateGroup(ctx context.Context, req *v1.UpdateGroupRequest) (*v1.GroupReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-
 	// TODO: check permissions
 
 	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
@@ -79,9 +76,9 @@ func (s *GroupsService) UpdateGroup(ctx context.Context, req *v1.UpdateGroupRequ
 }
 
 func (s *GroupsService) DeleteGroup(ctx context.Context, req *v1.GroupRequest) (*utils_v1.EmptyReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 	// TODO: check permissions
 
@@ -99,9 +96,9 @@ func (s *GroupsService) DeleteGroup(ctx context.Context, req *v1.GroupRequest) (
 }
 
 func (s *GroupsService) GetGroup(ctx context.Context, req *v1.GroupRequest) (*v1.GroupReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 	// TODO: check permissions
 
@@ -116,9 +113,9 @@ func (s *GroupsService) GetGroup(ctx context.Context, req *v1.GroupRequest) (*v1
 }
 
 func (s *GroupsService) ListGroups(ctx context.Context, req *v1.ListGroupsRequest) (*v1.ListGroupsReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	filter := data.GroupsListFilter{
@@ -138,9 +135,9 @@ func (s *GroupsService) ListGroups(ctx context.Context, req *v1.ListGroupsReques
 }
 
 func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMembersRequest) (*utils_v1.EmptyReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 	// TODO: check permissions
 
@@ -158,9 +155,9 @@ func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMemb
 }
 
 func (s *GroupsService) RemoveMembersFromGroup(ctx context.Context, req *v1.GroupMembersRequest) (*utils_v1.EmptyReply, error) {
-	tenantId, err := s.sh.GetTenantId(ctx, req.TenantId)
-	if err != nil {
-		return nil, v1.ErrorUnauthorized("invalid token")
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 	// TODO: check permissions
 
