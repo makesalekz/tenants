@@ -23,7 +23,7 @@ var (
 	// Name is the name of the compiled software.
 	Name string = "tenants"
 	// Version is the version of the compiled software.
-	Version string = "0.2.1"
+	Version string = "0.3.0"
 	// flagconf is the config flag.
 	flagconf string
 
