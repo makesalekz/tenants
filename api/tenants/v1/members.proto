@@ -51,6 +51,7 @@ message MemberReply {
 
 message GetMemberIdentitiesRequest {
   int64 userId = 1;
+  int64 tenantId = 2;
 }
 
 message GetMemberIdentitiesReply {

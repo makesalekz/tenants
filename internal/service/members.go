@@ -103,12 +103,7 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (
 }
 
 func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMemberIdentitiesRequest) (*v1.GetMemberIdentitiesReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
-		return nil, v1.ErrorEmptyActorId("empty tenant id")
-	}
-
-	member, err := s.mu.GetMemberByUserId(ctx, tenantId, req.UserId)
+	member, err := s.mu.GetMemberByUserId(ctx, req.TenantId, req.UserId)
 	if err != nil {
 		return nil, err
 	}
