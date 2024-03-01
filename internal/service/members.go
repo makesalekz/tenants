@@ -5,7 +5,6 @@ import (
 	"time"
 
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
-	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
@@ -172,17 +171,6 @@ func replyMembers(members []*biz.MemberItem) []*v1.TenantMember {
 	reply := make([]*v1.TenantMember, len(members))
 	for i, member := range members {
 		reply[i] = replyMember(member)
-	}
-	return reply
-}
-
-func replyShortMembers(members []*ent.Member) []*v1.MemberShort {
-	reply := make([]*v1.MemberShort, len(members))
-	for i, member := range members {
-		reply[i] = &v1.MemberShort{
-			Id:     member.ID,
-			UserId: member.UserID,
-		}
 	}
 	return reply
 }

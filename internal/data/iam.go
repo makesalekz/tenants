@@ -6,28 +6,34 @@ import (
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
 	"gitlab.calendaria.team/services/utils/v2/dialer"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type IamRemote struct {
-	dialer *dialer.Dialer
+	log    *log.Helper
+	dialer dialer.IDialer
 }
 
 func NewIamRemote(
+	logger log.Logger,
 	conf *conf.Bootstrap,
-	c *config.Config,
-	jwt *jwtp.JwtProcessor,
-) (*IamRemote, error) {
-	dialer, err := dialer.NewServiceDialer(c, jwt, "iam", conf.Discovery.Iam)
+	dm dialer.IDialerManager,
+) (*IamRemote, func(), error) {
+	dialer, err := dm.NewServiceDialer("iam", conf.Discovery.Iam)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	cleanup := func() {
+		dialer.Close()
 	}
 
 	return &IamRemote{
+		log:    log.NewHelper(log.With(logger, "module", "data/iam")),
 		dialer: dialer,
-	}, nil
+	}, cleanup, nil
 }
 
 func (r *IamRemote) getUsersClient(ctx context.Context) (iam_v1.UsersClient, error) {

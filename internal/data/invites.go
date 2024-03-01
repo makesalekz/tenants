@@ -92,7 +92,7 @@ func (r *invitesRepo) AcceptInvite(ctx context.Context, userId int64, invite *en
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 		}
 	}()
 
@@ -106,7 +106,10 @@ func (r *invitesRepo) AcceptInvite(ctx context.Context, userId int64, invite *en
 		return nil, err
 	}
 
-	tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
 
 	return updated, nil
 }
