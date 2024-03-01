@@ -8,6 +8,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v2/auth"
 )
 
 const ADMIN_ROLE_ID = 1
@@ -45,12 +46,14 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		return nil, err
 	}
 
-	err = uc.rbac.AssignRole(ctx, member.IdentityID.String(), tenant.ID, ADMIN_ROLE_ID)
+	tenantContext := auth.NewTenantContext(ctx, tenant.ID)
+
+	err = uc.rbac.AssignRole(tenantContext, member.IdentityID.String(), ADMIN_ROLE_ID)
 	if err != nil {
 		uc.log.Errorf("CreateTenant.AssignRole (admin): %s", err.Error())
 	}
 
-	err = uc.rbac.AssignRole(ctx, "", tenant.ID, BASIC_ROLE_ID)
+	err = uc.rbac.AssignRole(tenantContext, "", BASIC_ROLE_ID)
 	if err != nil {
 		uc.log.Errorf("CreateTenant.AssignRole (basic): %s", err.Error())
 	}

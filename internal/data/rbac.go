@@ -6,28 +6,34 @@ import (
 	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	jwtp "gitlab.calendaria.team/services/utils/v1/jwt"
 	"gitlab.calendaria.team/services/utils/v2/dialer"
+
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type RbacRemote struct {
-	dialer *dialer.Dialer
+	log    *log.Helper
+	dialer dialer.IDialer
 }
 
 func NewRbacRemote(
+	logger log.Logger,
 	conf *conf.Bootstrap,
-	c *config.Config,
-	jwt *jwtp.JwtProcessor,
-) (*RbacRemote, error) {
-	dialer, err := dialer.NewServiceDialer(c, jwt, "rbac", conf.Discovery.Rbac)
+	dm dialer.IDialerManager,
+) (*RbacRemote, func(), error) {
+	dialer, err := dm.NewServiceDialer("rbac", conf.Discovery.Rbac)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	cleanup := func() {
+		dialer.Close()
 	}
 
 	return &RbacRemote{
+		log:    log.NewHelper(log.With(logger, "module", "data/rbac")),
 		dialer: dialer,
-	}, nil
+	}, cleanup, nil
 }
 
 func (r *RbacRemote) getAssignsClient(ctx context.Context) (rbac_v1.AssignsClient, error) {
@@ -39,7 +45,7 @@ func (r *RbacRemote) getAssignsClient(ctx context.Context) (rbac_v1.AssignsClien
 	return rbac_v1.NewAssignsClient(conn), nil
 }
 
-func (r *RbacRemote) AssignRole(ctx context.Context, identityId string, tenantId, roleId int64) error {
+func (r *RbacRemote) AssignRole(ctx context.Context, identityId string, roleId int64) error {
 	client, err := r.getAssignsClient(ctx)
 	if err != nil {
 		return err
@@ -48,7 +54,6 @@ func (r *RbacRemote) AssignRole(ctx context.Context, identityId string, tenantId
 	_, err = client.AssignRole(
 		ctx,
 		&rbac_v1.AssignRoleRequest{
-			TenantId:   tenantId,
 			IdentityId: identityId,
 			RoleId:     roleId,
 		})
