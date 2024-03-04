@@ -2363,6 +2363,7 @@ type TenantMutation struct {
 	name           *string
 	created_at     *time.Time
 	updated_at     *time.Time
+	_type          *enum.TenantType
 	clearedFields  map[string]struct{}
 	members        map[int64]struct{}
 	removedmembers map[int64]struct{}
@@ -2695,6 +2696,42 @@ func (m *TenantMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetType sets the "type" field.
+func (m *TenantMutation) SetType(et enum.TenantType) {
+	m._type = &et
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *TenantMutation) GetType() (r enum.TenantType, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Tenant entity.
+// If the Tenant object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TenantMutation) OldType(ctx context.Context) (v enum.TenantType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *TenantMutation) ResetType() {
+	m._type = nil
+}
+
 // AddMemberIDs adds the "members" edge to the Member entity by ids.
 func (m *TenantMutation) AddMemberIDs(ids ...int64) {
 	if m.members == nil {
@@ -2891,7 +2928,7 @@ func (m *TenantMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TenantMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.deleted_at != nil {
 		fields = append(fields, tenant.FieldDeletedAt)
 	}
@@ -2906,6 +2943,9 @@ func (m *TenantMutation) Fields() []string {
 	}
 	if m.updated_at != nil {
 		fields = append(fields, tenant.FieldUpdatedAt)
+	}
+	if m._type != nil {
+		fields = append(fields, tenant.FieldType)
 	}
 	return fields
 }
@@ -2925,6 +2965,8 @@ func (m *TenantMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case tenant.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case tenant.FieldType:
+		return m.GetType()
 	}
 	return nil, false
 }
@@ -2944,6 +2986,8 @@ func (m *TenantMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCreatedAt(ctx)
 	case tenant.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case tenant.FieldType:
+		return m.OldType(ctx)
 	}
 	return nil, fmt.Errorf("unknown Tenant field %s", name)
 }
@@ -2987,6 +3031,13 @@ func (m *TenantMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case tenant.FieldType:
+		v, ok := value.(enum.TenantType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Tenant field %s", name)
@@ -3075,6 +3126,9 @@ func (m *TenantMutation) ResetField(name string) error {
 		return nil
 	case tenant.FieldUpdatedAt:
 		m.ResetUpdatedAt()
+		return nil
+	case tenant.FieldType:
+		m.ResetType()
 		return nil
 	}
 	return fmt.Errorf("unknown Tenant field %s", name)

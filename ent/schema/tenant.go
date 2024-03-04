@@ -3,11 +3,14 @@ package schema
 import (
 	"time"
 
+	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/ent/mixins"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Tenant holds the schema definition for the Tenant entity.
@@ -23,6 +26,9 @@ func (Tenant) Fields() []ent.Field {
 		field.String("name"),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
+		field.String("type").GoType(enum.TenantType("")).Immutable().Default(enum.Business.Value()).Annotations(
+			entsql.DefaultExpr("'PERSONAL'"),
+		),
 	}
 }
 
@@ -32,6 +38,12 @@ func (Tenant) Edges() []ent.Edge {
 		edge.To("members", Member.Type),
 		edge.To("groups", Group.Type),
 		edge.To("invites", Invite.Type),
+	}
+}
+
+func (Tenant) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("id", "owner_id", "type"),
 	}
 }
 

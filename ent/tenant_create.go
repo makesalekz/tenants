@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
@@ -75,6 +76,20 @@ func (tc *TenantCreate) SetUpdatedAt(t time.Time) *TenantCreate {
 func (tc *TenantCreate) SetNillableUpdatedAt(t *time.Time) *TenantCreate {
 	if t != nil {
 		tc.SetUpdatedAt(*t)
+	}
+	return tc
+}
+
+// SetType sets the "type" field.
+func (tc *TenantCreate) SetType(et enum.TenantType) *TenantCreate {
+	tc.mutation.SetType(et)
+	return tc
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (tc *TenantCreate) SetNillableType(et *enum.TenantType) *TenantCreate {
+	if et != nil {
+		tc.SetType(*et)
 	}
 	return tc
 }
@@ -181,6 +196,10 @@ func (tc *TenantCreate) defaults() error {
 		v := tenant.DefaultUpdatedAt()
 		tc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := tc.mutation.GetType(); !ok {
+		v := tenant.DefaultType
+		tc.mutation.SetType(v)
+	}
 	return nil
 }
 
@@ -250,6 +269,10 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.UpdatedAt(); ok {
 		_spec.SetField(tenant.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := tc.mutation.GetType(); ok {
+		_spec.SetField(tenant.FieldType, field.TypeString, value)
+		_node.Type = value
 	}
 	if nodes := tc.mutation.MembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -430,6 +453,9 @@ func (u *TenantUpsertOne) UpdateNewValues() *TenantUpsertOne {
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(tenant.FieldCreatedAt)
+		}
+		if _, exists := u.create.mutation.GetType(); exists {
+			s.SetIgnore(tenant.FieldType)
 		}
 	}))
 	return u
@@ -716,6 +742,9 @@ func (u *TenantUpsertBulk) UpdateNewValues() *TenantUpsertBulk {
 			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(tenant.FieldCreatedAt)
+			}
+			if _, exists := b.mutation.GetType(); exists {
+				s.SetIgnore(tenant.FieldType)
 			}
 		}
 	}))

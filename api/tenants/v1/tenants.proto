@@ -43,6 +43,7 @@ service Tenants {
 
 message CreateTenantRequest {
   string name = 1;
+  string type = 2;  // default = PERSONAL
 }
 
 message UpdateTenantRequest {

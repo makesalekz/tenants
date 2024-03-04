@@ -6,6 +6,7 @@ import (
 
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
@@ -38,6 +39,7 @@ func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantR
 	tenant, err := s.tu.CreateTenant(ctx, data.TenantDto{
 		OwnerId: actorId,
 		Name:    req.Name,
+		Type:    enum.TenantType(req.Type).DefaultIfInvalid(),
 	})
 	if err != nil {
 		return nil, err
@@ -136,6 +138,7 @@ func replyTenant(tenant *ent.Tenant) *v1.Tenant {
 		OwnerId:   tenant.OwnerID,
 		Name:      tenant.Name,
 		CreatedAt: tenant.CreatedAt.Format(time.RFC3339),
+		Type:      tenant.Type.Value(),
 	}
 
 	return &result
