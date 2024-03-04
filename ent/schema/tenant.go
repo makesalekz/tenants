@@ -43,7 +43,7 @@ func (Tenant) Edges() []ent.Edge {
 
 func (Tenant) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("id", "owner_id", "type"),
+		index.Fields("owner_id", "type"),
 	}
 }
 
