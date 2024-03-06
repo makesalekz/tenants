@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
+	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
@@ -16,6 +17,7 @@ type TenantDto struct {
 	TenantId int64
 	OwnerId  int64
 	Name     string
+	Type     enum.TenantType
 }
 
 type TenantsListFilter struct {
@@ -58,6 +60,7 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 	tenant, err := tx.Tenant.Create().
 		SetOwnerID(dto.OwnerId).
 		SetName(dto.Name).
+		SetType(dto.Type).
 		Save(ctx)
 	if err != nil {
 		return nil, nil, err

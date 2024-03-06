@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
 )
 
@@ -78,6 +79,12 @@ func CreatedAt(v time.Time) predicate.Tenant {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Tenant {
 	return predicate.Tenant(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldEQ(FieldType, vc))
 }
 
 // DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
@@ -313,6 +320,90 @@ func UpdatedAtLT(v time.Time) predicate.Tenant {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Tenant {
 	return predicate.Tenant(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldEQ(FieldType, vc))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldNEQ(FieldType, vc))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...enum.TenantType) predicate.Tenant {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.Tenant(sql.FieldIn(FieldType, v...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...enum.TenantType) predicate.Tenant {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.Tenant(sql.FieldNotIn(FieldType, v...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldGT(FieldType, vc))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldGTE(FieldType, vc))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldLT(FieldType, vc))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldLTE(FieldType, vc))
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldContains(FieldType, vc))
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldHasPrefix(FieldType, vc))
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldHasSuffix(FieldType, vc))
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldEqualFold(FieldType, vc))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v enum.TenantType) predicate.Tenant {
+	vc := string(v)
+	return predicate.Tenant(sql.FieldContainsFold(FieldType, vc))
 }
 
 // HasMembers applies the HasEdge predicate on the "members" edge.

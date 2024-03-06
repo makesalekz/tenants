@@ -5,6 +5,7 @@ package runtime
 import (
 	"time"
 
+	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
@@ -75,6 +76,10 @@ func init() {
 	tenantDescUpdatedAt := tenantFields[4].Descriptor()
 	// tenant.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	tenant.DefaultUpdatedAt = tenantDescUpdatedAt.Default.(func() time.Time)
+	// tenantDescType is the schema descriptor for type field.
+	tenantDescType := tenantFields[5].Descriptor()
+	// tenant.DefaultType holds the default value on creation for the type field.
+	tenant.DefaultType = enum.TenantType(tenantDescType.Default.(string))
 }
 
 const (

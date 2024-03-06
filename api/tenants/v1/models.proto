@@ -19,6 +19,7 @@ message Tenant {
   int64 ownerId = 2;
   string name = 3;
   string createdAt = 4;
+  string type = 5;
 }
 
 message TenantReply {

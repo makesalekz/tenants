@@ -92,6 +92,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			tenant.FieldName:      {Type: field.TypeString, Column: tenant.FieldName},
 			tenant.FieldCreatedAt: {Type: field.TypeTime, Column: tenant.FieldCreatedAt},
 			tenant.FieldUpdatedAt: {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
+			tenant.FieldType:      {Type: field.TypeString, Column: tenant.FieldType},
 		},
 	}
 	graph.MustAddE(
@@ -547,6 +548,11 @@ func (f *TenantFilter) WhereCreatedAt(p entql.TimeP) {
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
 func (f *TenantFilter) WhereUpdatedAt(p entql.TimeP) {
 	f.Where(p.Field(tenant.FieldUpdatedAt))
+}
+
+// WhereType applies the entql string predicate on the type field.
+func (f *TenantFilter) WhereType(p entql.StringP) {
+	f.Where(p.Field(tenant.FieldType))
 }
 
 // WhereHasMembers applies a predicate to check if query has an edge members.

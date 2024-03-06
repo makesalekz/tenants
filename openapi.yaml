@@ -471,6 +471,8 @@ components:
             properties:
                 name:
                     type: string
+                type:
+                    type: string
         tenants.v1.Group:
             type: object
             properties:
@@ -618,6 +620,8 @@ components:
                 name:
                     type: string
                 createdAt:
+                    type: string
+                type:
                     type: string
         tenants.v1.TenantMember:
             type: object
