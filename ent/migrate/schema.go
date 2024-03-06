@@ -110,7 +110,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeString, Default: schema.Expr("'BUSINESS'")},
+		{Name: "type", Type: field.TypeString, Default: schema.Expr("'PERSONAL'")},
 	}
 	// TenantsTable holds the schema information for the "tenants" table.
 	TenantsTable = &schema.Table{
@@ -119,9 +119,9 @@ var (
 		PrimaryKey: []*schema.Column{TenantsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "tenant_id_owner_id_type",
+				Name:    "tenant_owner_id_type",
 				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[0], TenantsColumns[2], TenantsColumns[6]},
+				Columns: []*schema.Column{TenantsColumns[2], TenantsColumns[6]},
 			},
 		},
 	}
