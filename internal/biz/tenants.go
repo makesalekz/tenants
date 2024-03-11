@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
@@ -47,6 +48,7 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 	}
 
 	tenantContext := auth.NewTenantContext(ctx, tenant.ID)
+	tenantContext = metadata.AppendToClientContext(tenantContext, "x-md-global-actor-role", "admin")
 
 	err = uc.rbac.AssignRole(tenantContext, member.IdentityID.String(), ADMIN_ROLE_ID)
 	if err != nil {
