@@ -26,6 +26,11 @@ func NewGRPCServer(
 	invitesService *service.InvitesService,
 	groupsService *service.GroupsService,
 ) *grpc.Server {
+	err := tracer.Initialize()
+	if err != nil {
+		panic(err)
+	}
+
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
