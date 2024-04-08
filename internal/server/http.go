@@ -1,19 +1,9 @@
 package server
 
 import (
-	"context"
-
-	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/tenants/internal/service"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
-	metrics "gitlab.calendaria.team/services/utils/v1/middlewares/metrics"
-	auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 
-	prom "github.com/go-kratos/kratos/contrib/metrics/prometheus/v2"
-	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
-	"github.com/go-kratos/kratos/v2/middleware/selector"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -41,42 +31,15 @@ var _activeRequests = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 	Help:      "The total number of active requests",
 }, []string{"kind", "operation"})
 
-func NewWhiteListMatcher() selector.MatchFunc {
-	whiteList := make(map[string]struct{})
-	whiteList["/tenants.v1.Invites/ShownInvite"] = struct{}{}
-	whiteList["/tenants.v1.Invites/DeclineInvite"] = struct{}{}
-	return func(_ context.Context, operation string) bool {
-		if _, ok := whiteList[operation]; ok {
-			return false
-		}
-		return true
-	}
-}
-
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(
 	c *conf.Bootstrap,
-	jwtp *jwt.JwtProcessor,
-	tenantsService *service.TenantsService,
-	membersService *service.MembersService,
-	invitesService *service.InvitesService,
-	groupsService *service.GroupsService,
 ) *khttp.Server {
+	prometheus.MustRegister(_metricSeconds, _metricRequests, _activeRequests)
+
 	var opts = []khttp.ServerOption{
 		khttp.Middleware(
 			recovery.Recovery(),
-			metadata.Server(),
-			selector.Server(
-				auth.Server(jwtp),
-				auth.BffMetaServer(jwtp),
-			).
-				Match(NewWhiteListMatcher()).
-				Build(),
-			metrics.Server(
-				metrics.WithSeconds(prom.NewHistogram(_metricSeconds)),
-				metrics.WithRequests(prom.NewCounter(_metricRequests)),
-				metrics.WithGauge(prom.NewGauge(_activeRequests)),
-			),
 		),
 	}
 	if c.Server.Http.Network != "" {
@@ -90,18 +53,7 @@ func NewHTTPServer(
 	}
 	srv := khttp.NewServer(opts...)
 
-	v1.RegisterTenantsHTTPServer(srv, tenantsService)
-	v1.RegisterMembersHTTPServer(srv, membersService)
-	v1.RegisterInvitesHTTPServer(srv, invitesService)
-	v1.RegisterGroupsHTTPServer(srv, groupsService)
-
-	registerTechRoutes(srv)
+	srv.Handle("/metrics", promhttp.Handler())
 
 	return srv
-}
-
-func registerTechRoutes(s *khttp.Server) {
-	prometheus.MustRegister(_metricSeconds, _metricRequests)
-
-	s.Handle("/metrics", promhttp.Handler())
 }
