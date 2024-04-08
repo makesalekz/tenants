@@ -4,13 +4,15 @@ import (
 	"context"
 	"os"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/wire"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
-	"gitlab.calendaria.team/services/utils/v2/dialer"
+	u_config "gitlab.calendaria.team/services/utils/v1/config"
+	u_jwt "gitlab.calendaria.team/services/utils/v1/jwt"
+	u_dialer "gitlab.calendaria.team/services/utils/v2/dialer"
+	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/wire"
 
 	_ "github.com/lib/pq"
 	_ "gitlab.calendaria.team/services/tenants/ent/runtime"
@@ -19,9 +21,10 @@ import (
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
 	NewData,
-	config.NewConfig,
-	jwt.NewJwtProcessor,
-	dialer.NewServiceDialerManager,
+	u_config.NewConfig,
+	u_jwt.NewJwtProcessor,
+	u_dialer.NewServiceDialerManager,
+	u_tracing.NewTracer,
 	NewNatsClient,
 	NewTenantsRepo,
 	NewMembersRepo,
@@ -38,7 +41,7 @@ type Data struct {
 }
 
 // NewData .
-func NewData(bc *conf.Bootstrap, c *config.Config, logger log.Logger) (*Data, func(), error) {
+func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, func(), error) {
 	l := log.NewHelper(logger)
 
 	dbDsn := bc.Db // read from local config
