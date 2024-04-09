@@ -44,7 +44,7 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 		return nil, err
 	}
 
-	// TODO: check permissions
+	// TODO: nobody can add members directly
 	if tenant.OwnerID != actorId {
 		return nil, v1.ErrorForbidden("only owner can add members")
 	}
@@ -58,27 +58,12 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 }
 
 func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest) (*utils_v1.EmptyReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
-		return nil, v1.ErrorEmptyActorId("empty actor id")
-	}
-
 	tenantId := auth.GetTenantIdFromContext(ctx)
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	tenant, err := s.tu.GetTenant(ctx, tenantId)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != actorId {
-		return nil, v1.ErrorForbidden("only owner can remove members")
-	}
-
-	err = s.mu.DeleteMember(ctx, tenantId, req.MemberId)
+	err := s.mu.DeleteMember(ctx, tenantId, req.MemberId)
 	if err != nil {
 		return nil, err
 	}

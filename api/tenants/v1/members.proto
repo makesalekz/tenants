@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package tenants.v1;
 
-import "google/api/annotations.proto";
 import "api/utils/v1/models.proto";
 import "api/tenants/v1/models.proto";
 
@@ -11,30 +10,12 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Members {
-  rpc CreateMembers(CreateMembersRequest) returns (utils.v1.EmptyReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/members"
-      body: "*"
-    };
-  };
-  rpc DeleteMember(MemberRequest) returns (utils.v1.EmptyReply) {
-    option (google.api.http) = {
-      delete: "/v1/tenants/members/{memberId}"
-    };
-  };
-  rpc GetMember(MemberRequest) returns (MemberReply) {
-    option (google.api.http) = {
-      get: "/v1/tenants/members/{memberId}"
-    };
-  };
+  rpc CreateMembers(CreateMembersRequest) returns (utils.v1.EmptyReply);
+  rpc DeleteMember(MemberRequest) returns (utils.v1.EmptyReply);
+  rpc GetMember(MemberRequest) returns (MemberReply);
   rpc GetMemberIdentities(GetMemberIdentitiesRequest)
       returns (GetMemberIdentitiesReply);
-  rpc ListMembers(ListMembersRequest) returns (ListMembersReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/members/list"
-      body: "*"
-    };
-  };
+  rpc ListMembers(ListMembersRequest) returns (ListMembersReply);
 }
 
 message CreateMembersRequest {

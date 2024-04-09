@@ -29,7 +29,7 @@ type TenantsListFilter struct {
 type TenantsRepo interface {
 	CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, *ent.Member, error)
 	UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error)
-	DeleteTenant(ctx context.Context, dto TenantDto) error
+	DeleteTenant(ctx context.Context, tenantId int64) error
 	GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error)
 	ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Tenant, error)
 	CountListTenants(ctx context.Context, filter TenantsListFilter) (int32, error)
@@ -81,13 +81,12 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 
 func (r *tenantsRepo) UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error) {
 	return r.db.Tenant.UpdateOneID(dto.TenantId).
-		Where(tenant.OwnerID(dto.OwnerId)).
 		SetName(dto.Name).
 		Save(ctx)
 }
 
-func (r *tenantsRepo) DeleteTenant(ctx context.Context, dto TenantDto) error {
-	return r.db.Tenant.DeleteOneID(dto.TenantId).Where(tenant.OwnerID(dto.OwnerId)).Exec(ctx)
+func (r *tenantsRepo) DeleteTenant(ctx context.Context, tenantId int64) error {
+	return r.db.Tenant.DeleteOneID(tenantId).Exec(ctx)
 }
 
 func (r *tenantsRepo) GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error) {
