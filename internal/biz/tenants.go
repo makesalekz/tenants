@@ -74,8 +74,8 @@ func (uc *TenantsUsecase) UpdateTenant(ctx context.Context, dto data.TenantDto) 
 	return tenant, nil
 }
 
-func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, dto data.TenantDto) error {
-	err := uc.repo.DeleteTenant(ctx, dto)
+func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, tenantId int64) error {
+	err := uc.repo.DeleteTenant(ctx, tenantId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return tenants_v1.ErrorNotFound("tenant not found")

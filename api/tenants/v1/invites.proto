@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package tenants.v1;
 
-import "google/api/annotations.proto";
 import "api/utils/v1/models.proto";
 import "api/iam/v1/models.proto";
 import "api/tenants/v1/models.proto";
@@ -12,47 +11,13 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Invites {
-  rpc CreateInvites(CreateInvitesRequest) returns (ListInvitesReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/invites"
-      body: "*"
-    };
-  };
-  rpc CancelInvite(InviteRequest) returns (utils.v1.EmptyReply) {
-    option (google.api.http) = {
-      put: "/v1/tenants/invites/{inviteId}"
-      body: "*"
-    };
-  };
-  rpc DeleteInvite(InviteRequest) returns (utils.v1.EmptyReply) {
-    option (google.api.http) = {
-      delete: "/v1/tenants/invites/{inviteId}"
-    };
-  };
-  rpc ListInvites(ListInvitesRequest) returns (ListInvitesReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/invites/list"
-      body: "*"
-    };
-  };
-  rpc AcceptInvite(InviteCodeRequest) returns (TenantReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/invites/accept"
-      body: "*"
-    };
-  };
-  rpc ShownInvite(InviteCodeRequest) returns (TenantReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/invites/shown"
-      body: "*"
-    };
-  };
-  rpc DeclineInvite(InviteCodeRequest) returns (utils.v1.EmptyReply) {
-    option (google.api.http) = {
-      post: "/v1/tenants/invites/decline"
-      body: "*"
-    };
-  };
+  rpc CreateInvites(CreateInvitesRequest) returns (ListInvitesReply);
+  rpc CancelInvite(InviteRequest) returns (utils.v1.EmptyReply);
+  rpc DeleteInvite(InviteRequest) returns (utils.v1.EmptyReply);
+  rpc ListInvites(ListInvitesRequest) returns (ListInvitesReply);
+  rpc AcceptInvite(InviteCodeRequest) returns (TenantReply);
+  rpc ShownInvite(InviteCodeRequest) returns (TenantReply);
+  rpc DeclineInvite(InviteCodeRequest) returns (utils.v1.EmptyReply);
 }
 
 message CreateInvitesRequest {
