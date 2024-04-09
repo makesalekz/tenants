@@ -34,7 +34,6 @@ func (s *GroupsService) CreateGroup(ctx context.Context, req *v1.CreateGroupRequ
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-	// TODO: check permissions
 
 	group, err := s.mu.CreateGroup(ctx, data.CreateGroupDto{
 		TenantId:    tenantId,
@@ -55,7 +54,6 @@ func (s *GroupsService) UpdateGroup(ctx context.Context, req *v1.UpdateGroupRequ
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-	// TODO: check permissions
 
 	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
 	if err != nil {
@@ -80,7 +78,6 @@ func (s *GroupsService) DeleteGroup(ctx context.Context, req *v1.GroupRequest) (
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-	// TODO: check permissions
 
 	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
 	if err != nil {
@@ -100,7 +97,6 @@ func (s *GroupsService) GetGroup(ctx context.Context, req *v1.GroupRequest) (*v1
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-	// TODO: check permissions
 
 	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
 	if err != nil {
@@ -139,7 +135,6 @@ func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMemb
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-	// TODO: check permissions
 
 	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
 	if err != nil {
@@ -159,7 +154,6 @@ func (s *GroupsService) RemoveMembersFromGroup(ctx context.Context, req *v1.Grou
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
-	// TODO: check permissions
 
 	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
 	if err != nil {
