@@ -33,28 +33,13 @@ func NewInvitesService(
 }
 
 func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvitesRequest) (*v1.ListInvitesReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
-		return nil, v1.ErrorEmptyActorId("empty actor id")
-	}
-
 	tenantId := auth.GetTenantIdFromContext(ctx)
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	if len(req.Emails) == 0 {
-		return nil, v1.ErrorInvalidRequest("emails is empty")
-	}
-
-	tenant, err := s.tu.GetTenant(ctx, tenantId)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != actorId {
-		return nil, v1.ErrorForbidden("only owner can create invites")
+		return nil, v1.ErrorInvalidRequest("emails are empty")
 	}
 
 	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails)
@@ -68,11 +53,6 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 }
 
 func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
-		return nil, v1.ErrorEmptyActorId("empty actor id")
-	}
-
 	tenantId := auth.GetTenantIdFromContext(ctx)
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
@@ -82,17 +62,7 @@ func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest
 		return nil, v1.ErrorInvalidRequest("invite_id is empty")
 	}
 
-	tenant, err := s.tu.GetTenant(ctx, tenantId)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != actorId {
-		return nil, v1.ErrorForbidden("only owner can update invites")
-	}
-
-	_, err = s.iu.CancelInvite(ctx, tenantId, req.InviteId)
+	_, err := s.iu.CancelInvite(ctx, tenantId, req.InviteId)
 	if err != nil {
 		return nil, err
 	}
@@ -100,11 +70,6 @@ func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
-		return nil, v1.ErrorEmptyActorId("empty actor id")
-	}
-
 	tenantId := auth.GetTenantIdFromContext(ctx)
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
@@ -114,20 +79,7 @@ func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest
 		return nil, v1.ErrorInvalidRequest("invite_id is empty")
 	}
 
-	tenant, err := s.tu.GetTenant(ctx, tenantId)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, v1.ErrorNotFound("tenant not found")
-		}
-		return nil, err
-	}
-
-	// TODO: check permissions
-	if tenant.OwnerID != actorId {
-		return nil, v1.ErrorForbidden("only owner can remove invites")
-	}
-
-	err = s.iu.DeleteInvite(ctx, tenant.ID, req.InviteId)
+	err := s.iu.DeleteInvite(ctx, tenantId, req.InviteId)
 	if err != nil {
 		return nil, err
 	}
