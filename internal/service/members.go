@@ -115,9 +115,10 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 	}
 
 	filter := data.MembersListFilter{
-		TenantId: tenantId,
-		GroupId:  req.GetGroupId(),
-		Search:   req.GetSearch(),
+		TenantId:       tenantId,
+		GroupId:        req.GetGroupId(),
+		Search:         req.GetSearch(),
+		ExcludeGroupId: req.GetExcludeGroupId(),
 	}
 
 	list, err := s.mu.ListMembers(ctx, filter, req.Sort, req.Paginate)

@@ -12,9 +12,10 @@ import (
 )
 
 type MembersListFilter struct {
-	TenantId int64
-	GroupId  int64
-	Search   string
+	TenantId       int64
+	GroupId        int64
+	Search         string
+	ExcludeGroupId int64
 }
 
 // MembersRepo
@@ -72,6 +73,8 @@ func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter)
 
 	if filter.GroupId != 0 {
 		query.Where(member.HasGroupsWith(group.ID(filter.GroupId)))
+	} else if filter.ExcludeGroupId != 0 {
+		query.Where(member.Not(member.HasGroupsWith(group.ID(filter.ExcludeGroupId))))
 	}
 
 	return query.All(ctx)
@@ -80,6 +83,12 @@ func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter)
 func (r *membersRepo) CountListMembers(ctx context.Context, filter MembersListFilter) (int32, error) {
 	query := r.db.Member.Query().
 		Where(member.TenantID(filter.TenantId))
+
+	if filter.GroupId != 0 {
+		query.Where(member.HasGroupsWith(group.ID(filter.GroupId)))
+	} else if filter.ExcludeGroupId != 0 {
+		query.Where(member.Not(member.HasGroupsWith(group.ID(filter.ExcludeGroupId))))
+	}
 
 	count, err := query.Count(ctx)
 

@@ -45,4 +45,5 @@ message ListMembersRequest {
   string search = 2;
   utils.v1.SortRequest sort = 3;
   utils.v1.PaginateRequest paginate = 4;
+  int64 excludeGroupId = 5;
 }
