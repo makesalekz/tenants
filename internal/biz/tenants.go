@@ -2,14 +2,15 @@ package biz
 
 import (
 	"context"
+	"strconv"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/metadata"
 	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v2/auth"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/metadata"
 )
 
 const ADMIN_ROLE_ID = 1
@@ -47,7 +48,7 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		return nil, err
 	}
 
-	tenantContext := auth.NewTenantContext(ctx, tenant.ID)
+	tenantContext := metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenant.ID, 10))
 	tenantContext = metadata.AppendToClientContext(tenantContext, "x-md-global-actor-role", "admin")
 
 	err = uc.rbac.AssignRole(tenantContext, member.IdentityID.String(), ADMIN_ROLE_ID)
