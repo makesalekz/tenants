@@ -48,6 +48,8 @@ services:
     networks:
       - backend
     restart: unless-stopped
+    depends_on:
+      - db
     environment:
       - AUTOMIGRATE=true
       - SERVICE_NAME=${SERVICE_NAME}
