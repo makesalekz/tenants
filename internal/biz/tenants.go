@@ -56,10 +56,10 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		uc.log.Errorf("CreateTenant.AssignRole (admin): %s", err.Error())
 	}
 
-	err = uc.rbac.AssignRole(tenantContext, "", BASIC_ROLE_ID)
-	if err != nil {
-		uc.log.Errorf("CreateTenant.AssignRole (basic): %s", err.Error())
-	}
+	// err = uc.rbac.AssignRole(tenantContext, "", BASIC_ROLE_ID)
+	// if err != nil {
+	// 	uc.log.Errorf("CreateTenant.AssignRole (basic): %s", err.Error())
+	// }
 
 	return tenant, nil
 }

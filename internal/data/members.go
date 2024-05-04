@@ -22,7 +22,7 @@ type MembersListFilter struct {
 type MembersRepo interface {
 	CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
 	DeleteMember(ctx context.Context, tenantId, memberId int64) error
-	GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error)
+	GetMembers(ctx context.Context, tenantId int64, identityIds []uuid.UUID) ([]*ent.Member, error)
 	GetMember(ctx context.Context, tenantId, memberId int64) (*ent.Member, error)
 	GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error)
 	ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error)
@@ -55,8 +55,8 @@ func (r *membersRepo) DeleteMember(ctx context.Context, tenantId, memberId int64
 	return err
 }
 
-func (r *membersRepo) GetMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
-	return r.db.Member.Query().Where(member.TenantID(tenantId), member.UserIDIn(usersIds...)).All(ctx)
+func (r *membersRepo) GetMembers(ctx context.Context, tenantId int64, identityIds []uuid.UUID) ([]*ent.Member, error) {
+	return r.db.Member.Query().Where(member.TenantID(tenantId), member.IdentityIDIn(identityIds...)).All(ctx)
 }
 
 func (r *membersRepo) GetMember(ctx context.Context, tenantId, memberId int64) (*ent.Member, error) {
