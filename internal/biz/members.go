@@ -76,7 +76,7 @@ func (uc *MembersUsecase) GetMembersByIdentities(ctx context.Context, tenantId i
 	for i, identity := range identities {
 		identityUuids[i], err = uuid.Parse(identity)
 		if err != nil {
-			return nil, v1.ErrorInternal("invalid identity, %s", err.Error())
+			return nil, v1.ErrorInvalidRequest("invalid identity, %s", err.Error())
 		}
 	}
 
