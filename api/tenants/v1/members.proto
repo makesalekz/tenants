@@ -13,6 +13,7 @@ service Members {
   rpc CreateMembers(CreateMembersRequest) returns (utils.v1.EmptyReply);
   rpc DeleteMember(MemberRequest) returns (utils.v1.EmptyReply);
   rpc GetMember(MemberRequest) returns (MemberReply);
+  rpc GetMembersByIdentities(IdentitiesRequest) returns (MembersReply);
   rpc GetMemberIdentities(GetMemberIdentitiesRequest)
       returns (GetMemberIdentitiesReply);
   rpc ListMembers(ListMembersRequest) returns (ListMembersReply);
@@ -26,8 +27,16 @@ message MemberRequest {
   int64 memberId = 1;
 }
 
+message IdentitiesRequest {
+  repeated string identityIds = 1;
+}
+
 message MemberReply {
   TenantMember member = 1;
+}
+
+message MembersReply {
+  repeated TenantMember members = 1;
 }
 
 message GetMemberIdentitiesRequest {
