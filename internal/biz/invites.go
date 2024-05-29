@@ -2,9 +2,13 @@ package biz
 
 import (
 	"context"
+	"fmt"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/nats"
 
 	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
+	"gitlab.calendaria.team/services/notifications/messages"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
@@ -28,6 +32,8 @@ type InvitesUsecase struct {
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
 	iam         *data.IamRemote
+	config      *config.Config
+	queue       *nats.QueueManager
 }
 
 // NewGreeterUsecase new a Greeter usecase.
@@ -35,15 +41,22 @@ func NewInvitesUsecase(
 	tenantsRepo data.TenantsRepo,
 	invitesRepo data.InvitesRepo,
 	iam *data.IamRemote,
+	queueManager *nats.QueueManager,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
 		tenantsRepo: tenantsRepo,
 		invitesRepo: invitesRepo,
 		iam:         iam,
+		queue:       queueManager,
 	}, nil
 }
 
-func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string) ([]InviteItem, error) {
+func buildInviteLine(baseUrl string, userId *int64, code string) string {
+	//baseUrl + "/a/" + userId + "/" + code
+	return fmt.Sprintf("%s/a/%d/%s", baseUrl, *userId, code)
+}
+
+func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId string) ([]InviteItem, error) {
 	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
 		return nil, err
@@ -76,9 +89,29 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 		if user, ok := usersMap[invite.Email]; ok {
 			invitesItems[i].User = user
 		}
+
+		if appId == "pms" || appId == "admin" {
+			uc.sendInviteEmail(invite)
+		}
 	}
 
 	return invitesItems, nil
+}
+
+func (uc *InvitesUsecase) sendInviteEmail(invite *ent.Invite) {
+	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
+	if err == nil {
+		return
+	}
+	inviteUrl := buildInviteLine(baseUrl, invite.UserID, invite.Code.String())
+	uc.queue.GetRemote(QueueEmail).Pub(messages.EmailDetails{
+		Language: "en",
+		Type:     "invite",
+		Email:    invite.Email,
+		Data: map[string]interface{}{
+			"InviteLink": inviteUrl,
+		},
+	})
 }
 
 func (uc *InvitesUsecase) CancelInvite(ctx context.Context, tenantId, inviteId int64) (*ent.Invite, error) {
