@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 
+	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
@@ -67,6 +68,30 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, memberId int6
 		Member: member,
 		User:   user,
 	}, nil
+}
+
+func (uc *MembersUsecase) GetMembersByIdentities(ctx context.Context, tenantId int64, identities []string) ([]*MemberItem, error) {
+	identityUuids := make([]uuid.UUID, len(identities))
+	var err error
+	for i, identity := range identities {
+		identityUuids[i], err = uuid.Parse(identity)
+		if err != nil {
+			return nil, v1.ErrorInvalidRequest("invalid identity, %s", err.Error())
+		}
+	}
+
+	members, err := uc.membersRepo.GetMembers(ctx, tenantId, identityUuids)
+	if err != nil {
+		return nil, err
+	}
+
+	memberItems := make([]*MemberItem, len(members))
+	for i, member := range members {
+		memberItems[i] = &MemberItem{
+			Member: member,
+		}
+	}
+	return memberItems, nil
 }
 
 func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {

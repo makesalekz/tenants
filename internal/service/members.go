@@ -28,6 +28,22 @@ func NewMembersService(
 	}
 }
 
+func (s *MembersService) GetMembersByIdentities(ctx context.Context, req *v1.IdentitiesRequest) (*v1.MembersReply, error) {
+	tenantId := auth.GetTenantIdFromContext(ctx)
+	if tenantId == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
+	}
+
+	members, err := s.mu.GetMembersByIdentities(ctx, tenantId, req.IdentityIds)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.MembersReply{
+		Members: replyMembers(members),
+	}, nil
+}
+
 func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*utils_v1.EmptyReply, error) {
 	actorId := auth.GetActorIdFromContext(ctx)
 	if actorId == 0 {
@@ -138,7 +154,7 @@ func replyMember(member *biz.MemberItem) *v1.TenantMember {
 		Id:         member.ID,
 		IdentityId: &identityId,
 		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
-		User:       member.User,
+		UserId:     member.UserID,
 	}
 
 	if len(member.Edges.Groups) > 0 {
