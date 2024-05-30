@@ -1,8 +1,9 @@
 package biz
 
-import "github.com/google/wire"
-
-var DefaultLanguage = "en"
+import (
+	"github.com/google/wire"
+	"gitlab.calendaria.team/services/utils/v1/nats"
+)
 
 const (
 	QueueEmail = "notifications/email"
@@ -14,4 +15,5 @@ var ProviderSet = wire.NewSet(
 	NewMembersUsecase,
 	NewInvitesUsecase,
 	NewGroupsUsecase,
+	nats.NewQueueManager,
 )

@@ -3,10 +3,7 @@ package biz
 import (
 	"context"
 	"fmt"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v1/nats"
 
-	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/notifications/messages"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
@@ -14,11 +11,14 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/nats"
+
+	"github.com/google/uuid"
 )
 
 type InviteItem struct {
 	*ent.Invite
-
 	User *iam_v1.UserShort
 }
 
@@ -33,7 +33,7 @@ type InvitesUsecase struct {
 	invitesRepo data.InvitesRepo
 	iam         *data.IamRemote
 	config      *config.Config
-	queue       *nats.QueueManager
+	qm          *nats.QueueManager
 }
 
 // NewGreeterUsecase new a Greeter usecase.
@@ -47,11 +47,11 @@ func NewInvitesUsecase(
 		tenantsRepo: tenantsRepo,
 		invitesRepo: invitesRepo,
 		iam:         iam,
-		queue:       queueManager,
+		qm:          queueManager,
 	}, nil
 }
 
-func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId string, lang *string) ([]InviteItem, error) {
+func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId, lang string) ([]InviteItem, error) {
 	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
 		return nil, err
@@ -84,10 +84,10 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 		if user, ok := usersMap[invite.Email]; ok {
 			invitesItems[i].User = user
 		}
+	}
 
-		if appId == "pms" || appId == "admin" {
-			go uc.sendInviteEmail(invitesItems[i], lang)
-		}
+	if appId == "pms" || appId == "admin" {
+		go uc.processInvitations(ctx, tenantId, invitesItems, lang)
 	}
 
 	return invitesItems, nil
@@ -189,14 +189,8 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, status)
 }
 
-func buildInviteLine(baseUrl string, userId *int64, code string) string {
-	return fmt.Sprintf("%s/a/%d/%s", baseUrl, *userId, code)
-}
-
-func (uc *InvitesUsecase) sendInviteEmail(inviteItem InviteItem, lang *string) {
-	ctx := context.Background()
-
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, inviteItem.TenantID)
+func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64, invitesItems []InviteItem, lang string) {
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
 	if err != nil {
 		return
 	}
@@ -204,24 +198,35 @@ func (uc *InvitesUsecase) sendInviteEmail(inviteItem InviteItem, lang *string) {
 	if err != nil {
 		return
 	}
-
 	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
 	if err != nil {
 		return
 	}
-	inviteUrl := buildInviteLine(baseUrl, inviteItem.Invite.UserID, inviteItem.Invite.Code.String())
+	queue := uc.qm.GetRemote(QueueEmail)
 
-	emailDetailData := map[string]string{
-		"InviteLink":    inviteUrl,
-		"UserName":      inviteItem.User.Name,
-		"WorkspaceName": tenant.Name,
-		"InvitedBy":     owner.Name,
+	for _, inviteItem := range invitesItems {
+		inviteUrl := buildInviteLine(baseUrl, inviteItem.ID, inviteItem.Invite.Code.String())
+		emailDetailData := map[string]string{
+			"InviteLink":    inviteUrl,
+			"UserName":      inviteItem.User.Name,
+			"WorkspaceName": tenant.Name,
+			"InvitedBy":     owner.Name,
+		}
+		uc.sendEmail(queue, lang, inviteItem.Email, emailDetailData)
+	}
+}
+
+func (uc *InvitesUsecase) sendEmail(queue *nats.Queue, lang, email string, data map[string]string) {
+	emailDetails := messages.EmailDetails{
+		Language: lang,
+		Type:     "invite",
+		Emails:   []string{email},
+		Data:     data,
 	}
 
-	uc.queue.GetRemote(QueueEmail).Pub(messages.EmailDetails{
-		Language: *lang,
-		Type:     "invite",
-		Emails:   []string{inviteItem.Email},
-		Data:     emailDetailData,
-	})
+	queue.Pub(emailDetails)
+}
+
+func buildInviteLine(baseUrl string, inviteId int64, code string) string {
+	return fmt.Sprintf("%s/a/%d/%s", baseUrl, inviteId, code)
 }
