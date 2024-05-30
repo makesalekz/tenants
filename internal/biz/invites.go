@@ -2,19 +2,23 @@ package biz
 
 import (
 	"context"
+	"fmt"
+	"gitlab.calendaria.team/services/notifications/messages"
 
-	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"gitlab.calendaria.team/services/utils/v1/config"
+	"gitlab.calendaria.team/services/utils/v1/nats"
+
+	"github.com/google/uuid"
 )
 
 type InviteItem struct {
 	*ent.Invite
-
 	User *iam_v1.UserShort
 }
 
@@ -28,6 +32,8 @@ type InvitesUsecase struct {
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
 	iam         *data.IamRemote
+	config      *config.Config
+	qm          *nats.QueueManager
 }
 
 // NewGreeterUsecase new a Greeter usecase.
@@ -35,15 +41,17 @@ func NewInvitesUsecase(
 	tenantsRepo data.TenantsRepo,
 	invitesRepo data.InvitesRepo,
 	iam *data.IamRemote,
+	queueManager *nats.QueueManager,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
 		tenantsRepo: tenantsRepo,
 		invitesRepo: invitesRepo,
 		iam:         iam,
+		qm:          queueManager,
 	}, nil
 }
 
-func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string) ([]InviteItem, error) {
+func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId, lang string) ([]InviteItem, error) {
 	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
 		return nil, err
@@ -76,6 +84,10 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 		if user, ok := usersMap[invite.Email]; ok {
 			invitesItems[i].User = user
 		}
+	}
+
+	if appId == "pms" || appId == "admin" {
+		go uc.processInvitations(ctx, tenantId, invitesItems, lang)
 	}
 
 	return invitesItems, nil
@@ -175,4 +187,46 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 	}
 
 	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, status)
+}
+
+func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64, invitesItems []InviteItem, lang string) {
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
+	if err != nil {
+		return
+	}
+	owner, err := uc.iam.GetUser(ctx, tenant.OwnerID)
+	if err != nil {
+		return
+	}
+	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
+	if err != nil {
+		return
+	}
+	queue := uc.qm.GetRemote(QueueEmail)
+
+	for _, inviteItem := range invitesItems {
+		inviteUrl := buildInviteLine(baseUrl, inviteItem.ID, inviteItem.Invite.Code.String())
+		emailDetailData := map[string]string{
+			"InviteLink":    inviteUrl,
+			"WorkspaceName": tenant.Name,
+			"InvitedBy":     owner.Name,
+		}
+
+		if inviteItem.User != nil && inviteItem.User.Name != "" {
+			emailDetailData["UserName"] = inviteItem.User.Name
+		}
+
+		emailDetails := messages.EmailDetails{
+			Language: lang,
+			Type:     "invite",
+			Emails:   []string{inviteItem.Email},
+			Data:     emailDetailData,
+		}
+
+		queue.Pub(emailDetails)
+	}
+}
+
+func buildInviteLine(baseUrl string, inviteId int64, code string) string {
+	return fmt.Sprintf("%s/a/%d/%s", baseUrl, inviteId, code)
 }

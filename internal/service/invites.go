@@ -42,7 +42,7 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 		return nil, v1.ErrorInvalidRequest("emails are empty")
 	}
 
-	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails)
+	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails, req.AppId, req.Language)
 	if err != nil {
 		return nil, err
 	}

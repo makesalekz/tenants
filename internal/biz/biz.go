@@ -1,6 +1,13 @@
 package biz
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+	"gitlab.calendaria.team/services/utils/v1/nats"
+)
+
+const (
+	QueueEmail = "notifications/email"
+)
 
 // ProviderSet is biz providers.
 var ProviderSet = wire.NewSet(
@@ -8,4 +15,5 @@ var ProviderSet = wire.NewSet(
 	NewMembersUsecase,
 	NewInvitesUsecase,
 	NewGroupsUsecase,
+	nats.NewQueueManager,
 )

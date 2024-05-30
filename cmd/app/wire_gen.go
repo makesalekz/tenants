@@ -16,6 +16,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/config"
 	"gitlab.calendaria.team/services/utils/v1/jwt"
+	"gitlab.calendaria.team/services/utils/v1/nats"
 	"gitlab.calendaria.team/services/utils/v2/dialer"
 	"gitlab.calendaria.team/services/utils/v2/tracing"
 )
@@ -75,8 +76,17 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	tenantsService := service.NewTenantsService(tenantsUsecase, membersUsecase)
 	membersService := service.NewMembersService(tenantsUsecase, membersUsecase)
 	invitesRepo := data.NewInvitesRepo(dataData)
-	invitesUsecase, err := biz.NewInvitesUsecase(tenantsRepo, invitesRepo, iamRemote)
+	encodedConn, cleanup4, err := data.NewNatsClient(bootstrap)
 	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	queueManager := nats.NewQueueManager(configConfig, encodedConn, logger)
+	invitesUsecase, err := biz.NewInvitesUsecase(tenantsRepo, invitesRepo, iamRemote, queueManager)
+	if err != nil {
+		cleanup4()
 		cleanup3()
 		cleanup2()
 		cleanup()
@@ -86,6 +96,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	groupsRepo := data.NewGroupsRepo(dataData)
 	groupsUsecase, err := biz.NewGroupsUsecase(tenantsRepo, groupsRepo)
 	if err != nil {
+		cleanup4()
 		cleanup3()
 		cleanup2()
 		cleanup()
@@ -96,6 +107,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	httpServer := server.NewHTTPServer(bootstrap)
 	app := newApp(logger, configConfig, grpcServer, httpServer)
 	return app, func() {
+		cleanup4()
 		cleanup3()
 		cleanup2()
 		cleanup()
