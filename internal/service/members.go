@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"gitlab.calendaria.team/services/tenants/ent"
 	"time"
 
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
@@ -28,19 +29,19 @@ func NewMembersService(
 	}
 }
 
-func (s *MembersService) GetMembersUsersIds(ctx context.Context, req *v1.IdentitiesRequest) (*v1.UserIdsReply, error) {
+func (s *MembersService) GetShortMembers(ctx context.Context, req *v1.IdentitiesRequest) (*v1.MembersReply, error) {
 	tenantId := auth.GetTenantIdFromContext(ctx)
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	userIds, err := s.mu.GetMembersUsersIds(ctx, tenantId, req.IdentityIds)
+	members, err := s.mu.GetShortMembers(ctx, tenantId, req.IdentityIds)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.UserIdsReply{
-		UserIds: userIds,
+	return &v1.MembersReply{
+		Members: replyShortMembers(members),
 	}, nil
 }
 
@@ -182,6 +183,23 @@ func replyMembers(members []*biz.MemberItem) []*v1.TenantMember {
 	reply := make([]*v1.TenantMember, len(members))
 	for i, member := range members {
 		reply[i] = replyMember(member)
+	}
+	return reply
+}
+
+func replyShortMember(member *ent.Member) *v1.MemberReply {
+	return &v1.MemberReply{
+		Id:         member.ID,
+		IdentityId: member.IdentityID.String(),
+		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
+		UserId:     member.UserID,
+	}
+}
+
+func replyShortMembers(members []*ent.Member) []*v1.MemberReply {
+	reply := make([]*v1.MemberReply, len(members))
+	for i, member := range members {
+		reply[i] = replyShortMember(member)
 	}
 	return reply
 }
