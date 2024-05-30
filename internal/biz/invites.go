@@ -3,9 +3,9 @@ package biz
 import (
 	"context"
 	"fmt"
+	"gitlab.calendaria.team/services/notifications/messages"
 
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
-	"gitlab.calendaria.team/services/notifications/messages"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
@@ -216,19 +216,15 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 			emailDetailData["UserName"] = inviteItem.User.Name
 		}
 
-		uc.sendEmail(queue, lang, inviteItem.Email, emailDetailData)
-	}
-}
+		emailDetails := messages.EmailDetails{
+			Language: lang,
+			Type:     "invite",
+			Emails:   []string{inviteItem.Email},
+			Data:     emailDetailData,
+		}
 
-func (uc *InvitesUsecase) sendEmail(queue *nats.Queue, lang, email string, data map[string]string) {
-	emailDetails := messages.EmailDetails{
-		Language: lang,
-		Type:     "invite",
-		Emails:   []string{email},
-		Data:     data,
+		queue.Pub(emailDetails)
 	}
-
-	queue.Pub(emailDetails)
 }
 
 func buildInviteLine(baseUrl string, inviteId int64, code string) string {
