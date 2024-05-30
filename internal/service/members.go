@@ -28,19 +28,19 @@ func NewMembersService(
 	}
 }
 
-func (s *MembersService) GetMembersByIdentities(ctx context.Context, req *v1.IdentitiesRequest) (*v1.MembersReply, error) {
+func (s *MembersService) GetMembersUsersIds(ctx context.Context, req *v1.IdentitiesRequest) (*v1.UserIdsReply, error) {
 	tenantId := auth.GetTenantIdFromContext(ctx)
 	if tenantId == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	members, err := s.mu.GetMembersByIdentities(ctx, tenantId, req.IdentityIds)
+	userIds, err := s.mu.GetMembersUsersIds(ctx, tenantId, req.IdentityIds)
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.MembersReply{
-		Members: replyMembers(members),
+	return &v1.UserIdsReply{
+		UserIds: userIds,
 	}, nil
 }
 
@@ -98,7 +98,11 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (
 	}
 
 	return &v1.MemberReply{
-		Member: replyMember(member),
+		Id:         member.ID,
+		IdentityId: member.IdentityID.String(),
+		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
+		UserId:     member.UserID,
+		Groups:     getMemberGroups(member),
 	}, nil
 }
 
@@ -148,22 +152,27 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 	}, nil
 }
 
+func getMemberGroups(member *biz.MemberItem) []int64 {
+	if len(member.Edges.Groups) == 0 {
+		return nil
+	}
+
+	groups := make([]int64, len(member.Edges.Groups))
+	for i, group := range member.Edges.Groups {
+		groups[i] = group.ID
+	}
+
+	return groups
+}
+
 func replyMember(member *biz.MemberItem) *v1.TenantMember {
 	identityId := member.IdentityID.String()
 	result := v1.TenantMember{
 		Id:         member.ID,
 		IdentityId: &identityId,
 		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
-		UserId:     member.UserID,
-	}
-
-	if len(member.Edges.Groups) > 0 {
-		groups := make([]int64, len(member.Edges.Groups))
-		for i, group := range member.Edges.Groups {
-			groups[i] = group.ID
-		}
-
-		result.Groups = groups
+		User:       member.User,
+		Groups:     getMemberGroups(member),
 	}
 
 	return &result

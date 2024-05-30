@@ -11,9 +11,9 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.32.0
 	github.com/prometheus/client_golang v1.18.0
-	gitlab.calendaria.team/services/iam v1.6.1
-	gitlab.calendaria.team/services/rbac v0.3.3
-	gitlab.calendaria.team/services/utils v0.2.15
+	gitlab.calendaria.team/services/iam v1.7.0
+	gitlab.calendaria.team/services/rbac v0.3.5-resources
+	gitlab.calendaria.team/services/utils v0.2.17
 	go.uber.org/automaxprocs v1.5.3
 	google.golang.org/grpc v1.61.1
 	google.golang.org/protobuf v1.32.0
@@ -39,7 +39,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-playground/form/v4 v4.2.0 // indirect
-	github.com/golang-jwt/jwt/v5 v5.1.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
