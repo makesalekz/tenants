@@ -23,7 +23,7 @@ const (
 	Members_CreateMembers_FullMethodName       = "/tenants.v1.Members/CreateMembers"
 	Members_DeleteMember_FullMethodName        = "/tenants.v1.Members/DeleteMember"
 	Members_GetMember_FullMethodName           = "/tenants.v1.Members/GetMember"
-	Members_GetMembersUsersIds_FullMethodName  = "/tenants.v1.Members/GetMembersUsersIds"
+	Members_GetShortMembers_FullMethodName     = "/tenants.v1.Members/GetShortMembers"
 	Members_GetMemberIdentities_FullMethodName = "/tenants.v1.Members/GetMemberIdentities"
 	Members_ListMembers_FullMethodName         = "/tenants.v1.Members/ListMembers"
 )
@@ -35,7 +35,7 @@ type MembersClient interface {
 	CreateMembers(ctx context.Context, in *CreateMembersRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	DeleteMember(ctx context.Context, in *MemberRequest, opts ...grpc.CallOption) (*v1.EmptyReply, error)
 	GetMember(ctx context.Context, in *MemberRequest, opts ...grpc.CallOption) (*MemberReply, error)
-	GetMembersUsersIds(ctx context.Context, in *IdentitiesRequest, opts ...grpc.CallOption) (*UserIdsReply, error)
+	GetShortMembers(ctx context.Context, in *IdentitiesRequest, opts ...grpc.CallOption) (*MembersReply, error)
 	GetMemberIdentities(ctx context.Context, in *GetMemberIdentitiesRequest, opts ...grpc.CallOption) (*GetMemberIdentitiesReply, error)
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersReply, error)
 }
@@ -75,9 +75,9 @@ func (c *membersClient) GetMember(ctx context.Context, in *MemberRequest, opts .
 	return out, nil
 }
 
-func (c *membersClient) GetMembersUsersIds(ctx context.Context, in *IdentitiesRequest, opts ...grpc.CallOption) (*UserIdsReply, error) {
-	out := new(UserIdsReply)
-	err := c.cc.Invoke(ctx, Members_GetMembersUsersIds_FullMethodName, in, out, opts...)
+func (c *membersClient) GetShortMembers(ctx context.Context, in *IdentitiesRequest, opts ...grpc.CallOption) (*MembersReply, error) {
+	out := new(MembersReply)
+	err := c.cc.Invoke(ctx, Members_GetShortMembers_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ type MembersServer interface {
 	CreateMembers(context.Context, *CreateMembersRequest) (*v1.EmptyReply, error)
 	DeleteMember(context.Context, *MemberRequest) (*v1.EmptyReply, error)
 	GetMember(context.Context, *MemberRequest) (*MemberReply, error)
-	GetMembersUsersIds(context.Context, *IdentitiesRequest) (*UserIdsReply, error)
+	GetShortMembers(context.Context, *IdentitiesRequest) (*MembersReply, error)
 	GetMemberIdentities(context.Context, *GetMemberIdentitiesRequest) (*GetMemberIdentitiesReply, error)
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
 	mustEmbedUnimplementedMembersServer()
@@ -128,8 +128,8 @@ func (UnimplementedMembersServer) DeleteMember(context.Context, *MemberRequest) 
 func (UnimplementedMembersServer) GetMember(context.Context, *MemberRequest) (*MemberReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMember not implemented")
 }
-func (UnimplementedMembersServer) GetMembersUsersIds(context.Context, *IdentitiesRequest) (*UserIdsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMembersUsersIds not implemented")
+func (UnimplementedMembersServer) GetShortMembers(context.Context, *IdentitiesRequest) (*MembersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetShortMembers not implemented")
 }
 func (UnimplementedMembersServer) GetMemberIdentities(context.Context, *GetMemberIdentitiesRequest) (*GetMemberIdentitiesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMemberIdentities not implemented")
@@ -204,20 +204,20 @@ func _Members_GetMember_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Members_GetMembersUsersIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Members_GetShortMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IdentitiesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MembersServer).GetMembersUsersIds(ctx, in)
+		return srv.(MembersServer).GetShortMembers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Members_GetMembersUsersIds_FullMethodName,
+		FullMethod: Members_GetShortMembers_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MembersServer).GetMembersUsersIds(ctx, req.(*IdentitiesRequest))
+		return srv.(MembersServer).GetShortMembers(ctx, req.(*IdentitiesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -278,8 +278,8 @@ var Members_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Members_GetMember_Handler,
 		},
 		{
-			MethodName: "GetMembersUsersIds",
-			Handler:    _Members_GetMembersUsersIds_Handler,
+			MethodName: "GetShortMembers",
+			Handler:    _Members_GetShortMembers_Handler,
 		},
 		{
 			MethodName: "GetMemberIdentities",

@@ -13,7 +13,7 @@ service Members {
   rpc CreateMembers(CreateMembersRequest) returns (utils.v1.EmptyReply);
   rpc DeleteMember(MemberRequest) returns (utils.v1.EmptyReply);
   rpc GetMember(MemberRequest) returns (MemberReply);
-  rpc GetMembersUsersIds(IdentitiesRequest) returns (UserIdsReply);
+  rpc GetShortMembers(IdentitiesRequest) returns (MembersReply);
   rpc GetMemberIdentities(GetMemberIdentitiesRequest)
       returns (GetMemberIdentitiesReply);
   rpc ListMembers(ListMembersRequest) returns (ListMembersReply);
@@ -39,8 +39,8 @@ message MemberReply {
   repeated int64 groups = 5;
 }
 
-message UserIdsReply {
-  repeated int64 userIds = 1;
+message MembersReply {
+  repeated MemberReply members = 1;
 }
 
 message GetMemberIdentitiesRequest {

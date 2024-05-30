@@ -70,7 +70,7 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, memberId int6
 	}, nil
 }
 
-func (uc *MembersUsecase) GetMembersUsersIds(ctx context.Context, tenantId int64, identities []string) ([]int64, error) {
+func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, identities []string) ([]*ent.Member, error) {
 	identityUuids := make([]uuid.UUID, len(identities))
 	var err error
 	for i, identity := range identities {
@@ -85,11 +85,7 @@ func (uc *MembersUsecase) GetMembersUsersIds(ctx context.Context, tenantId int64
 		return nil, err
 	}
 
-	userIds := make([]int64, len(members))
-	for i, member := range members {
-		userIds[i] = member.UserID
-	}
-	return userIds, nil
+	return members, nil
 }
 
 func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
