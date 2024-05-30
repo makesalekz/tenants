@@ -208,10 +208,14 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 		inviteUrl := buildInviteLine(baseUrl, inviteItem.ID, inviteItem.Invite.Code.String())
 		emailDetailData := map[string]string{
 			"InviteLink":    inviteUrl,
-			"UserName":      inviteItem.User.Name,
 			"WorkspaceName": tenant.Name,
 			"InvitedBy":     owner.Name,
 		}
+
+		if inviteItem.User != nil && inviteItem.User.Name != "" {
+			emailDetailData["UserName"] = inviteItem.User.Name
+		}
+
 		uc.sendEmail(queue, lang, inviteItem.Email, emailDetailData)
 	}
 }
