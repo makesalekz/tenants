@@ -45,18 +45,13 @@ func (r *RbacRemote) getAssignsClient(ctx context.Context) (rbac_v1.AssignsClien
 	return rbac_v1.NewAssignsClient(conn), nil
 }
 
-func (r *RbacRemote) AssignRole(ctx context.Context, identityId string, roleId int64) error {
+func (r *RbacRemote) AssignRoles(ctx context.Context, assigns ...*rbac_v1.AssignRoleRequest) error {
 	client, err := r.getAssignsClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.AssignRole(
-		ctx,
-		&rbac_v1.AssignRoleRequest{
-			IdentityId: identityId,
-			RoleId:     roleId,
-		})
+	_, err = client.AssignRoles(ctx, &rbac_v1.AssignRolesRequest{Assigns: assigns})
 	if err != nil {
 		return err
 	}

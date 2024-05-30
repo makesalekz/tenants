@@ -40,7 +40,7 @@ message TenantMember {
   string createdAt = 2;
   optional string identityId = 3;
 
-  int64 userId = 6;
+  iam.v1.UserShort user = 4;
   repeated int64 groups = 5;
 }
 

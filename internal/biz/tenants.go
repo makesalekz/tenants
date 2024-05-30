@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
 	tenants_v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
@@ -48,17 +49,19 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		return nil, err
 	}
 
-	tenantContext := metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenant.ID, 10))
-	tenantContext = metadata.AppendToClientContext(tenantContext, "x-md-global-actor-role", "admin")
-
-	err = uc.rbac.AssignRole(tenantContext, member.IdentityID.String(), ADMIN_ROLE_ID)
+	err = uc.rbac.AssignRoles(
+		metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenant.ID, 10)),
+		&rbac_v1.AssignRoleRequest{
+			IdentityId: member.IdentityID.String(),
+			RoleId:     ADMIN_ROLE_ID,
+		},
+		&rbac_v1.AssignRoleRequest{
+			IdentityId: "",
+			RoleId:     BASIC_ROLE_ID,
+		},
+	)
 	if err != nil {
-		uc.log.Errorf("CreateTenant.AssignRole (admin): %s", err.Error())
-	}
-
-	err = uc.rbac.AssignRole(tenantContext, "", BASIC_ROLE_ID)
-	if err != nil {
-		uc.log.Errorf("CreateTenant.AssignRole (basic): %s", err.Error())
+		uc.log.Errorf("CreateTenant.AssignRoles: %s", err.Error())
 	}
 
 	return tenant, nil
