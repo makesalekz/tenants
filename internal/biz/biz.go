@@ -2,6 +2,8 @@ package biz
 
 import "github.com/google/wire"
 
+var DefaultLanguage = "en"
+
 const (
 	QueueEmail = "notifications/email"
 )

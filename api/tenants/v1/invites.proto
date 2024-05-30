@@ -23,6 +23,7 @@ service Invites {
 message CreateInvitesRequest {
   repeated string emails = 1;
   string appId = 2;
+  optional string language = 3;
 }
 
 message InviteRequest {

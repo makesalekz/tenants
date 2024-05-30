@@ -42,7 +42,12 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 		return nil, v1.ErrorInvalidRequest("emails are empty")
 	}
 
-	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails, req.AppId)
+	language := req.Language
+	if language == nil || *language == "" {
+		language = &biz.DefaultLanguage
+	}
+
+	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails, req.AppId, language)
 	if err != nil {
 		return nil, err
 	}

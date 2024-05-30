@@ -51,12 +51,7 @@ func NewInvitesUsecase(
 	}, nil
 }
 
-func buildInviteLine(baseUrl string, userId *int64, code string) string {
-	//baseUrl + "/a/" + userId + "/" + code
-	return fmt.Sprintf("%s/a/%d/%s", baseUrl, *userId, code)
-}
-
-func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId string) ([]InviteItem, error) {
+func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId string, lang *string) ([]InviteItem, error) {
 	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
 		return nil, err
@@ -91,27 +86,11 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 		}
 
 		if appId == "pms" || appId == "admin" {
-			uc.sendInviteEmail(invite)
+			go uc.sendInviteEmail(invitesItems[i], lang)
 		}
 	}
 
 	return invitesItems, nil
-}
-
-func (uc *InvitesUsecase) sendInviteEmail(invite *ent.Invite) {
-	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
-	if err == nil {
-		return
-	}
-	inviteUrl := buildInviteLine(baseUrl, invite.UserID, invite.Code.String())
-	uc.queue.GetRemote(QueueEmail).Pub(messages.EmailDetails{
-		Language: "en",
-		Type:     "invite",
-		Email:    invite.Email,
-		Data: map[string]interface{}{
-			"InviteLink": inviteUrl,
-		},
-	})
 }
 
 func (uc *InvitesUsecase) CancelInvite(ctx context.Context, tenantId, inviteId int64) (*ent.Invite, error) {
@@ -208,4 +187,41 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 	}
 
 	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, status)
+}
+
+func buildInviteLine(baseUrl string, userId *int64, code string) string {
+	return fmt.Sprintf("%s/a/%d/%s", baseUrl, *userId, code)
+}
+
+func (uc *InvitesUsecase) sendInviteEmail(inviteItem InviteItem, lang *string) {
+	ctx := context.Background()
+
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, inviteItem.TenantID)
+	if err != nil {
+		return
+	}
+	owner, err := uc.iam.GetUser(ctx, tenant.OwnerID)
+	if err != nil {
+		return
+	}
+
+	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
+	if err != nil {
+		return
+	}
+	inviteUrl := buildInviteLine(baseUrl, inviteItem.Invite.UserID, inviteItem.Invite.Code.String())
+
+	emailDetailData := map[string]string{
+		"InviteLink":    inviteUrl,
+		"UserName":      inviteItem.User.Name,
+		"WorkspaceName": tenant.Name,
+		"InvitedBy":     owner.Name,
+	}
+
+	uc.queue.GetRemote(QueueEmail).Pub(messages.EmailDetails{
+		Language: *lang,
+		Type:     "invite",
+		Emails:   []string{inviteItem.Email},
+		Data:     emailDetailData,
+	})
 }
