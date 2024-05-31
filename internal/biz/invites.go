@@ -46,6 +46,7 @@ func NewInvitesUsecase(
 	invitesRepo data.InvitesRepo,
 	iam *data.IamRemote,
 	queueManager *nats.QueueManager,
+	config *config.Config,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
 		log:         log.NewHelper(logger),
@@ -53,6 +54,7 @@ func NewInvitesUsecase(
 		invitesRepo: invitesRepo,
 		iam:         iam,
 		qm:          queueManager,
+		config:      config,
 	}, nil
 }
 
