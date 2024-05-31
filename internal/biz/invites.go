@@ -194,18 +194,20 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 }
 
 func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64, invitesItems []InviteItem, lang string) {
-	uc.log.Info("[processInvitations] started with invitesItems: %v", invitesItems)
+	uc.log.Infof("[processInvitations] started with invitesItems: %v", invitesItems)
 	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
 	if err != nil {
+		uc.log.Errorf("[processInvitations] tenant not found: %v", err)
 		return
 	}
 	owner, err := uc.iam.GetUser(ctx, tenant.OwnerID)
 	if err != nil {
+		uc.log.Errorf("[processInvitations] owner not found: %v", err)
 		return
 	}
 	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
 	if err != nil {
-		uc.log.Debugf("[processInvitations] base url is not provided: %v", err)
+		uc.log.Errorf("[processInvitations] INVITE_BASE_URL is not provided: %v", err)
 		return
 	}
 	queue := uc.qm.GetRemote(QueueEmail)
@@ -230,7 +232,7 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 		}
 
 		queue.Pub(emailDetails)
-		uc.log.Info("[processInvitations] email sent to queue %s [%d]", QueueEmail, inviteItem.Email)
+		uc.log.Infof("[processInvitations] email sent to queue %s [%s] with details %T", QueueEmail, inviteItem.Email, emailDetails)
 	}
 }
 
