@@ -84,7 +84,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	queueManager := nats.NewQueueManager(configConfig, encodedConn, logger)
-	invitesUsecase, err := biz.NewInvitesUsecase(tenantsRepo, invitesRepo, iamRemote, queueManager)
+	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iamRemote, queueManager)
 	if err != nil {
 		cleanup4()
 		cleanup3()
