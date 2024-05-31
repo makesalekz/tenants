@@ -3,9 +3,9 @@ package biz
 import (
 	"context"
 	"fmt"
-	"gitlab.calendaria.team/services/notifications/messages"
-
+	"github.com/go-kratos/kratos/v2/log"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
+	"gitlab.calendaria.team/services/notifications/messages"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
@@ -29,6 +29,7 @@ type InvitesList struct {
 
 // InvitesUsecase is a Greeter usecase.
 type InvitesUsecase struct {
+	log         *log.Helper
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
 	iam         *data.IamRemote
@@ -38,12 +39,14 @@ type InvitesUsecase struct {
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewInvitesUsecase(
+	logger log.Logger,
 	tenantsRepo data.TenantsRepo,
 	invitesRepo data.InvitesRepo,
 	iam *data.IamRemote,
 	queueManager *nats.QueueManager,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
+		log:         log.NewHelper(logger),
 		tenantsRepo: tenantsRepo,
 		invitesRepo: invitesRepo,
 		iam:         iam,
@@ -190,6 +193,7 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 }
 
 func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64, invitesItems []InviteItem, lang string) {
+	uc.log.Info("[processInvitations] started with invitesItems: %v", invitesItems)
 	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
 	if err != nil {
 		return
@@ -200,6 +204,7 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 	}
 	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
 	if err != nil {
+		uc.log.Debugf("[processInvitations] base url is not provided: %v", err)
 		return
 	}
 	queue := uc.qm.GetRemote(QueueEmail)
@@ -224,6 +229,7 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 		}
 
 		queue.Pub(emailDetails)
+		uc.log.Info("[processInvitations] email sent to queue %s [%d]", QueueEmail, inviteItem.Email)
 	}
 }
 
