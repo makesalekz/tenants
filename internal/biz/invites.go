@@ -3,7 +3,7 @@ package biz
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/log"
+
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/notifications/messages"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
@@ -14,6 +14,7 @@ import (
 	"gitlab.calendaria.team/services/utils/v1/config"
 	"gitlab.calendaria.team/services/utils/v1/nats"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/uuid"
 )
 
