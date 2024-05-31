@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"fmt"
+	"time"
 
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/notifications/messages"
@@ -91,7 +92,12 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 	}
 
 	if appId == "pms" || appId == "admin" {
-		go uc.processInvitations(ctx, tenantId, invitesItems, lang)
+		go func() {
+			processCtx, processCancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer processCancel()
+
+			uc.processInvitations(processCtx, tenantId, invitesItems, lang)
+		}()
 	}
 
 	return invitesItems, nil
@@ -195,21 +201,25 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 
 func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64, invitesItems []InviteItem, lang string) {
 	uc.log.Infof("[processInvitations] started with invitesItems: %v", invitesItems)
+
 	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
 	if err != nil {
 		uc.log.Errorf("[processInvitations] tenant not found: %v", err)
 		return
 	}
+
 	owner, err := uc.iam.GetUser(ctx, tenant.OwnerID)
 	if err != nil {
 		uc.log.Errorf("[processInvitations] owner not found: %v", err)
 		return
 	}
+
 	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
 	if err != nil {
 		uc.log.Errorf("[processInvitations] INVITE_BASE_URL is not provided: %v", err)
 		return
 	}
+
 	queue := uc.qm.GetRemote(QueueEmail)
 
 	for _, inviteItem := range invitesItems {
