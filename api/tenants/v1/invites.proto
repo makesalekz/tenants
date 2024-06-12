@@ -16,7 +16,7 @@ service Invites {
   rpc DeleteInvite(InviteRequest) returns (utils.v1.EmptyReply);
   rpc ListInvites(ListInvitesRequest) returns (ListInvitesReply);
   rpc AcceptInvite(InviteCodeRequest) returns (TenantReply);
-  rpc ShownInvite(InviteCodeRequest) returns (InviteReply);
+  rpc ShownInvite(InviteCodeRequest) returns (TenantReply);
   rpc DeclineInvite(InviteCodeRequest) returns (utils.v1.EmptyReply);
 }
 
@@ -45,11 +45,6 @@ message ListInvitesReply {
 message InviteCodeRequest {
   int64 inviteId = 1;
   string code = 2;
-}
-
-message InviteReply {
-  Invite invite = 1;
-  Tenant tenant = 2;
 }
 
 enum Status {

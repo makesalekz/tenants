@@ -10,7 +10,6 @@ kratos proto add api/tenants/v1/members.proto
 
 ```bash
 kratos proto client api/tenants/v1/members.proto
-kratos proto client api/tenants/v1/invites.proto
 ```
 
 ## Generate the source code of service by proto file
