@@ -70,7 +70,9 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, memberId int6
 	}, nil
 }
 
-func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, identities []string) ([]*ent.Member, error) {
+func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, identities []string) (
+	[]*ent.Member, error,
+) {
 	identityUuids := make([]uuid.UUID, len(identities))
 	var err error
 	for i, identity := range identities {
@@ -89,7 +91,7 @@ func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, i
 }
 
 func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
-	member, err := uc.membersRepo.GetMemberByUserId(ctx, tenantId, userId)
+	member, err := uc.membersRepo.GetMemberByUserID(ctx, tenantId, userId)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("member not found")
@@ -99,7 +101,9 @@ func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userI
 	return member, nil
 }
 
-func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
+func (uc *MembersUsecase) ListMembers(
+	ctx context.Context, filter data.MembersListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest,
+) (*MembersList, error) {
 	members, err := uc.membersRepo.ListMembers(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -117,12 +121,14 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersLi
 		membersMap[member.UserID] = member
 	}
 
-	reply, err := uc.iam.ListUsers(ctx, &iam_v1.ListUsersRequest{
-		Ids:      usersIds,
-		Search:   filter.Search,
-		Sort:     sort,
-		Paginate: paginate,
-	})
+	reply, err := uc.iam.ListUsers(
+		ctx, &iam_v1.ListUsersRequest{
+			Ids:      usersIds,
+			Search:   filter.Search,
+			Sort:     sort,
+			Paginate: paginate,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
