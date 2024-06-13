@@ -22,7 +22,7 @@ type MembersListFilter struct {
 type MembersRepo interface {
 	CreateMembers(ctx context.Context, tenantID int64, usersIDs []int64) ([]*ent.Member, error)
 	DeleteMember(ctx context.Context, tenantID, memberID int64) error
-	GetMembers(ctx context.Context, tenantID int64, identityIDs []uuid.UUID) ([]*ent.Member, error)
+	GetMembers(ctx context.Context, tenantID int64, identityIDs []uuid.UUID, withGroups bool) ([]*ent.Member, error)
 	GetMember(ctx context.Context, tenantID, memberID int64) (*ent.Member, error)
 	GetMemberByUserID(ctx context.Context, tenantID, userID int64) (*ent.Member, error)
 	ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error)
@@ -61,14 +61,21 @@ func (r *membersRepo) DeleteMember(ctx context.Context, tenantID, memberID int64
 	return err
 }
 
-func (r *membersRepo) GetMembers(ctx context.Context, tenantID int64, identityIDs []uuid.UUID) ([]*ent.Member, error) {
-	return r.db.Member.Query().Where(
-		member.TenantID(tenantID),
-		member.Or(
-			member.IdentityIDIn(identityIDs...),
+func (r *membersRepo) GetMembers(
+	ctx context.Context, tenantID int64, identityIDs []uuid.UUID, withGroups bool,
+) ([]*ent.Member, error) {
+	query := r.db.Member.Query().Where(member.TenantID(tenantID))
+
+	predicate := member.IdentityIDIn(identityIDs...)
+
+	if withGroups {
+		predicate = member.Or(
+			predicate,
 			member.HasGroupsWith(group.IdentityIDIn(identityIDs...)),
-		),
-	).WithGroups().All(ctx)
+		)
+	}
+
+	return query.Where(predicate).WithGroups().All(ctx)
 }
 
 func (r *membersRepo) GetMember(ctx context.Context, tenantID, memberID int64) (*ent.Member, error) {

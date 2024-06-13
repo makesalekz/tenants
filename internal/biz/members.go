@@ -72,7 +72,7 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, tenantID, memberID int6
 	}, nil
 }
 
-func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantID int64, identities []string) (
+func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantID int64, identities []string, withGroups bool) (
 	[]*ent.Member, error,
 ) {
 	identityUuids := make([]uuid.UUID, len(identities))
@@ -84,7 +84,7 @@ func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantID int64, i
 		}
 	}
 
-	members, err := uc.membersRepo.GetMembers(ctx, tenantID, identityUuids)
+	members, err := uc.membersRepo.GetMembers(ctx, tenantID, identityUuids, withGroups)
 	if err != nil {
 		return nil, err
 	}

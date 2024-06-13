@@ -38,7 +38,7 @@ func (s *MembersService) GetShortMembers(ctx context.Context, req *v1.Identities
 
 	reply := &v1.MembersReply{}
 
-	members, err := s.mu.GetShortMembers(ctx, tenantID, req.GetIdentityIds())
+	members, err := s.mu.GetShortMembers(ctx, tenantID, req.GetIdentityIds(), req.GetWithGroups())
 	if err != nil {
 		return nil, err
 	}
