@@ -32,8 +32,8 @@ func NewGroupsUsecase(
 	}, nil
 }
 
-func (uc *GroupsUsecase) CreateGroup(ctx context.Context, dto data.CreateGroupDto) (*ent.Group, error) {
-	group, err := uc.groupsRepo.CreateGroup(ctx, dto)
+func (uc *GroupsUsecase) CreateGroup(ctx context.Context, actorID int64, dto data.CreateGroupDto) (*ent.Group, error) {
+	group, err := uc.groupsRepo.CreateGroup(ctx, actorID, dto)
 	if err != nil {
 		if u_error.IsUniqueViolation(err) {
 			return nil, v1.ErrorResourceAlreadyExists("group with the same name already exists")
@@ -47,7 +47,9 @@ func (uc *GroupsUsecase) CreateGroup(ctx context.Context, dto data.CreateGroupDt
 	return group, nil
 }
 
-func (uc *GroupsUsecase) UpdateGroup(ctx context.Context, group *ent.Group, dto data.UpdateGroupDto) (*ent.Group, error) {
+func (uc *GroupsUsecase) UpdateGroup(ctx context.Context, group *ent.Group, dto data.UpdateGroupDto) (
+	*ent.Group, error,
+) {
 	return uc.groupsRepo.UpdateGroup(ctx, group, dto)
 }
 
@@ -55,8 +57,8 @@ func (uc *GroupsUsecase) DeleteGroup(ctx context.Context, group *ent.Group) erro
 	return uc.groupsRepo.DeleteGroup(ctx, group)
 }
 
-func (uc *GroupsUsecase) GetGroup(ctx context.Context, tenantId, groupId int64) (*ent.Group, error) {
-	group, err := uc.groupsRepo.GetGroup(ctx, tenantId, groupId)
+func (uc *GroupsUsecase) GetGroup(ctx context.Context, tenantID, groupID int64) (*ent.Group, error) {
+	group, err := uc.groupsRepo.GetGroup(ctx, tenantID, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("group not found")
@@ -66,7 +68,9 @@ func (uc *GroupsUsecase) GetGroup(ctx context.Context, tenantId, groupId int64) 
 	return group, nil
 }
 
-func (uc *GroupsUsecase) ListGroups(ctx context.Context, filter data.GroupsListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*GroupsList, error) {
+func (uc *GroupsUsecase) ListGroups(
+	ctx context.Context, filter data.GroupsListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest,
+) (*GroupsList, error) {
 	if paginate == nil {
 		paginate = &utils_v1.PaginateRequest{}
 	}
@@ -89,10 +93,10 @@ func (uc *GroupsUsecase) ListGroups(ctx context.Context, filter data.GroupsListF
 	}, nil
 }
 
-func (uc *GroupsUsecase) AddMembersToGroup(ctx context.Context, group *ent.Group, membersIds []int64) error {
-	return uc.groupsRepo.AddMembersToGroup(ctx, group, membersIds)
+func (uc *GroupsUsecase) AddMembersToGroup(ctx context.Context, group *ent.Group, membersIDs []int64) error {
+	return uc.groupsRepo.AddMembersToGroup(ctx, group, membersIDs)
 }
 
-func (uc *GroupsUsecase) RemoveMembersFromGroup(ctx context.Context, group *ent.Group, membersIds []int64) error {
-	return uc.groupsRepo.RemoveMembersFromGroup(ctx, group, membersIds)
+func (uc *GroupsUsecase) RemoveMembersFromGroup(ctx context.Context, group *ent.Group, membersIDs []int64) error {
+	return uc.groupsRepo.RemoveMembersFromGroup(ctx, group, membersIDs)
 }

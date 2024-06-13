@@ -32,17 +32,19 @@ func NewInvitesService(
 	}
 }
 
-func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvitesRequest) (*v1.ListInvitesReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvitesRequest) (
+	*v1.ListInvitesReply, error,
+) {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	if len(req.Emails) == 0 {
+	if len(req.GetEmails()) == 0 {
 		return nil, v1.ErrorInvalidRequest("emails are empty")
 	}
 
-	invites, err := s.iu.CreateInvites(ctx, tenantId, req.Emails, req.AppId, req.Language)
+	invites, err := s.iu.CreateInvites(ctx, tenantID, req.GetEmails(), req.GetAppId(), req.GetLanguage())
 	if err != nil {
 		return nil, err
 	}
@@ -53,16 +55,16 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 }
 
 func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	if req.InviteId == 0 {
+	if req.GetInviteId() == 0 {
 		return nil, v1.ErrorInvalidRequest("invite_id is empty")
 	}
 
-	_, err := s.iu.CancelInvite(ctx, tenantId, req.InviteId)
+	_, err := s.iu.CancelInvite(ctx, tenantID, req.GetInviteId())
 	if err != nil {
 		return nil, err
 	}
@@ -70,16 +72,16 @@ func (s *InvitesService) CancelInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest) (*utils_v1.EmptyReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	if req.InviteId == 0 {
+	if req.GetInviteId() == 0 {
 		return nil, v1.ErrorInvalidRequest("invite_id is empty")
 	}
 
-	err := s.iu.DeleteInvite(ctx, tenantId, req.InviteId)
+	err := s.iu.DeleteInvite(ctx, tenantID, req.GetInviteId())
 	if err != nil {
 		return nil, err
 	}
@@ -87,25 +89,27 @@ func (s *InvitesService) DeleteInvite(ctx context.Context, req *v1.InviteRequest
 }
 
 func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesRequest) (*v1.ListInvitesReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	var status *enum.InviteStatus
-	if req.Status != v1.Status_UNSPECIFIED {
-		statusString := enum.InviteStatus(req.Status.String())
+	if req.GetStatus() != v1.Status_UNSPECIFIED {
+		statusString := enum.InviteStatus(req.GetStatus().String())
 		if !statusString.IsValid() {
 			return nil, v1.ErrorInvalidRequest("invalid status")
 		}
 		status = &statusString
 	}
 
-	list, err := s.iu.ListInvites(ctx, data.InvitesListFilter{
-		TenantId: tenantId,
-		Status:   status,
-		Search:   req.Search,
-	}, req.Sort, req.Paginate)
+	list, err := s.iu.ListInvites(
+		ctx, data.InvitesListFilter{
+			TenantID: tenantID,
+			Status:   status,
+			Search:   req.GetSearch(),
+		}, req.GetSort(), req.GetPaginate(),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -116,21 +120,21 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 }
 
 func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
+	actorID := auth.GetActorIdFromContext(ctx)
+	if actorID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	if req.Code == "" {
+	if req.GetCode() == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
 
-	code, err := uuid.Parse(req.Code)
+	code, err := uuid.Parse(req.GetCode())
 	if err != nil {
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	invite, err := s.iu.AcceptInvite(ctx, req.InviteId, actorId, code)
+	invite, err := s.iu.AcceptInvite(ctx, req.GetInviteId(), actorID, code)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("invite not found")
@@ -155,16 +159,16 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 }
 
 func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
-	if req.Code == "" {
+	if req.GetCode() == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
 
-	code, err := uuid.Parse(req.Code)
+	code, err := uuid.Parse(req.GetCode())
 	if err != nil {
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	invite, err := s.iu.UpdateInvite(ctx, req.InviteId, code, enum.Shown)
+	invite, err := s.iu.UpdateInvite(ctx, req.GetInviteId(), code, enum.Shown)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("invite not found")
@@ -186,16 +190,16 @@ func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequ
 }
 
 func (s *InvitesService) DeclineInvite(ctx context.Context, req *v1.InviteCodeRequest) (*utils_v1.EmptyReply, error) {
-	if req.Code == "" {
+	if req.GetCode() == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
 
-	code, err := uuid.Parse(req.Code)
+	code, err := uuid.Parse(req.GetCode())
 	if err != nil {
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	_, err = s.iu.UpdateInvite(ctx, req.InviteId, code, enum.Declined)
+	_, err = s.iu.UpdateInvite(ctx, req.GetInviteId(), code, enum.Declined)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("invite not found")

@@ -124,7 +124,7 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (
 func (s *MembersService) GetMemberIdentities(
 	ctx context.Context, req *v1.GetMemberIdentitiesRequest,
 ) (*v1.GetMemberIdentitiesReply, error) {
-	member, err := s.mu.GetMemberByUserId(ctx, req.GetTenantId(), req.GetUserId())
+	member, err := s.mu.GetMemberByUserID(ctx, req.GetTenantId(), req.GetUserId())
 	if err != nil {
 		return nil, err
 	}

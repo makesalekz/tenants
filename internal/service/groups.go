@@ -30,16 +30,23 @@ func NewGroupsService(
 }
 
 func (s *GroupsService) CreateGroup(ctx context.Context, req *v1.CreateGroupRequest) (*v1.GroupReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	actorID := auth.GetActorIdFromContext(ctx)
+	if actorID == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
+	}
+
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	group, err := s.mu.CreateGroup(ctx, data.CreateGroupDto{
-		TenantId:    tenantId,
-		Name:        req.Name,
-		Description: req.Description,
-	})
+	group, err := s.mu.CreateGroup(
+		ctx, actorID, data.CreateGroupDto{
+			TenantID:    tenantID,
+			Name:        req.GetName(),
+			Description: req.GetDescription(),
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -50,20 +57,22 @@ func (s *GroupsService) CreateGroup(ctx context.Context, req *v1.CreateGroupRequ
 }
 
 func (s *GroupsService) UpdateGroup(ctx context.Context, req *v1.UpdateGroupRequest) (*v1.GroupReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
+	group, err := s.mu.GetGroup(ctx, tenantID, req.GetGroupId())
 	if err != nil {
 		return nil, err
 	}
 
-	updated, err := s.mu.UpdateGroup(ctx, group, data.UpdateGroupDto{
-		Name:        req.Name,
-		Description: req.Description,
-	})
+	updated, err := s.mu.UpdateGroup(
+		ctx, group, data.UpdateGroupDto{
+			Name:        req.GetName(),
+			Description: req.GetDescription(),
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -74,12 +83,12 @@ func (s *GroupsService) UpdateGroup(ctx context.Context, req *v1.UpdateGroupRequ
 }
 
 func (s *GroupsService) DeleteGroup(ctx context.Context, req *v1.GroupRequest) (*utils_v1.EmptyReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
+	group, err := s.mu.GetGroup(ctx, tenantID, req.GetGroupId())
 	if err != nil {
 		return nil, err
 	}
@@ -93,12 +102,12 @@ func (s *GroupsService) DeleteGroup(ctx context.Context, req *v1.GroupRequest) (
 }
 
 func (s *GroupsService) GetGroup(ctx context.Context, req *v1.GroupRequest) (*v1.GroupReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
+	group, err := s.mu.GetGroup(ctx, tenantID, req.GetGroupId())
 	if err != nil {
 		return nil, err
 	}
@@ -109,17 +118,17 @@ func (s *GroupsService) GetGroup(ctx context.Context, req *v1.GroupRequest) (*v1
 }
 
 func (s *GroupsService) ListGroups(ctx context.Context, req *v1.ListGroupsRequest) (*v1.ListGroupsReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	filter := data.GroupsListFilter{
-		TenantId: tenantId,
-		Search:   req.Search,
+		TenantID: tenantID,
+		Search:   req.GetSearch(),
 	}
 
-	list, err := s.mu.ListGroups(ctx, filter, req.Sort, req.Paginate)
+	list, err := s.mu.ListGroups(ctx, filter, req.GetSort(), req.GetPaginate())
 	if err != nil {
 		return nil, err
 	}
@@ -130,13 +139,15 @@ func (s *GroupsService) ListGroups(ctx context.Context, req *v1.ListGroupsReques
 	}, nil
 }
 
-func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMembersRequest) (*utils_v1.EmptyReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMembersRequest) (
+	*utils_v1.EmptyReply, error,
+) {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
+	group, err := s.mu.GetGroup(ctx, tenantID, req.GetGroupId())
 	if err != nil {
 		return nil, err
 	}
@@ -149,13 +160,15 @@ func (s *GroupsService) AddMembersToGroup(ctx context.Context, req *v1.GroupMemb
 	return &utils_v1.EmptyReply{}, nil
 }
 
-func (s *GroupsService) RemoveMembersFromGroup(ctx context.Context, req *v1.GroupMembersRequest) (*utils_v1.EmptyReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+func (s *GroupsService) RemoveMembersFromGroup(ctx context.Context, req *v1.GroupMembersRequest) (
+	*utils_v1.EmptyReply, error,
+) {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	group, err := s.mu.GetGroup(ctx, tenantId, req.GetGroupId())
+	group, err := s.mu.GetGroup(ctx, tenantID, req.GetGroupId())
 	if err != nil {
 		return nil, err
 	}

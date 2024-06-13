@@ -58,15 +58,17 @@ func NewInvitesUsecase(
 	}, nil
 }
 
-func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, emails []string, appId, lang string) ([]InviteItem, error) {
+func (uc *InvitesUsecase) CreateInvites(
+	ctx context.Context, tenantID int64, emails []string, appID, lang string,
+) ([]InviteItem, error) {
 	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
 		return nil, err
 	}
 
 	usersMap := make(map[string]*iam_v1.UserShort)
-	for _, user := range reply.Users {
-		usersMap[user.Email] = user
+	for _, user := range reply.GetUsers() {
+		usersMap[user.GetEmail()] = user
 	}
 
 	dtos := make([]data.InviteDto, len(emails))
@@ -75,11 +77,11 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 			Email: email,
 		}
 		if user, ok := usersMap[email]; ok {
-			dtos[i].UserId = &user.Id
+			dtos[i].UserID = &user.Id
 		}
 	}
 
-	invites, err := uc.invitesRepo.CreateInvites(ctx, tenantId, dtos)
+	invites, err := uc.invitesRepo.CreateInvites(ctx, tenantID, dtos)
 	if err != nil {
 		return nil, err
 	}
@@ -93,20 +95,20 @@ func (uc *InvitesUsecase) CreateInvites(ctx context.Context, tenantId int64, ema
 		}
 	}
 
-	if appId == "pms" || appId == "admin" {
+	if appID == "pms" || appID == "admin" {
 		go func() {
-			processCtx, processCancel := context.WithTimeout(context.Background(), 30*time.Second)
+			processCtx, processCancel := context.WithTimeout(context.Background(), DefaultTimeout*time.Second)
 			defer processCancel()
 
-			uc.processInvitations(processCtx, tenantId, invitesItems, lang)
+			uc.processInvitations(processCtx, tenantID, invitesItems, lang)
 		}()
 	}
 
 	return invitesItems, nil
 }
 
-func (uc *InvitesUsecase) CancelInvite(ctx context.Context, tenantId, inviteId int64) (*ent.Invite, error) {
-	invite, err := uc.invitesRepo.GetInvite(ctx, tenantId, inviteId)
+func (uc *InvitesUsecase) CancelInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error) {
+	invite, err := uc.invitesRepo.GetInvite(ctx, tenantID, inviteID)
 	if err != nil {
 		return nil, err
 	}
@@ -118,11 +120,13 @@ func (uc *InvitesUsecase) CancelInvite(ctx context.Context, tenantId, inviteId i
 	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, enum.Canceled)
 }
 
-func (uc *InvitesUsecase) DeleteInvite(ctx context.Context, tenantId, inviteId int64) error {
-	return uc.invitesRepo.DeleteInvite(ctx, tenantId, inviteId)
+func (uc *InvitesUsecase) DeleteInvite(ctx context.Context, tenantID, inviteID int64) error {
+	return uc.invitesRepo.DeleteInvite(ctx, tenantID, inviteID)
 }
 
-func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*InvitesList, error) {
+func (uc *InvitesUsecase) ListInvites(
+	ctx context.Context, filter data.InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest,
+) (*InvitesList, error) {
 	if paginate == nil {
 		paginate = &utils_v1.PaginateRequest{}
 	}
@@ -137,21 +141,21 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 		return nil, err
 	}
 
-	usersIds := make([]int64, 0, len(invites))
+	usersIDs := make([]int64, 0, len(invites))
 	for _, invite := range invites {
 		if invite.UserID != nil {
-			usersIds = append(usersIds, *invite.UserID)
+			usersIDs = append(usersIDs, *invite.UserID)
 		}
 	}
 
-	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Ids: usersIds})
+	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Ids: usersIDs})
 	if err != nil {
 		return nil, err
 	}
 
 	usersMap := make(map[int64]*iam_v1.UserShort)
-	for _, user := range reply.Users {
-		usersMap[user.Id] = user
+	for _, user := range reply.GetUsers() {
+		usersMap[user.GetId()] = user
 	}
 
 	invitesItems := make([]InviteItem, len(invites))
@@ -171,8 +175,10 @@ func (uc *InvitesUsecase) ListInvites(ctx context.Context, filter data.InvitesLi
 	}, nil
 }
 
-func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteId, userId int64, code uuid.UUID) (*ent.Invite, error) {
-	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, code)
+func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteID, userID int64, code uuid.UUID) (
+	*ent.Invite, error,
+) {
+	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteID, code)
 	if err != nil {
 		return nil, err
 	}
@@ -181,15 +187,17 @@ func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteId, userId int
 		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
-	return uc.invitesRepo.AcceptInvite(ctx, userId, invite)
+	return uc.invitesRepo.AcceptInvite(ctx, userID, invite)
 }
 
-func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code uuid.UUID, status enum.InviteStatus) (*ent.Invite, error) {
+func (uc *InvitesUsecase) UpdateInvite(
+	ctx context.Context, inviteID int64, code uuid.UUID, status enum.InviteStatus,
+) (*ent.Invite, error) {
 	if status != enum.Shown && status != enum.Declined {
 		return nil, v1.ErrorInvalidRequest("invalid status")
 	}
 
-	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteId, code)
+	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteID, code)
 	if err != nil {
 		return nil, err
 	}
@@ -201,10 +209,12 @@ func (uc *InvitesUsecase) UpdateInvite(ctx context.Context, inviteId int64, code
 	return uc.invitesRepo.UpdateInviteStatus(ctx, invite, status)
 }
 
-func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64, invitesItems []InviteItem, lang string) {
+func (uc *InvitesUsecase) processInvitations(
+	ctx context.Context, tenantID int64, invitesItems []InviteItem, lang string,
+) {
 	uc.log.Infof("[processInvitations] started with invitesItems: %v", invitesItems)
 
-	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantId)
+	tenant, err := uc.tenantsRepo.GetTenant(ctx, tenantID)
 	if err != nil {
 		uc.log.Errorf("[processInvitations] tenant not found: %v", err)
 		return
@@ -216,7 +226,7 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 		return
 	}
 
-	baseUrl, err := uc.config.Value("INVITE_BASE_URL").String()
+	baseURL, err := uc.config.Value("INVITE_BASE_URL").String()
 	if err != nil {
 		uc.log.Errorf("[processInvitations] INVITE_BASE_URL is not provided: %v", err)
 		return
@@ -225,15 +235,15 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 	queue := uc.qm.GetRemote(QueueEmail)
 
 	for _, inviteItem := range invitesItems {
-		inviteUrl := buildInviteLine(baseUrl, inviteItem.ID, inviteItem.Invite.Code.String())
+		inviteURL := buildInviteLine(baseURL, inviteItem.ID, inviteItem.Invite.Code.String())
 		emailDetailData := map[string]string{
-			"InviteLink":    inviteUrl,
+			"InviteLink":    inviteURL,
 			"WorkspaceName": tenant.Name,
-			"InvitedBy":     owner.Name,
+			"InvitedBy":     owner.GetName(),
 		}
 
-		if inviteItem.User != nil && inviteItem.User.Name != "" {
-			emailDetailData["UserName"] = inviteItem.User.Name
+		if inviteItem.User != nil && inviteItem.User.GetName() != "" {
+			emailDetailData["UserName"] = inviteItem.User.GetName()
 		}
 
 		emailDetails := messages.EmailDetails{
@@ -244,10 +254,13 @@ func (uc *InvitesUsecase) processInvitations(ctx context.Context, tenantId int64
 		}
 
 		queue.Pub(emailDetails)
-		uc.log.Infof("[processInvitations] email sent to queue %s [%s] with details %T", QueueEmail, inviteItem.Email, emailDetails)
+		uc.log.Infof(
+			"[processInvitations] email sent to queue %s [%s] with details %T", QueueEmail, inviteItem.Email,
+			emailDetails,
+		)
 	}
 }
 
-func buildInviteLine(baseUrl string, inviteId int64, code string) string {
-	return fmt.Sprintf("%s/a/%d/%s", baseUrl, inviteId, code)
+func buildInviteLine(baseURL string, inviteID int64, code string) string {
+	return fmt.Sprintf("%s/a/%d/%s", baseURL, inviteID, code)
 }

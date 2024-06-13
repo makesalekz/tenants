@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	_ "github.com/lib/pq"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/member"
-
-	_ "github.com/lib/pq"
+	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
 )
 
 type MembersListFilter struct {
@@ -40,10 +40,16 @@ func NewMembersRepo(d *Data) MembersRepo {
 	}
 }
 
-func (r *membersRepo) CreateMembers(ctx context.Context, tenantID int64, usersIDs []int64) ([]*ent.Member, error) {
+func (r *membersRepo) CreateMembers(
+	ctx context.Context, tenantID int64, usersIDs []int64,
+) ([]*ent.Member, error) {
 	membersCreate := make([]*ent.MemberCreate, len(usersIDs))
 	for i, userID := range usersIDs {
-		membersCreate[i] = r.db.Member.Create().SetTenantID(tenantID).SetUserID(userID).SetIdentityID(uuid.New())
+		membersCreate[i] = r.db.Member.
+			Create().
+			SetTenantID(tenantID).
+			SetUserID(userID).
+			SetIdentityID(u_uuid.NewFromActorID(userID))
 	}
 
 	return r.db.Member.CreateBulk(membersCreate...).Save(ctx)
