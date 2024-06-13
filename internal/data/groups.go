@@ -97,7 +97,6 @@ func (r *groupsRepo) ListGroups(
 		}
 
 		queryOrder := ent.Asc(sortField)
-
 		if sort.GetDescending() {
 			queryOrder = ent.Desc(sortField)
 		}

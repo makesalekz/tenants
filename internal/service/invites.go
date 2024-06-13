@@ -158,7 +158,7 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 	}, nil
 }
 
-func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.TenantReply, error) {
+func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequest) (*v1.InviteReply, error) {
 	if req.GetCode() == "" {
 		return nil, v1.ErrorInvalidRequest("code is empty")
 	}
@@ -184,7 +184,14 @@ func (s *InvitesService) ShownInvite(ctx context.Context, req *v1.InviteCodeRequ
 		return nil, err
 	}
 
-	return &v1.TenantReply{
+	return &v1.InviteReply{
+		Invite: &v1.Invite{
+			Id:        invite.ID,
+			Email:     invite.Email,
+			Status:    v1.Status(v1.Status_value[invite.Status.Value()]),
+			CreatedAt: invite.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: invite.UpdatedAt.Format(time.RFC3339),
+		},
 		Tenant: replyTenant(tenant),
 	}, nil
 }

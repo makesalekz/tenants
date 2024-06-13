@@ -16,8 +16,6 @@ service Members {
   rpc GetShortMembers(IdentitiesRequest) returns (MembersReply);
   rpc GetMemberIdentities(GetMemberIdentitiesRequest)
       returns (GetMemberIdentitiesReply);
-  rpc GetMembersIdentities(GetMembersIdentitiesRequest)
-      returns (GetMembersIdentitiesReply);
   rpc ListMembers(ListMembersRequest) returns (ListMembersReply);
 }
 
@@ -55,15 +53,6 @@ message GetMemberIdentitiesRequest {
 message GetMemberIdentitiesReply {
   string member = 1;
   repeated string groups = 2;
-}
-
-message GetMembersIdentitiesRequest{
-  repeated int64 userIds = 1;
-  int64 tenantId = 2;
-}
-
-message     GetMembersIdentitiesReply{
-
 }
 
 message ListMembersRequest {

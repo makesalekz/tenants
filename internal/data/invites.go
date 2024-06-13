@@ -164,7 +164,6 @@ func (r *invitesRepo) ListInvites(
 		}
 
 		queryOrder := ent.Asc(sortField)
-
 		if sort.GetDescending() {
 			queryOrder = ent.Desc(sortField)
 		}
