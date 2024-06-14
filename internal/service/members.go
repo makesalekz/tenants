@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"gitlab.calendaria.team/services/tenants/ent"
+	"golang.org/x/exp/maps"
 
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
@@ -46,12 +47,14 @@ func (s *MembersService) GetShortMembers(ctx context.Context, req *v1.Identities
 	reply.Members = replyShortMembers(members)
 
 	if req.GetWithGroups() {
-		groups := []*ent.Group{}
+		groups := map[int64]*ent.Group{}
 		for _, member := range members {
-			groups = append(groups, member.Edges.Groups...)
+			for _, group := range member.Edges.Groups {
+				groups[group.ID] = group
+			}
 		}
 
-		reply.Groups = groupsReply(groups)
+		reply.Groups = groupsReply(maps.Values(groups))
 	}
 
 	return reply, nil
