@@ -235,7 +235,7 @@ func (uc *InvitesUsecase) processInvitations(
 	queue := uc.qm.GetRemote(QueueEmail)
 
 	for _, inviteItem := range invitesItems {
-		inviteURL := buildInviteLine(baseURL, inviteItem.ID, inviteItem.Invite.Code.String())
+		inviteURL := buildInviteLine(baseURL, inviteItem.ID, inviteItem.Invite.Code.String(), lang)
 		emailDetailData := map[string]string{
 			"InviteLink":    inviteURL,
 			"WorkspaceName": tenant.Name,
@@ -261,6 +261,6 @@ func (uc *InvitesUsecase) processInvitations(
 	}
 }
 
-func buildInviteLine(baseURL string, inviteID int64, code string) string {
-	return fmt.Sprintf("%s/a/%d/%s", baseURL, inviteID, code)
+func buildInviteLine(baseUrl string, inviteId int64, code, lang string) string {
+	return fmt.Sprintf("%s/%s/a/%d/%s", baseUrl, lang, inviteId, code)
 }
