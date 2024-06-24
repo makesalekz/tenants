@@ -3,35 +3,37 @@ package data
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
 
 	_ "github.com/lib/pq"
 )
 
 type TenantDto struct {
-	TenantId int64
-	OwnerId  int64
+	TenantID int64
+	OwnerID  int64
 	Name     string
 	Type     enum.TenantType
 }
 
 type TenantsListFilter struct {
-	OwnerId int64
-	UserId  int64
+	OwnerID int64
+	UserID  int64
 }
 
-// TenantsRepo
+// TenantsRepo.
 type TenantsRepo interface {
 	CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, *ent.Member, error)
 	UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error)
-	DeleteTenant(ctx context.Context, tenantId int64) error
-	GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error)
-	ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Tenant, error)
+	DeleteTenant(ctx context.Context, tenantID int64) error
+	GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error)
+	ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) (
+		[]*ent.Tenant, error,
+	)
 	CountListTenants(ctx context.Context, filter TenantsListFilter) (int32, error)
 }
 
@@ -58,7 +60,7 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 	}()
 
 	tenant, err := tx.Tenant.Create().
-		SetOwnerID(dto.OwnerId).
+		SetOwnerID(dto.OwnerID).
 		SetName(dto.Name).
 		SetType(dto.Type).
 		Save(ctx)
@@ -66,7 +68,11 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 		return nil, nil, err
 	}
 
-	member, err := tx.Member.Create().SetTenantID(tenant.ID).SetUserID(dto.OwnerId).SetIdentityID(uuid.New()).Save(ctx)
+	member, err := tx.Member.Create().
+		SetTenantID(tenant.ID).
+		SetUserID(dto.OwnerID).
+		SetIdentityID(u_uuid.NewFromActorID(dto.OwnerID)).
+		Save(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -80,50 +86,52 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 }
 
 func (r *tenantsRepo) UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error) {
-	return r.db.Tenant.UpdateOneID(dto.TenantId).
+	return r.db.Tenant.UpdateOneID(dto.TenantID).
 		SetName(dto.Name).
 		Save(ctx)
 }
 
-func (r *tenantsRepo) DeleteTenant(ctx context.Context, tenantId int64) error {
-	return r.db.Tenant.DeleteOneID(tenantId).Exec(ctx)
+func (r *tenantsRepo) DeleteTenant(ctx context.Context, tenantID int64) error {
+	return r.db.Tenant.DeleteOneID(tenantID).Exec(ctx)
 }
 
-func (r *tenantsRepo) GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error) {
-	return r.db.Tenant.Get(ctx, tenantId)
+func (r *tenantsRepo) GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error) {
+	return r.db.Tenant.Get(ctx, tenantID)
 }
 
-func (r *tenantsRepo) ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) ([]*ent.Tenant, error) {
+func (r *tenantsRepo) ListTenants(
+	ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest,
+) ([]*ent.Tenant, error) {
 	query := r.db.Tenant.Query()
 
-	if filter.UserId != 0 {
-		query.Where(tenant.HasMembersWith(member.UserID(filter.UserId)))
+	if filter.UserID != 0 {
+		query.Where(tenant.HasMembersWith(member.UserID(filter.UserID)))
 	}
 
-	if filter.OwnerId != 0 {
-		query.Where(tenant.OwnerID(filter.OwnerId))
+	if filter.OwnerID != 0 {
+		query.Where(tenant.OwnerID(filter.OwnerID))
 	}
 
-	if paginate.FromId != 0 {
-		query.Where(tenant.IDGT(paginate.FromId))
+	if paginate.GetFromId() != 0 {
+		query.Where(tenant.IDGT(paginate.GetFromId()))
 	}
 
-	if paginate.Limit == 0 {
+	if paginate.GetLimit() == 0 {
 		paginate.Limit = 100
 	}
 
-	return query.Limit(int(paginate.Limit)).Order(ent.Asc(tenant.FieldID)).All(ctx)
+	return query.Limit(int(paginate.GetLimit())).Order(ent.Asc(tenant.FieldID)).All(ctx)
 }
 
 func (r *tenantsRepo) CountListTenants(ctx context.Context, filter TenantsListFilter) (int32, error) {
 	query := r.db.Tenant.Query()
 
-	if filter.UserId != 0 {
-		query.Where(tenant.HasMembersWith(member.UserID(filter.UserId)))
+	if filter.UserID != 0 {
+		query.Where(tenant.HasMembersWith(member.UserID(filter.UserID)))
 	}
 
-	if filter.OwnerId != 0 {
-		query.Where(tenant.OwnerID(filter.OwnerId))
+	if filter.OwnerID != 0 {
+		query.Where(tenant.OwnerID(filter.OwnerID))
 	}
 
 	count, err := query.Count(ctx)

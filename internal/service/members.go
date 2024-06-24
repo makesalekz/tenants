@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
-	"gitlab.calendaria.team/services/tenants/ent"
 	"time"
+
+	"gitlab.calendaria.team/services/tenants/ent"
+	"golang.org/x/exp/maps"
 
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/biz"
@@ -30,43 +32,58 @@ func NewMembersService(
 }
 
 func (s *MembersService) GetShortMembers(ctx context.Context, req *v1.IdentitiesRequest) (*v1.MembersReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	members, err := s.mu.GetShortMembers(ctx, tenantId, req.IdentityIds)
+	reply := &v1.MembersReply{}
+
+	members, err := s.mu.GetShortMembers(ctx, tenantID, req.GetIdentityIds(), req.GetWithGroups())
 	if err != nil {
 		return nil, err
 	}
 
-	return &v1.MembersReply{
-		Members: replyShortMembers(members),
-	}, nil
+	reply.Members = replyShortMembers(members)
+
+	if req.GetWithGroups() {
+		groups := map[int64]*ent.Group{}
+		for _, member := range members {
+			for _, group := range member.Edges.Groups {
+				groups[group.ID] = group
+			}
+		}
+
+		reply.Groups = groupsReply(maps.Values(groups))
+	}
+
+	return reply, nil
 }
 
-func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (*utils_v1.EmptyReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
+func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMembersRequest) (
+	*utils_v1.EmptyReply, error,
+) {
+	actorID := auth.GetActorIdFromContext(ctx)
+	if actorID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	tenant, err := s.tu.GetTenant(ctx, tenantId)
+	tenant, err := s.tu.GetTenant(ctx, tenantID)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: nobody can add members directly
-	if tenant.OwnerID != actorId {
+	if tenant.OwnerID != actorID {
 		return nil, v1.ErrorForbidden("only owner can add members")
 	}
 
-	_, err = s.mu.CreateMembers(ctx, tenantId, req.UsersIds)
+	_, err = s.mu.CreateMembers(ctx, tenantID, req.GetUsersIds())
 	if err != nil {
 		return nil, err
 	}
@@ -75,12 +92,12 @@ func (s *MembersService) CreateMembers(ctx context.Context, req *v1.CreateMember
 }
 
 func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest) (*utils_v1.EmptyReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	err := s.mu.DeleteMember(ctx, tenantId, req.MemberId)
+	err := s.mu.DeleteMember(ctx, tenantID, req.GetMemberId())
 	if err != nil {
 		return nil, err
 	}
@@ -88,12 +105,12 @@ func (s *MembersService) DeleteMember(ctx context.Context, req *v1.MemberRequest
 }
 
 func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (*v1.MemberReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
-	member, err := s.mu.GetMember(ctx, tenantId, req.MemberId)
+	member, err := s.mu.GetMember(ctx, tenantID, req.GetMemberId())
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +124,10 @@ func (s *MembersService) GetMember(ctx context.Context, req *v1.MemberRequest) (
 	}, nil
 }
 
-func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMemberIdentitiesRequest) (*v1.GetMemberIdentitiesReply, error) {
-	member, err := s.mu.GetMemberByUserId(ctx, req.TenantId, req.UserId)
+func (s *MembersService) GetMemberIdentities(
+	ctx context.Context, req *v1.GetMemberIdentitiesRequest,
+) (*v1.GetMemberIdentitiesReply, error) {
+	member, err := s.mu.GetMemberByUserID(ctx, req.GetTenantId(), req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -130,19 +149,19 @@ func (s *MembersService) GetMemberIdentities(ctx context.Context, req *v1.GetMem
 }
 
 func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
-	tenantId := auth.GetTenantIdFromContext(ctx)
-	if tenantId == 0 {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty tenant id")
 	}
 
 	filter := data.MembersListFilter{
-		TenantId:       tenantId,
-		GroupId:        req.GetGroupId(),
+		TenantID:       tenantID,
+		GroupID:        req.GetGroupId(),
 		Search:         req.GetSearch(),
-		ExcludeGroupId: req.GetExcludeGroupId(),
+		ExcludeGroupID: req.GetExcludeGroupId(),
 	}
 
-	list, err := s.mu.ListMembers(ctx, filter, req.Sort, req.Paginate)
+	list, err := s.mu.ListMembers(ctx, filter, req.GetSort(), req.GetPaginate())
 	if err != nil {
 		return nil, err
 	}
@@ -167,10 +186,10 @@ func getMemberGroups(member *biz.MemberItem) []int64 {
 }
 
 func replyMember(member *biz.MemberItem) *v1.TenantMember {
-	identityId := member.IdentityID.String()
+	identityID := member.IdentityID.String()
 	result := v1.TenantMember{
 		Id:         member.ID,
-		IdentityId: &identityId,
+		IdentityId: &identityID,
 		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
 		User:       member.User,
 		Groups:     getMemberGroups(member),
@@ -188,12 +207,18 @@ func replyMembers(members []*biz.MemberItem) []*v1.TenantMember {
 }
 
 func replyShortMember(member *ent.Member) *v1.MemberReply {
-	return &v1.MemberReply{
+	shortMember := &v1.MemberReply{
 		Id:         member.ID,
 		IdentityId: member.IdentityID.String(),
 		CreatedAt:  member.CreatedAt.Format(time.RFC3339),
 		UserId:     member.UserID,
 	}
+
+	for _, group := range member.Edges.Groups {
+		shortMember.Groups = append(shortMember.Groups, group.ID)
+	}
+
+	return shortMember
 }
 
 func replyShortMembers(members []*ent.Member) []*v1.MemberReply {

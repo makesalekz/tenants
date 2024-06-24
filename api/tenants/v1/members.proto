@@ -29,6 +29,7 @@ message MemberRequest {
 
 message IdentitiesRequest {
   repeated string identityIds = 1;
+  bool withGroups=2;
 }
 
 message MemberReply {
@@ -41,6 +42,7 @@ message MemberReply {
 
 message MembersReply {
   repeated MemberReply members = 1;
+  repeated Group groups=2;
 }
 
 message GetMemberIdentitiesRequest {

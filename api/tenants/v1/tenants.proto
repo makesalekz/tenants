@@ -10,6 +10,7 @@ option java_multiple_files = true;
 option java_package = "tenants.v1";
 
 service Tenants {
+  // WARNING: Super unsafe method, never expose it, NEVER EVER
   rpc CreateTenant(CreateTenantRequest) returns (TenantReply);
   rpc UpdateTenant(UpdateTenantRequest) returns (TenantReply);
   rpc DeleteTenant(TenantRequest) returns (utils.v1.EmptyReply);

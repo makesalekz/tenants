@@ -42,16 +42,18 @@ func NewMembersUsecase(
 	}, nil
 }
 
-func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantId int64, usersIds []int64) ([]*ent.Member, error) {
-	return uc.membersRepo.CreateMembers(ctx, tenantId, usersIds)
+func (uc *MembersUsecase) CreateMembers(ctx context.Context, tenantID int64, usersIDs []int64) (
+	[]*ent.Member, error,
+) {
+	return uc.membersRepo.CreateMembers(ctx, tenantID, usersIDs)
 }
 
-func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantId, memberId int64) error {
-	return uc.membersRepo.DeleteMember(ctx, tenantId, memberId)
+func (uc *MembersUsecase) DeleteMember(ctx context.Context, tenantID, memberID int64) error {
+	return uc.membersRepo.DeleteMember(ctx, tenantID, memberID)
 }
 
-func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, memberId int64) (*MemberItem, error) {
-	member, err := uc.membersRepo.GetMember(ctx, tenantId, memberId)
+func (uc *MembersUsecase) GetMember(ctx context.Context, tenantID, memberID int64) (*MemberItem, error) {
+	member, err := uc.membersRepo.GetMember(ctx, tenantID, memberID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("member not found")
@@ -70,7 +72,9 @@ func (uc *MembersUsecase) GetMember(ctx context.Context, tenantId, memberId int6
 	}, nil
 }
 
-func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, identities []string) ([]*ent.Member, error) {
+func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantID int64, identities []string, withGroups bool) (
+	[]*ent.Member, error,
+) {
 	identityUuids := make([]uuid.UUID, len(identities))
 	var err error
 	for i, identity := range identities {
@@ -80,7 +84,7 @@ func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, i
 		}
 	}
 
-	members, err := uc.membersRepo.GetMembers(ctx, tenantId, identityUuids)
+	members, err := uc.membersRepo.GetMembers(ctx, tenantID, identityUuids, withGroups)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +92,8 @@ func (uc *MembersUsecase) GetShortMembers(ctx context.Context, tenantId int64, i
 	return members, nil
 }
 
-func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userId int64) (*ent.Member, error) {
-	member, err := uc.membersRepo.GetMemberByUserId(ctx, tenantId, userId)
+func (uc *MembersUsecase) GetMemberByUserID(ctx context.Context, tenantID, userID int64) (*ent.Member, error) {
+	member, err := uc.membersRepo.GetMemberByUserID(ctx, tenantID, userID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, v1.ErrorNotFound("member not found")
@@ -99,7 +103,9 @@ func (uc *MembersUsecase) GetMemberByUserId(ctx context.Context, tenantId, userI
 	return member, nil
 }
 
-func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest) (*MembersList, error) {
+func (uc *MembersUsecase) ListMembers(
+	ctx context.Context, filter data.MembersListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest,
+) (*MembersList, error) {
 	members, err := uc.membersRepo.ListMembers(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -110,27 +116,29 @@ func (uc *MembersUsecase) ListMembers(ctx context.Context, filter data.MembersLi
 		return nil, err
 	}
 
-	usersIds := make([]int64, len(members))
+	usersIDs := make([]int64, len(members))
 	membersMap := make(map[int64]*ent.Member)
 	for i, member := range members {
-		usersIds[i] = member.UserID
+		usersIDs[i] = member.UserID
 		membersMap[member.UserID] = member
 	}
 
-	reply, err := uc.iam.ListUsers(ctx, &iam_v1.ListUsersRequest{
-		Ids:      usersIds,
-		Search:   filter.Search,
-		Sort:     sort,
-		Paginate: paginate,
-	})
+	reply, err := uc.iam.ListUsers(
+		ctx, &iam_v1.ListUsersRequest{
+			Ids:      usersIDs,
+			Search:   filter.Search,
+			Sort:     sort,
+			Paginate: paginate,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	membersItems := make([]*MemberItem, len(reply.Users))
-	for i, user := range reply.Users {
+	membersItems := make([]*MemberItem, len(reply.GetUsers()))
+	for i, user := range reply.GetUsers() {
 		membersItems[i] = &MemberItem{
-			Member: membersMap[user.Id],
+			Member: membersMap[user.GetId()],
 			User:   user,
 		}
 	}

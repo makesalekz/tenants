@@ -31,16 +31,18 @@ func NewTenantsService(
 }
 
 func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantRequest) (*v1.TenantReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
-	if actorId == 0 {
+	actorID := auth.GetActorIdFromContext(ctx)
+	if actorID == 0 {
 		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenant, err := s.tu.CreateTenant(ctx, data.TenantDto{
-		OwnerId: actorId,
-		Name:    req.Name,
-		Type:    enum.TenantType(req.Type).DefaultIfInvalid(),
-	})
+	tenant, err := s.tu.CreateTenant(
+		ctx, data.TenantDto{
+			OwnerID: actorID,
+			Name:    req.GetName(),
+			Type:    enum.TenantType(req.GetType()).DefaultIfInvalid(),
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -50,10 +52,12 @@ func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantR
 }
 
 func (s *TenantsService) UpdateTenant(ctx context.Context, req *v1.UpdateTenantRequest) (*v1.TenantReply, error) {
-	tenant, err := s.tu.UpdateTenant(ctx, data.TenantDto{
-		TenantId: req.TenantId,
-		Name:     req.Name,
-	})
+	tenant, err := s.tu.UpdateTenant(
+		ctx, data.TenantDto{
+			TenantID: req.GetTenantId(),
+			Name:     req.GetName(),
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +67,7 @@ func (s *TenantsService) UpdateTenant(ctx context.Context, req *v1.UpdateTenantR
 }
 
 func (s *TenantsService) DeleteTenant(ctx context.Context, req *v1.TenantRequest) (*utils_v1.EmptyReply, error) {
-	err := s.tu.DeleteTenant(ctx, req.TenantId)
+	err := s.tu.DeleteTenant(ctx, req.GetTenantId())
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +75,7 @@ func (s *TenantsService) DeleteTenant(ctx context.Context, req *v1.TenantRequest
 }
 
 func (s *TenantsService) GetTenant(ctx context.Context, req *v1.TenantRequest) (*v1.TenantReply, error) {
-	tenant, err := s.tu.GetTenant(ctx, req.TenantId)
+	tenant, err := s.tu.GetTenant(ctx, req.GetTenantId())
 	if err != nil {
 		return nil, err
 	}
@@ -81,12 +85,14 @@ func (s *TenantsService) GetTenant(ctx context.Context, req *v1.TenantRequest) (
 }
 
 func (s *TenantsService) ListTenants(ctx context.Context, req *v1.ListTenantsRequest) (*v1.ListTenantsReply, error) {
-	actorId := auth.GetActorIdFromContext(ctx)
+	actorID := auth.GetActorIdFromContext(ctx)
 
-	list, err := s.tu.ListTenants(ctx, data.TenantsListFilter{
-		UserId:  actorId,
-		OwnerId: req.OwnerId,
-	}, req.Paginate)
+	list, err := s.tu.ListTenants(
+		ctx, data.TenantsListFilter{
+			UserID:  actorID,
+			OwnerID: req.GetOwnerId(),
+		}, req.GetPaginate(),
+	)
 	if err != nil {
 		return nil, err
 	}
