@@ -16,6 +16,7 @@ type MembersListFilter struct {
 	GroupID        int64
 	Search         string
 	ExcludeGroupID int64
+	WithGroups     bool
 }
 
 // MembersRepo.
@@ -94,6 +95,10 @@ func (r *membersRepo) ListMembers(ctx context.Context, filter MembersListFilter)
 		query.Where(member.HasGroupsWith(group.ID(filter.GroupID)))
 	} else if filter.ExcludeGroupID != 0 {
 		query.Where(member.Not(member.HasGroupsWith(group.ID(filter.ExcludeGroupID))))
+	}
+
+	if filter.WithGroups {
+		query.WithGroups()
 	}
 
 	return query.All(ctx)

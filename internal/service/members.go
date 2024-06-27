@@ -168,6 +168,7 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 
 	return &v1.ListMembersReply{
 		Members:  replyMembers(list.Members),
+		Groups:   groupsReply(list.Groups),
 		Paginate: list.Paginate,
 	}, nil
 }

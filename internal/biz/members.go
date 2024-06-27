@@ -9,6 +9,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	"golang.org/x/exp/maps"
 )
 
 type MemberItem struct {
@@ -19,6 +20,7 @@ type MemberItem struct {
 
 type MembersList struct {
 	Members  []*MemberItem
+	Groups   []*ent.Group
 	Paginate *utils_v1.PaginateReply
 }
 
@@ -118,9 +120,19 @@ func (uc *MembersUsecase) ListMembers(
 
 	usersIDs := make([]int64, len(members))
 	membersMap := make(map[int64]*ent.Member)
+	groupsMap := make(map[int64]*ent.Group)
+
 	for i, member := range members {
 		usersIDs[i] = member.UserID
 		membersMap[member.UserID] = member
+
+		for _, group := range member.Edges.Groups {
+			if group == nil {
+				continue
+			}
+
+			groupsMap[group.ID] = group
+		}
 	}
 
 	reply, err := uc.iam.ListUsers(
@@ -145,6 +157,7 @@ func (uc *MembersUsecase) ListMembers(
 
 	return &MembersList{
 		Members: membersItems,
+		Groups:  maps.Values(groupsMap),
 		Paginate: &utils_v1.PaginateReply{
 			Total: &total,
 		},
