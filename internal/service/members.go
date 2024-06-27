@@ -159,6 +159,7 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 		GroupID:        req.GetGroupId(),
 		Search:         req.GetSearch(),
 		ExcludeGroupID: req.GetExcludeGroupId(),
+		WithGroups:     req.GetWithGroups(),
 	}
 
 	list, err := s.mu.ListMembers(ctx, filter, req.GetSort(), req.GetPaginate())
