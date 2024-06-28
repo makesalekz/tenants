@@ -46,5 +46,6 @@ message TenantMember {
 
 message ListMembersReply {
   repeated TenantMember members = 1;
+  repeated Group groups=3;
   utils.v1.PaginateReply paginate = 2;
 }

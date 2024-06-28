@@ -58,6 +58,7 @@ message GetMemberIdentitiesReply {
 message ListMembersRequest {
   int64 groupId = 1;
   string search = 2;
+  bool withGroups = 6;
   utils.v1.SortRequest sort = 3;
   utils.v1.PaginateRequest paginate = 4;
   int64 excludeGroupId = 5;
