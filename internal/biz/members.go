@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"golang.org/x/exp/maps"
+
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"golang.org/x/exp/maps"
 )
 
 type MemberItem struct {
@@ -127,11 +128,9 @@ func (uc *MembersUsecase) ListMembers(
 		membersMap[member.UserID] = member
 
 		for _, group := range member.Edges.Groups {
-			if group == nil {
-				continue
+			if group != nil {
+				groupsMap[group.ID] = group
 			}
-
-			groupsMap[group.ID] = group
 		}
 	}
 
