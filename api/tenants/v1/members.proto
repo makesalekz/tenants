@@ -17,6 +17,7 @@ service Members {
   rpc GetMemberIdentities(GetMemberIdentitiesRequest)
       returns (GetMemberIdentitiesReply);
   rpc ListMembers(ListMembersRequest) returns (ListMembersReply);
+  rpc CountMembers(utils.v1.EmptyRequest) returns (CountMembersReply);
 }
 
 message CreateMembersRequest {
@@ -62,4 +63,8 @@ message ListMembersRequest {
   utils.v1.SortRequest sort = 3;
   utils.v1.PaginateRequest paginate = 4;
   int64 excludeGroupId = 5;
+}
+
+message CountMembersReply{
+  int64 count = 1;
 }
