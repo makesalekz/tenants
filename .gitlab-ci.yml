@@ -26,14 +26,14 @@ release:
 merge:
   extends: .merge
 
+helm-lint:
+  extends: .helm-lint  
+
 build:
   extends: .build-shell
 
 migration-build:
   extends: .migration-build
-
-helm-lint:
-  extends: .helm-lint
 
 deploy:
   extends: .deploy
