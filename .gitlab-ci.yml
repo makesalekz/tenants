@@ -1,10 +1,13 @@
 include:
   - project: 'deploy/dev'
-    file: '/go-app.yml'
+    file: '/go-app-v2.yml'
     ref: 'main'
-  
+
 lint dev:
   extends: .lint-dev
+
+test dev:
+  extends: .test-dev
 
 build dev:
   extends: .build-dev
@@ -13,7 +16,16 @@ deploy dev:
   extends: .deploy-dev
   variables:
     DB_PORT: 54407
-  
+
+cleanup:
+  extends: .cleanup
+
+release:
+  extends: .release
+
+merge:
+  extends: .merge
+
 build:
   extends: .build
 
@@ -25,3 +37,6 @@ helm-lint:
 
 deploy:
   extends: .deploy
+
+rollout:
+  extends: .rollout
