@@ -26,6 +26,7 @@ const (
 	Members_GetShortMembers_FullMethodName     = "/tenants.v1.Members/GetShortMembers"
 	Members_GetMemberIdentities_FullMethodName = "/tenants.v1.Members/GetMemberIdentities"
 	Members_ListMembers_FullMethodName         = "/tenants.v1.Members/ListMembers"
+	Members_CountMembers_FullMethodName        = "/tenants.v1.Members/CountMembers"
 )
 
 // MembersClient is the client API for Members service.
@@ -38,6 +39,7 @@ type MembersClient interface {
 	GetShortMembers(ctx context.Context, in *IdentitiesRequest, opts ...grpc.CallOption) (*MembersReply, error)
 	GetMemberIdentities(ctx context.Context, in *GetMemberIdentitiesRequest, opts ...grpc.CallOption) (*GetMemberIdentitiesReply, error)
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersReply, error)
+	CountMembers(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*CountMembersReply, error)
 }
 
 type membersClient struct {
@@ -108,6 +110,16 @@ func (c *membersClient) ListMembers(ctx context.Context, in *ListMembersRequest,
 	return out, nil
 }
 
+func (c *membersClient) CountMembers(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*CountMembersReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CountMembersReply)
+	err := c.cc.Invoke(ctx, Members_CountMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MembersServer is the server API for Members service.
 // All implementations must embed UnimplementedMembersServer
 // for forward compatibility
@@ -118,6 +130,7 @@ type MembersServer interface {
 	GetShortMembers(context.Context, *IdentitiesRequest) (*MembersReply, error)
 	GetMemberIdentities(context.Context, *GetMemberIdentitiesRequest) (*GetMemberIdentitiesReply, error)
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
+	CountMembers(context.Context, *v1.EmptyRequest) (*CountMembersReply, error)
 	mustEmbedUnimplementedMembersServer()
 }
 
@@ -142,6 +155,9 @@ func (UnimplementedMembersServer) GetMemberIdentities(context.Context, *GetMembe
 }
 func (UnimplementedMembersServer) ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMembers not implemented")
+}
+func (UnimplementedMembersServer) CountMembers(context.Context, *v1.EmptyRequest) (*CountMembersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CountMembers not implemented")
 }
 func (UnimplementedMembersServer) mustEmbedUnimplementedMembersServer() {}
 
@@ -264,6 +280,24 @@ func _Members_ListMembers_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Members_CountMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MembersServer).CountMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Members_CountMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MembersServer).CountMembers(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Members_ServiceDesc is the grpc.ServiceDesc for Members service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -294,6 +328,10 @@ var Members_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMembers",
 			Handler:    _Members_ListMembers_Handler,
+		},
+		{
+			MethodName: "CountMembers",
+			Handler:    _Members_CountMembers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

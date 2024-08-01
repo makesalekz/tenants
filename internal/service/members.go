@@ -174,6 +174,20 @@ func (s *MembersService) ListMembers(ctx context.Context, req *v1.ListMembersReq
 	}, nil
 }
 
+func (s *MembersService) CountMembers(ctx context.Context, req *utils_v1.EmptyRequest) (*v1.CountMembersReply, error) {
+	tenantID := auth.GetTenantIdFromContext(ctx)
+	if tenantID == 0 {
+		return nil, v1.ErrorEmptyActorId("empty tenant id")
+	}
+
+	count, err := s.mu.CountMembers(ctx, tenantID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.CountMembersReply{Count: count}, nil
+}
+
 func getMemberGroups(member *biz.MemberItem) []int64 {
 	if len(member.Edges.Groups) == 0 {
 		return nil

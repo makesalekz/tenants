@@ -162,3 +162,12 @@ func (uc *MembersUsecase) ListMembers(
 		},
 	}, nil
 }
+
+func (uc *MembersUsecase) CountMembers(ctx context.Context, tenantID int64) (int64, error) {
+	count, err := uc.membersRepo.CountListMembers(ctx, data.MembersListFilter{TenantID: tenantID})
+	if err != nil {
+		return 0, v1.ErrorDatabaseQuery("failed to count members, err %s", err.Error())
+	}
+
+	return int64(count), nil
+}
