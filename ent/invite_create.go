@@ -220,7 +220,7 @@ func (ic *InviteCreate) check() error {
 	if _, ok := ic.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Invite.updated_at"`)}
 	}
-	if _, ok := ic.mutation.TenantID(); !ok {
+	if len(ic.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Invite.tenant"`)}
 	}
 	return nil

@@ -7,8 +7,8 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	u_config "gitlab.calendaria.team/services/utils/v1/config"
-	u_jwt "gitlab.calendaria.team/services/utils/v1/jwt"
 	u_dialer "gitlab.calendaria.team/services/utils/v2/dialer"
+	u_jwt "gitlab.calendaria.team/services/utils/v2/jwt"
 	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
 
 	"github.com/go-kratos/kratos/v2/log"

@@ -4,8 +4,8 @@ import (
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/service"
-	u_jwt "gitlab.calendaria.team/services/utils/v1/jwt"
 	u_metrics "gitlab.calendaria.team/services/utils/v1/middlewares/metrics"
+	u_jwt "gitlab.calendaria.team/services/utils/v2/jwt"
 	u_auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
 
@@ -19,7 +19,7 @@ import (
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(
 	c *conf.Bootstrap,
-	jwtp *u_jwt.JwtProcessor,
+	jwtp u_jwt.IJwtProcessor,
 	tracer *u_tracing.Tracer,
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,

@@ -15,9 +15,9 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/server"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v1/jwt"
 	"gitlab.calendaria.team/services/utils/v1/nats"
 	"gitlab.calendaria.team/services/utils/v2/dialer"
+	"gitlab.calendaria.team/services/utils/v2/jwt"
 	"gitlab.calendaria.team/services/utils/v2/tracing"
 )
 
@@ -33,7 +33,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	if err != nil {
 		return nil, nil, err
 	}
-	jwtProcessor, err := jwt.NewJwtProcessor(configConfig)
+	iJwtProcessor, err := jwt.NewJwtProcessor(configConfig)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -43,7 +43,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	tenantsRepo := data.NewTenantsRepo(dataData)
-	iDialerManager, err := dialer.NewServiceDialerManager(configConfig, tracer, jwtProcessor)
+	iDialerManager, err := dialer.NewServiceDialerManager(configConfig, tracer, iJwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -103,7 +103,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	groupsService := service.NewGroupsService(tenantsUsecase, groupsUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, jwtProcessor, tracer, tenantsService, membersService, invitesService, groupsService)
+	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, tracer, tenantsService, membersService, invitesService, groupsService)
 	httpServer := server.NewHTTPServer(bootstrap)
 	app := newApp(logger, configConfig, grpcServer, httpServer)
 	return app, func() {

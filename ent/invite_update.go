@@ -198,7 +198,7 @@ func (iu *InviteUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Invite.status": %w`, err)}
 		}
 	}
-	if _, ok := iu.mutation.TenantID(); iu.mutation.TenantCleared() && !ok {
+	if iu.mutation.TenantCleared() && len(iu.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Invite.tenant"`)
 	}
 	return nil
@@ -464,7 +464,7 @@ func (iuo *InviteUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Invite.status": %w`, err)}
 		}
 	}
-	if _, ok := iuo.mutation.TenantID(); iuo.mutation.TenantCleared() && !ok {
+	if iuo.mutation.TenantCleared() && len(iuo.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Invite.tenant"`)
 	}
 	return nil
