@@ -14,8 +14,11 @@ import (
 )
 
 type InviteDto struct {
-	Email  string
-	UserID *int64
+	Email      string
+	UserID     *int64
+	RoleID     int64
+	Resource   string
+	ResourceID int64
 }
 
 type InvitesListFilter struct {
@@ -30,7 +33,9 @@ type InvitesRepo interface {
 	GetInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error)
 	GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (*ent.Invite, error)
 	UpdateInviteStatus(ctx context.Context, invite *ent.Invite, status enum.InviteStatus) (*ent.Invite, error)
-	AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (*ent.Invite, error)
+	AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (
+		*ent.Invite, *ent.Member, error,
+	)
 	DeleteInvite(ctx context.Context, tenantID, inviteID int64) error
 	ListInvites(
 		ctx context.Context, filter InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest,
@@ -61,6 +66,18 @@ func (r *invitesRepo) CreateInvites(ctx context.Context, tenantID int64, dtos []
 			SetEmail(dto.Email)
 		if dto.UserID != nil {
 			invitesCreate[i].SetUserID(*dto.UserID)
+		}
+
+		if dto.RoleID != 0 {
+			invitesCreate[i].SetRoleID(dto.RoleID)
+		}
+
+		if dto.Resource != "" {
+			invitesCreate[i].SetResource(dto.Resource)
+		}
+
+		if dto.ResourceID != 0 {
+			invitesCreate[i].SetResourceID(dto.ResourceID)
 		}
 	}
 
@@ -95,10 +112,12 @@ func (r *invitesRepo) UpdateInviteStatus(
 	return invite.Update().SetStatus(status).SetUpdatedAt(time.Now()).Save(ctx)
 }
 
-func (r *invitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (*ent.Invite, error) {
+func (r *invitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (
+	*ent.Invite, *ent.Member, error,
+) {
 	tx, err := r.db.Tx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer func() {
 		if err != nil {
@@ -106,30 +125,32 @@ func (r *invitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *en
 		}
 	}()
 
+	var tenantMember *ent.Member
+
 	updated, err := tx.Invite.UpdateOneID(invite.ID).
 		SetUserID(userID).
 		SetStatus(enum.Accepted).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	_, err = tx.Member.Create().
+	tenantMember, err = tx.Member.Create().
 		SetTenantID(invite.TenantID).
 		SetUserID(userID).
 		SetIdentityID(u_uuid.NewFromActorID(userID)).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return updated, nil
+	return updated, tenantMember, nil
 }
 
 func (r *invitesRepo) DeleteInvite(ctx context.Context, tenantID, inviteID int64) error {

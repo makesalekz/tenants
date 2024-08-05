@@ -7,6 +7,7 @@ import (
 
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/notifications/messages"
+	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
@@ -35,6 +36,7 @@ type InvitesUsecase struct {
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
 	iam         *data.IamRemote
+	rbac        *data.RbacRemote
 	config      *config.Config
 	qm          u_nats.IQueueManager
 }
@@ -45,6 +47,7 @@ func NewInvitesUsecase(
 	tenantsRepo data.TenantsRepo,
 	invitesRepo data.InvitesRepo,
 	iam *data.IamRemote,
+	rbac *data.RbacRemote,
 	queueManager u_nats.IQueueManager,
 	config *config.Config,
 ) (*InvitesUsecase, error) {
@@ -53,13 +56,20 @@ func NewInvitesUsecase(
 		tenantsRepo: tenantsRepo,
 		invitesRepo: invitesRepo,
 		iam:         iam,
+		rbac:        rbac,
 		qm:          queueManager,
 		config:      config,
 	}, nil
 }
 
 func (uc *InvitesUsecase) CreateInvites(
-	ctx context.Context, tenantID int64, emails []string, appID, lang string,
+	ctx context.Context,
+	tenantID int64, appID string,
+	emails []string,
+	lang string,
+	roleID int64,
+	resource string,
+	resourceID int64,
 ) ([]InviteItem, error) {
 	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
 	if err != nil {
@@ -74,7 +84,10 @@ func (uc *InvitesUsecase) CreateInvites(
 	dtos := make([]data.InviteDto, len(emails))
 	for i, email := range emails {
 		dtos[i] = data.InviteDto{
-			Email: email,
+			Email:      email,
+			RoleID:     roleID,
+			Resource:   resource,
+			ResourceID: resourceID,
 		}
 		if user, ok := usersMap[email]; ok {
 			dtos[i].UserID = &user.Id
@@ -187,7 +200,28 @@ func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteID, userID int
 		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
-	return uc.invitesRepo.AcceptInvite(ctx, userID, invite)
+	invite, tenantMember, err := uc.invitesRepo.AcceptInvite(ctx, userID, invite)
+	if err != nil {
+		return nil, v1.ErrorDatabaseQuery("failed to accept invite, err %s", err.Error())
+	}
+
+	if invite.RoleID != 0 {
+		err = uc.rbac.AssignRoles(
+			ctx, &rbac_v1.AssignRoleRequest{
+				IdentityId: tenantMember.IdentityID.String(),
+				RoleId:     invite.RoleID,
+				Resource: &rbac_v1.Resource{
+					Type: invite.Resource,
+					Id:   invite.ResourceID,
+				},
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return invite, nil
 }
 
 func (uc *InvitesUsecase) UpdateInvite(
@@ -261,6 +295,6 @@ func (uc *InvitesUsecase) processInvitations(
 	}
 }
 
-func buildInviteLine(baseUrl string, inviteId int64, code, lang string) string {
-	return fmt.Sprintf("%s/%s/a/%d/%s", baseUrl, lang, inviteId, code)
+func buildInviteLine(baseURL string, inviteID int64, code, lang string) string {
+	return fmt.Sprintf("%s/%s/a/%d/%s", baseURL, lang, inviteID, code)
 }

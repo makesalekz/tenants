@@ -24,6 +24,9 @@ message CreateInvitesRequest {
   repeated string emails = 1;
   string appId = 2;
   string language = 3;
+  int64 roleId = 4;
+  string resource = 5;
+  int64 resourceId = 6;
 }
 
 message InviteRequest {

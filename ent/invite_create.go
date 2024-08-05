@@ -99,6 +99,48 @@ func (ic *InviteCreate) SetNillableUpdatedAt(t *time.Time) *InviteCreate {
 	return ic
 }
 
+// SetRoleID sets the "role_id" field.
+func (ic *InviteCreate) SetRoleID(i int64) *InviteCreate {
+	ic.mutation.SetRoleID(i)
+	return ic
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (ic *InviteCreate) SetNillableRoleID(i *int64) *InviteCreate {
+	if i != nil {
+		ic.SetRoleID(*i)
+	}
+	return ic
+}
+
+// SetResource sets the "resource" field.
+func (ic *InviteCreate) SetResource(s string) *InviteCreate {
+	ic.mutation.SetResource(s)
+	return ic
+}
+
+// SetNillableResource sets the "resource" field if the given value is not nil.
+func (ic *InviteCreate) SetNillableResource(s *string) *InviteCreate {
+	if s != nil {
+		ic.SetResource(*s)
+	}
+	return ic
+}
+
+// SetResourceID sets the "resource_id" field.
+func (ic *InviteCreate) SetResourceID(i int64) *InviteCreate {
+	ic.mutation.SetResourceID(i)
+	return ic
+}
+
+// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
+func (ic *InviteCreate) SetNillableResourceID(i *int64) *InviteCreate {
+	if i != nil {
+		ic.SetResourceID(*i)
+	}
+	return ic
+}
+
 // SetTenant sets the "tenant" edge to the Tenant entity.
 func (ic *InviteCreate) SetTenant(t *Tenant) *InviteCreate {
 	return ic.SetTenantID(t.ID)
@@ -232,6 +274,18 @@ func (ic *InviteCreate) createSpec() (*Invite, *sqlgraph.CreateSpec) {
 		_spec.SetField(invite.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := ic.mutation.RoleID(); ok {
+		_spec.SetField(invite.FieldRoleID, field.TypeInt64, value)
+		_node.RoleID = value
+	}
+	if value, ok := ic.mutation.Resource(); ok {
+		_spec.SetField(invite.FieldResource, field.TypeString, value)
+		_node.Resource = value
+	}
+	if value, ok := ic.mutation.ResourceID(); ok {
+		_spec.SetField(invite.FieldResourceID, field.TypeInt64, value)
+		_node.ResourceID = value
+	}
 	if nodes := ic.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -349,6 +403,72 @@ func (u *InviteUpsert) UpdateUpdatedAt() *InviteUpsert {
 	return u
 }
 
+// SetRoleID sets the "role_id" field.
+func (u *InviteUpsert) SetRoleID(v int64) *InviteUpsert {
+	u.Set(invite.FieldRoleID, v)
+	return u
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateRoleID() *InviteUpsert {
+	u.SetExcluded(invite.FieldRoleID)
+	return u
+}
+
+// AddRoleID adds v to the "role_id" field.
+func (u *InviteUpsert) AddRoleID(v int64) *InviteUpsert {
+	u.Add(invite.FieldRoleID, v)
+	return u
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (u *InviteUpsert) ClearRoleID() *InviteUpsert {
+	u.SetNull(invite.FieldRoleID)
+	return u
+}
+
+// SetResource sets the "resource" field.
+func (u *InviteUpsert) SetResource(v string) *InviteUpsert {
+	u.Set(invite.FieldResource, v)
+	return u
+}
+
+// UpdateResource sets the "resource" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateResource() *InviteUpsert {
+	u.SetExcluded(invite.FieldResource)
+	return u
+}
+
+// ClearResource clears the value of the "resource" field.
+func (u *InviteUpsert) ClearResource() *InviteUpsert {
+	u.SetNull(invite.FieldResource)
+	return u
+}
+
+// SetResourceID sets the "resource_id" field.
+func (u *InviteUpsert) SetResourceID(v int64) *InviteUpsert {
+	u.Set(invite.FieldResourceID, v)
+	return u
+}
+
+// UpdateResourceID sets the "resource_id" field to the value that was provided on create.
+func (u *InviteUpsert) UpdateResourceID() *InviteUpsert {
+	u.SetExcluded(invite.FieldResourceID)
+	return u
+}
+
+// AddResourceID adds v to the "resource_id" field.
+func (u *InviteUpsert) AddResourceID(v int64) *InviteUpsert {
+	u.Add(invite.FieldResourceID, v)
+	return u
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (u *InviteUpsert) ClearResourceID() *InviteUpsert {
+	u.SetNull(invite.FieldResourceID)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -456,6 +576,83 @@ func (u *InviteUpsertOne) SetUpdatedAt(v time.Time) *InviteUpsertOne {
 func (u *InviteUpsertOne) UpdateUpdatedAt() *InviteUpsertOne {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *InviteUpsertOne) SetRoleID(v int64) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetRoleID(v)
+	})
+}
+
+// AddRoleID adds v to the "role_id" field.
+func (u *InviteUpsertOne) AddRoleID(v int64) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.AddRoleID(v)
+	})
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateRoleID() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateRoleID()
+	})
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (u *InviteUpsertOne) ClearRoleID() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearRoleID()
+	})
+}
+
+// SetResource sets the "resource" field.
+func (u *InviteUpsertOne) SetResource(v string) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetResource(v)
+	})
+}
+
+// UpdateResource sets the "resource" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateResource() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateResource()
+	})
+}
+
+// ClearResource clears the value of the "resource" field.
+func (u *InviteUpsertOne) ClearResource() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearResource()
+	})
+}
+
+// SetResourceID sets the "resource_id" field.
+func (u *InviteUpsertOne) SetResourceID(v int64) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetResourceID(v)
+	})
+}
+
+// AddResourceID adds v to the "resource_id" field.
+func (u *InviteUpsertOne) AddResourceID(v int64) *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.AddResourceID(v)
+	})
+}
+
+// UpdateResourceID sets the "resource_id" field to the value that was provided on create.
+func (u *InviteUpsertOne) UpdateResourceID() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateResourceID()
+	})
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (u *InviteUpsertOne) ClearResourceID() *InviteUpsertOne {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearResourceID()
 	})
 }
 
@@ -732,6 +929,83 @@ func (u *InviteUpsertBulk) SetUpdatedAt(v time.Time) *InviteUpsertBulk {
 func (u *InviteUpsertBulk) UpdateUpdatedAt() *InviteUpsertBulk {
 	return u.Update(func(s *InviteUpsert) {
 		s.UpdateUpdatedAt()
+	})
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *InviteUpsertBulk) SetRoleID(v int64) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetRoleID(v)
+	})
+}
+
+// AddRoleID adds v to the "role_id" field.
+func (u *InviteUpsertBulk) AddRoleID(v int64) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.AddRoleID(v)
+	})
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateRoleID() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateRoleID()
+	})
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (u *InviteUpsertBulk) ClearRoleID() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearRoleID()
+	})
+}
+
+// SetResource sets the "resource" field.
+func (u *InviteUpsertBulk) SetResource(v string) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetResource(v)
+	})
+}
+
+// UpdateResource sets the "resource" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateResource() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateResource()
+	})
+}
+
+// ClearResource clears the value of the "resource" field.
+func (u *InviteUpsertBulk) ClearResource() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearResource()
+	})
+}
+
+// SetResourceID sets the "resource_id" field.
+func (u *InviteUpsertBulk) SetResourceID(v int64) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.SetResourceID(v)
+	})
+}
+
+// AddResourceID adds v to the "resource_id" field.
+func (u *InviteUpsertBulk) AddResourceID(v int64) *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.AddResourceID(v)
+	})
+}
+
+// UpdateResourceID sets the "resource_id" field to the value that was provided on create.
+func (u *InviteUpsertBulk) UpdateResourceID() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.UpdateResourceID()
+	})
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (u *InviteUpsertBulk) ClearResourceID() *InviteUpsertBulk {
+	return u.Update(func(s *InviteUpsert) {
+		s.ClearResourceID()
 	})
 }
 

@@ -49,6 +49,9 @@ var (
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"NEW", "SENT", "SHOWN", "ACCEPTED", "DECLINED", "CANCELED"}, Default: "NEW"},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "role_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "resource", Type: field.TypeString, Nullable: true},
+		{Name: "resource_id", Type: field.TypeInt64, Nullable: true},
 		{Name: "tenant_id", Type: field.TypeInt64},
 	}
 	// InvitesTable holds the schema information for the "invites" table.
@@ -59,7 +62,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "invites_tenants_invites",
-				Columns:    []*schema.Column{InvitesColumns[7]},
+				Columns:    []*schema.Column{InvitesColumns[10]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -68,7 +71,7 @@ var (
 			{
 				Name:    "invite_tenant_id_email",
 				Unique:  true,
-				Columns: []*schema.Column{InvitesColumns[7], InvitesColumns[2]},
+				Columns: []*schema.Column{InvitesColumns[10], InvitesColumns[2]},
 			},
 		},
 	}

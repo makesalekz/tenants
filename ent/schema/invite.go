@@ -26,6 +26,9 @@ func (Invite) Fields() []ent.Field {
 		field.Enum("status").GoType(enum.InviteStatus("")).Default(enum.New.Value()),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
+		field.Int64("role_id").Optional(),
+		field.String("resource").Optional(),
+		field.Int64("resource_id").Optional(),
 	}
 }
 

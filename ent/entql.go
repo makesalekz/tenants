@@ -49,13 +49,16 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Invite",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			invite.FieldTenantID:  {Type: field.TypeInt64, Column: invite.FieldTenantID},
-			invite.FieldCode:      {Type: field.TypeUUID, Column: invite.FieldCode},
-			invite.FieldEmail:     {Type: field.TypeString, Column: invite.FieldEmail},
-			invite.FieldUserID:    {Type: field.TypeInt64, Column: invite.FieldUserID},
-			invite.FieldStatus:    {Type: field.TypeEnum, Column: invite.FieldStatus},
-			invite.FieldCreatedAt: {Type: field.TypeTime, Column: invite.FieldCreatedAt},
-			invite.FieldUpdatedAt: {Type: field.TypeTime, Column: invite.FieldUpdatedAt},
+			invite.FieldTenantID:   {Type: field.TypeInt64, Column: invite.FieldTenantID},
+			invite.FieldCode:       {Type: field.TypeUUID, Column: invite.FieldCode},
+			invite.FieldEmail:      {Type: field.TypeString, Column: invite.FieldEmail},
+			invite.FieldUserID:     {Type: field.TypeInt64, Column: invite.FieldUserID},
+			invite.FieldStatus:     {Type: field.TypeEnum, Column: invite.FieldStatus},
+			invite.FieldCreatedAt:  {Type: field.TypeTime, Column: invite.FieldCreatedAt},
+			invite.FieldUpdatedAt:  {Type: field.TypeTime, Column: invite.FieldUpdatedAt},
+			invite.FieldRoleID:     {Type: field.TypeInt64, Column: invite.FieldRoleID},
+			invite.FieldResource:   {Type: field.TypeString, Column: invite.FieldResource},
+			invite.FieldResourceID: {Type: field.TypeInt64, Column: invite.FieldResourceID},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -376,6 +379,21 @@ func (f *InviteFilter) WhereCreatedAt(p entql.TimeP) {
 // WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
 func (f *InviteFilter) WhereUpdatedAt(p entql.TimeP) {
 	f.Where(p.Field(invite.FieldUpdatedAt))
+}
+
+// WhereRoleID applies the entql int64 predicate on the role_id field.
+func (f *InviteFilter) WhereRoleID(p entql.Int64P) {
+	f.Where(p.Field(invite.FieldRoleID))
+}
+
+// WhereResource applies the entql string predicate on the resource field.
+func (f *InviteFilter) WhereResource(p entql.StringP) {
+	f.Where(p.Field(invite.FieldResource))
+}
+
+// WhereResourceID applies the entql int64 predicate on the resource_id field.
+func (f *InviteFilter) WhereResourceID(p entql.Int64P) {
+	f.Where(p.Field(invite.FieldResourceID))
 }
 
 // WhereHasTenant applies a predicate to check if query has an edge tenant.
