@@ -19,6 +19,7 @@ import (
 )
 
 // ProviderSet is data providers.
+//
 //nolint:gochecknoglobals // global variable, used in wire
 var ProviderSet = wire.NewSet(
 	NewData,
