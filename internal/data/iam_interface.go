@@ -11,7 +11,7 @@ import (
 // IIamRemote ...
 type IIamRemote interface {
 	// GetUser returns userShort from iam service by userId.
-	GetUser(ctx context.Context, userId int64) (*iam_v1.UserShort, error)
+	GetUser(ctx context.Context, userID int64) (*iam_v1.UserShort, error)
 	// GetUsers returns userShorts map from iam service by mapUsersIds.
 	GetUsers(ctx context.Context, req *iam_v1.GetUsersRequest) (*iam_v1.UsersReply, error)
 	// GetUsers returns userShorts map from iam service by mapUsersIds.

@@ -19,7 +19,7 @@ type InvitesRepo interface {
 	GetInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error)
 	GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (*ent.Invite, error)
 	UpdateInviteStatus(ctx context.Context, invite *ent.Invite, status enum.InviteStatus) (*ent.Invite, error)
-	AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (
+	AcceptInvite(ctx context.Context, actorID int64, invite *ent.Invite) (
 		*ent.Invite, *ent.Member, error,
 	)
 	DeleteInvite(ctx context.Context, tenantID, inviteID int64) error
@@ -67,29 +67,20 @@ func (r *invitesRepo) CreateInvites(ctx context.Context, tenantID int64, dtos []
 		}
 	}
 
-	err := r.db.Invite.CreateBulk(invitesCreate...).
-		OnConflictColumns(invite.FieldTenantID, invite.FieldEmail).
-		UpdateStatus().
-		UpdateUpdatedAt().
-		Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	emails := make([]string, len(dtos))
-	for i, dto := range dtos {
-		emails[i] = dto.Email
-	}
-
-	return r.db.Invite.Query().Where(invite.TenantID(tenantID), invite.EmailIn(emails...)).All(ctx)
+	return r.db.Invite.CreateBulk(invitesCreate...).Save(ctx)
 }
 
 func (r *invitesRepo) GetInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error) {
 	return r.db.Invite.Query().Where(invite.TenantID(tenantID), invite.ID(inviteID)).First(ctx)
 }
 
-func (r *invitesRepo) GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (*ent.Invite, error) {
-	return r.db.Invite.Query().Where(invite.ID(inviteID), invite.Code(code)).First(ctx)
+func (r *invitesRepo) GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (
+	*ent.Invite, error,
+) {
+	return r.db.Invite.Query().Where(
+		invite.ID(inviteID),
+		invite.Code(code),
+	).First(ctx)
 }
 
 func (r *invitesRepo) UpdateInviteStatus(

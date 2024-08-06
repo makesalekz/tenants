@@ -147,14 +147,8 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	invite, err := s.iu.AcceptInvite(ctx, req.GetInviteId(), actorID, code)
+	invite, err := s.iu.AcceptInvite(ctx, actorID, req.GetInviteId(), code)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, v1.ErrorNotFound("invite not found")
-		}
-		if ent.IsConstraintError(err) {
-			return nil, v1.ErrorInvalidRequest("member already exists")
-		}
 		return nil, err
 	}
 

@@ -40,9 +40,9 @@ func (m *MockInvitesRepo) EXPECT() *MockInvitesRepoMockRecorder {
 }
 
 // AcceptInvite mocks base method.
-func (m *MockInvitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (*ent.Invite, *ent.Member, error) {
+func (m *MockInvitesRepo) AcceptInvite(ctx context.Context, actorID int64, invite *ent.Invite) (*ent.Invite, *ent.Member, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AcceptInvite", ctx, userID, invite)
+	ret := m.ctrl.Call(m, "AcceptInvite", ctx, actorID, invite)
 	ret0, _ := ret[0].(*ent.Invite)
 	ret1, _ := ret[1].(*ent.Member)
 	ret2, _ := ret[2].(error)
@@ -50,9 +50,9 @@ func (m *MockInvitesRepo) AcceptInvite(ctx context.Context, userID int64, invite
 }
 
 // AcceptInvite indicates an expected call of AcceptInvite.
-func (mr *MockInvitesRepoMockRecorder) AcceptInvite(ctx, userID, invite interface{}) *gomock.Call {
+func (mr *MockInvitesRepoMockRecorder) AcceptInvite(ctx, actorID, invite interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcceptInvite", reflect.TypeOf((*MockInvitesRepo)(nil).AcceptInvite), ctx, userID, invite)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcceptInvite", reflect.TypeOf((*MockInvitesRepo)(nil).AcceptInvite), ctx, actorID, invite)
 }
 
 // CountListInvites mocks base method.

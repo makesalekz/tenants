@@ -36,18 +36,18 @@ func (m *MockIIamRemote) EXPECT() *MockIIamRemoteMockRecorder {
 }
 
 // GetUser mocks base method.
-func (m *MockIIamRemote) GetUser(ctx context.Context, userId int64) (*iam_v1.UserShort, error) {
+func (m *MockIIamRemote) GetUser(ctx context.Context, userID int64) (*iam_v1.UserShort, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", ctx, userId)
+	ret := m.ctrl.Call(m, "GetUser", ctx, userID)
 	ret0, _ := ret[0].(*iam_v1.UserShort)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUser indicates an expected call of GetUser.
-func (mr *MockIIamRemoteMockRecorder) GetUser(ctx, userId interface{}) *gomock.Call {
+func (mr *MockIIamRemoteMockRecorder) GetUser(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockIIamRemote)(nil).GetUser), ctx, userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockIIamRemote)(nil).GetUser), ctx, userID)
 }
 
 // GetUsers mocks base method.

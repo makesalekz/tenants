@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -69,9 +70,12 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "invite_tenant_id_email",
+				Name:    "invite_tenant_id_user_id_status",
 				Unique:  true,
-				Columns: []*schema.Column{InvitesColumns[10], InvitesColumns[2]},
+				Columns: []*schema.Column{InvitesColumns[10], InvitesColumns[3], InvitesColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'accepted'",
+				},
 			},
 		},
 	}

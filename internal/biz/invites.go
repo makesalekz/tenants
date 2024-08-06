@@ -75,22 +75,30 @@ func (uc *InvitesUsecase) CreateInvites(
 		usersMap[user.GetEmail()] = user
 	}
 
-	dtos := make([]data.InviteDto, len(invite.Emails))
-	for i, email := range invite.Emails {
-		dtos[i] = data.InviteDto{
+	emails := make(map[string]struct{}, len(invite.Emails))
+	for i := range invite.Emails {
+		emails[invite.Emails[i]] = struct{}{}
+	}
+
+	dtos := make([]data.InviteDto, 0, len(emails))
+	for email := range emails {
+		dto := data.InviteDto{
 			Email:      email,
 			RoleID:     invite.RoleID,
 			Resource:   invite.Resource,
 			ResourceID: invite.ResourceID,
 		}
+
 		if user, ok := usersMap[email]; ok {
-			dtos[i].UserID = &user.Id
+			dto.UserID = &user.Id
 		}
+
+		dtos = append(dtos, dto)
 	}
 
 	invites, err := uc.invitesRepo.CreateInvites(ctx, tenantID, dtos)
 	if err != nil {
-		return nil, err
+		return nil, v1.ErrorDatabaseQuery("failed to invite person")
 	}
 
 	invitesItems := make([]InviteItem, len(invites))
@@ -182,7 +190,7 @@ func (uc *InvitesUsecase) ListInvites(
 	}, nil
 }
 
-func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteID, userID int64, code uuid.UUID) (
+func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, actorID, inviteID int64, code uuid.UUID) (
 	*ent.Invite, error,
 ) {
 	invite, err := uc.invitesRepo.GetInviteByCode(ctx, inviteID, code)
@@ -194,8 +202,15 @@ func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, inviteID, userID int
 		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
-	invite, tenantMember, err := uc.invitesRepo.AcceptInvite(ctx, userID, invite)
+	invite, tenantMember, err := uc.invitesRepo.AcceptInvite(ctx, actorID, invite)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, v1.ErrorNotFound("invite not found")
+		}
+		if ent.IsConstraintError(err) {
+			return nil, v1.ErrorInvalidRequest("member already exists")
+		}
+
 		return nil, v1.ErrorDatabaseQuery("failed to accept invite, err %s", err.Error())
 	}
 
