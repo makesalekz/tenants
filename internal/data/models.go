@@ -39,7 +39,7 @@ func (dto *InvitesDTO) Validate() error {
 		return errors.New("there is no email in invite")
 	}
 
-	var bitmask int64 = btoi(dto.RoleID != 0) |
+	var bitmask = btoi(dto.RoleID != 0) |
 		btoi(dto.Resource != "")<<1 |
 		btoi(dto.ResourceID != 0)<<2
 

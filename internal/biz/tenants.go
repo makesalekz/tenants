@@ -14,8 +14,8 @@ import (
 	"github.com/go-kratos/kratos/v2/metadata"
 )
 
-const ADMIN_ROLE_ID = 1
-const BASIC_ROLE_ID = 2
+const AdminRoleID = 1
+const BasicRoleID = 2
 
 type TenantsList struct {
 	Tenants  []*ent.Tenant
@@ -53,11 +53,11 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		metadata.AppendToClientContext(ctx, "x-md-global-tenant-id", strconv.FormatInt(tenant.ID, 10)),
 		&rbac_v1.AssignRoleRequest{
 			IdentityId: member.IdentityID.String(),
-			RoleId:     ADMIN_ROLE_ID,
+			RoleId:     AdminRoleID,
 		},
 		&rbac_v1.AssignRoleRequest{
 			IdentityId: "",
-			RoleId:     BASIC_ROLE_ID,
+			RoleId:     BasicRoleID,
 		},
 	)
 	if err != nil {
@@ -78,8 +78,8 @@ func (uc *TenantsUsecase) UpdateTenant(ctx context.Context, dto data.TenantDto) 
 	return tenant, nil
 }
 
-func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, tenantId int64) error {
-	err := uc.repo.DeleteTenant(ctx, tenantId)
+func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, tenantID int64) error {
+	err := uc.repo.DeleteTenant(ctx, tenantID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return tenants_v1.ErrorNotFound("tenant not found")
@@ -87,11 +87,10 @@ func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, tenantId int64) erro
 		return err
 	}
 	return nil
-
 }
 
-func (uc *TenantsUsecase) GetTenant(ctx context.Context, tenantId int64) (*ent.Tenant, error) {
-	tenant, err := uc.repo.GetTenant(ctx, tenantId)
+func (uc *TenantsUsecase) GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error) {
+	tenant, err := uc.repo.GetTenant(ctx, tenantID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, tenants_v1.ErrorNotFound("tenant not found")
@@ -122,7 +121,7 @@ func (uc *TenantsUsecase) ListTenants(
 		Total: &total,
 	}
 
-	if len(tenants) == int(paginate.Limit) {
+	if len(tenants) == int(paginate.GetLimit()) {
 		paginateReply.FromId = &tenants[len(tenants)-1].ID
 	}
 
