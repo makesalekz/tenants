@@ -27,14 +27,14 @@ type TenantsUsecase struct {
 	log *log.Helper
 
 	repo data.TenantsRepo
-	rbac *data.RbacRemote
+	rbac data.IRbacRemote
 }
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewTenantsUsecase(
 	logger log.Logger,
 	repo data.TenantsRepo,
-	rbac *data.RbacRemote,
+	rbac data.IRbacRemote,
 ) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
 		log:  log.NewHelper(logger),
@@ -101,7 +101,9 @@ func (uc *TenantsUsecase) GetTenant(ctx context.Context, tenantId int64) (*ent.T
 	return tenant, nil
 }
 
-func (uc *TenantsUsecase) ListTenants(ctx context.Context, filter data.TenantsListFilter, paginate *utils_v1.PaginateRequest) (*TenantsList, error) {
+func (uc *TenantsUsecase) ListTenants(
+	ctx context.Context, filter data.TenantsListFilter, paginate *utils_v1.PaginateRequest,
+) (*TenantsList, error) {
 	if paginate == nil {
 		paginate = &utils_v1.PaginateRequest{}
 	}

@@ -20,7 +20,7 @@ func NewIamRemote(
 	logger log.Logger,
 	conf *conf.Bootstrap,
 	dm dialer.IDialerManager,
-) (*IamRemote, func(), error) {
+) (IIamRemote, func(), error) {
 	dialer, err := dm.NewServiceDialer("iam", conf.Discovery.Iam)
 	if err != nil {
 		return nil, nil, err

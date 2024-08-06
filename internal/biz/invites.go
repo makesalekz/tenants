@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	kconfig "github.com/go-kratos/kratos/v2/config"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/notifications/messages"
 	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
@@ -13,7 +14,6 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/enum"
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v1/config"
 	u_nats "gitlab.calendaria.team/services/utils/v1/nats"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -35,9 +35,9 @@ type InvitesUsecase struct {
 	log         *log.Helper
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
-	iam         *data.IamRemote
-	rbac        *data.RbacRemote
-	config      *config.Config
+	iam         data.IIamRemote
+	rbac        data.IRbacRemote
+	config      kconfig.Config
 	qm          u_nats.IQueueManager
 }
 
@@ -46,10 +46,10 @@ func NewInvitesUsecase(
 	logger log.Logger,
 	tenantsRepo data.TenantsRepo,
 	invitesRepo data.InvitesRepo,
-	iam *data.IamRemote,
-	rbac *data.RbacRemote,
+	iam data.IIamRemote,
+	rbac data.IRbacRemote,
 	queueManager u_nats.IQueueManager,
-	config *config.Config,
+	config kconfig.Config,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
 		log:         log.NewHelper(logger),
@@ -63,15 +63,9 @@ func NewInvitesUsecase(
 }
 
 func (uc *InvitesUsecase) CreateInvites(
-	ctx context.Context,
-	tenantID int64, appID string,
-	emails []string,
-	lang string,
-	roleID int64,
-	resource string,
-	resourceID int64,
+	ctx context.Context, tenantID int64, appID string, invite *data.InvitesDTO,
 ) ([]InviteItem, error) {
-	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: emails})
+	reply, err := uc.iam.GetUsers(ctx, &iam_v1.GetUsersRequest{Emails: invite.Emails})
 	if err != nil {
 		return nil, err
 	}
@@ -81,13 +75,13 @@ func (uc *InvitesUsecase) CreateInvites(
 		usersMap[user.GetEmail()] = user
 	}
 
-	dtos := make([]data.InviteDto, len(emails))
-	for i, email := range emails {
+	dtos := make([]data.InviteDto, len(invite.Emails))
+	for i, email := range invite.Emails {
 		dtos[i] = data.InviteDto{
 			Email:      email,
-			RoleID:     roleID,
-			Resource:   resource,
-			ResourceID: resourceID,
+			RoleID:     invite.RoleID,
+			Resource:   invite.Resource,
+			ResourceID: invite.ResourceID,
 		}
 		if user, ok := usersMap[email]; ok {
 			dtos[i].UserID = &user.Id
@@ -113,7 +107,7 @@ func (uc *InvitesUsecase) CreateInvites(
 			processCtx, processCancel := context.WithTimeout(context.Background(), DefaultTimeout*time.Second)
 			defer processCancel()
 
-			uc.processInvitations(processCtx, tenantID, invitesItems, lang)
+			uc.processInvitations(processCtx, tenantID, invitesItems, invite.Lang)
 		}()
 	}
 

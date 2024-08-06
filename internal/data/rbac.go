@@ -20,7 +20,7 @@ func NewRbacRemote(
 	logger log.Logger,
 	conf *conf.Bootstrap,
 	dm dialer.IDialerManager,
-) (*RbacRemote, func(), error) {
+) (IRbacRemote, func(), error) {
 	dialer, err := dm.NewServiceDialer("rbac", conf.Discovery.Rbac)
 	if err != nil {
 		return nil, nil, err

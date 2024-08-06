@@ -44,15 +44,20 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 		return nil, v1.ErrorInvalidRequest("emails are empty")
 	}
 
-	invites, err := s.iu.CreateInvites(
-		ctx,
-		tenantID, req.GetAppId(),
-		req.GetEmails(),
-		req.GetLanguage(),
-		req.GetRoleId(),
-		req.GetResource(),
-		req.GetResourceId(),
-	)
+	invite := &data.InvitesDTO{
+		Emails:     req.GetEmails(),
+		Lang:       req.GetLanguage(),
+		RoleID:     req.GetRoleId(),
+		Resource:   req.GetResource(),
+		ResourceID: req.GetResourceId(),
+	}
+
+	err := invite.Validate()
+	if err != nil {
+		return nil, v1.ErrorInvalidRequest("failed validation, err %s", err.Error())
+	}
+
+	invites, err := s.iu.CreateInvites(ctx, tenantID, req.GetAppId(), invite)
 	if err != nil {
 		return nil, err
 	}

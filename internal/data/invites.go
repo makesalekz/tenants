@@ -13,20 +13,6 @@ import (
 	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
 )
 
-type InviteDto struct {
-	Email      string
-	UserID     *int64
-	RoleID     int64
-	Resource   string
-	ResourceID int64
-}
-
-type InvitesListFilter struct {
-	TenantID int64
-	Search   string
-	Status   *enum.InviteStatus
-}
-
 // InvitesRepo.
 type InvitesRepo interface {
 	CreateInvites(ctx context.Context, tenantID int64, dtos []InviteDto) ([]*ent.Invite, error)

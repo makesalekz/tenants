@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	kconfig "github.com/go-kratos/kratos/v2/config"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	u_config "gitlab.calendaria.team/services/utils/v1/config"
@@ -27,6 +28,7 @@ var ProviderSet = wire.NewSet(
 	u_jwt.NewJwtProcessor,
 	u_dialer.NewServiceDialerManager,
 	u_tracing.NewTracer,
+	KConfig,
 	NewNatsClient,
 	NewTenantsRepo,
 	NewMembersRepo,
@@ -95,4 +97,15 @@ func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, 
 	return &Data{
 		db: client,
 	}, cleanup, nil
+}
+
+func KConfig(c *u_config.Config) kconfig.Config {
+	return c
+}
+
+func btoi(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
 }

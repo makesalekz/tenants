@@ -48,25 +48,25 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	rbacRemote, cleanup2, err := data.NewRbacRemote(logger, bootstrap, iDialerManager)
+	iRbacRemote, cleanup2, err := data.NewRbacRemote(logger, bootstrap, iDialerManager)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	tenantsUsecase, err := biz.NewTenantsUsecase(logger, tenantsRepo, rbacRemote)
+	tenantsUsecase, err := biz.NewTenantsUsecase(logger, tenantsRepo, iRbacRemote)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	membersRepo := data.NewMembersRepo(dataData)
-	iamRemote, cleanup3, err := data.NewIamRemote(logger, bootstrap, iDialerManager)
+	iIamRemote, cleanup3, err := data.NewIamRemote(logger, bootstrap, iDialerManager)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	membersUsecase, err := biz.NewMembersUsecase(tenantsRepo, membersRepo, iamRemote)
+	membersUsecase, err := biz.NewMembersUsecase(tenantsRepo, membersRepo, iIamRemote)
 	if err != nil {
 		cleanup3()
 		cleanup2()
@@ -84,7 +84,8 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	iQueueManager := nats.NewQueueManager(configConfig, encodedConn, logger)
-	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iamRemote, rbacRemote, iQueueManager, configConfig)
+	config2 := data.KConfig(configConfig)
+	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iIamRemote, iRbacRemote, iQueueManager, config2)
 	if err != nil {
 		cleanup4()
 		cleanup3()

@@ -29,14 +29,14 @@ type MembersList struct {
 type MembersUsecase struct {
 	tenantsRepo data.TenantsRepo
 	membersRepo data.MembersRepo
-	iam         *data.IamRemote
+	iam         data.IIamRemote
 }
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewMembersUsecase(
 	tenantsRepo data.TenantsRepo,
 	membersRepo data.MembersRepo,
-	iam *data.IamRemote,
+	iam data.IIamRemote,
 ) (*MembersUsecase, error) {
 	return &MembersUsecase{
 		tenantsRepo: tenantsRepo,
