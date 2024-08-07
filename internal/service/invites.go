@@ -63,7 +63,7 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 	}
 
 	return &v1.ListInvitesReply{
-		Invites: replyInvites(invites),
+		Invites: ReplyInvites(invites),
 	}, nil
 }
 
@@ -127,7 +127,7 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 		return nil, err
 	}
 	return &v1.ListInvitesReply{
-		Invites:  replyInvites(list.Invites),
+		Invites:  ReplyInvites(list.Invites),
 		Paginate: list.Paginate,
 	}, nil
 }
@@ -234,7 +234,7 @@ func replyInvite(invite biz.InviteItem) *v1.Invite {
 	}
 }
 
-func replyInvites(invites []biz.InviteItem) []*v1.Invite {
+func ReplyInvites(invites []biz.InviteItem) []*v1.Invite {
 	reply := make([]*v1.Invite, len(invites))
 	for i, invite := range invites {
 		reply[i] = replyInvite(invite)
