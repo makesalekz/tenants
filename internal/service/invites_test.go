@@ -151,7 +151,7 @@ func TestInvitesCreate(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	require.Equal(t, expectedInvites, invites.Invites)
+	require.Equal(t, expectedInvites, invites.GetInvites())
 }
 
 func TestFailVerify(t *testing.T) {
