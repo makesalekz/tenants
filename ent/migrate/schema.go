@@ -74,7 +74,7 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{InvitesColumns[10], InvitesColumns[3], InvitesColumns[4]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "status = 'accepted'",
+					Where: "status = 'accepted' AND user_id IS NOT NULL",
 				},
 			},
 			{
@@ -82,7 +82,7 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{InvitesColumns[10], InvitesColumns[2], InvitesColumns[4]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "status = 'accepted'",
+					Where: "status = 'accepted' AND email IS NOT NULL",
 				},
 			},
 		},
