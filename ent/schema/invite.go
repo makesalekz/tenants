@@ -48,5 +48,6 @@ func (Invite) Edges() []ent.Edge {
 func (Invite) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("tenant_id", "user_id", "status").Annotations(entsql.IndexWhere("status = 'accepted'")).Unique(),
+		index.Fields("tenant_id", "email", "status").Annotations(entsql.IndexWhere("status = 'accepted'")).Unique(),
 	}
 }

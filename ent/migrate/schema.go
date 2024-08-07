@@ -77,6 +77,14 @@ var (
 					Where: "status = 'accepted'",
 				},
 			},
+			{
+				Name:    "invite_tenant_id_email_status",
+				Unique:  true,
+				Columns: []*schema.Column{InvitesColumns[10], InvitesColumns[2], InvitesColumns[4]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "status = 'accepted'",
+				},
+			},
 		},
 	}
 	// MembersColumns holds the columns for the "members" table.
