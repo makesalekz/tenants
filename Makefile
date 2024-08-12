@@ -153,7 +153,18 @@ cover:
 .PHONY: mock
 # generate mock - (example here)
 mock:
-	mockgen -source internal/data/teams.go -destination internal/data/mock/teams.go -package mock
+	mockgen -source internal/data/invites.go -destination internal/data/mock/invites.go -package mock
+	mockgen -source internal/data/members.go -destination internal/data/mock/members.go -package mock
+	mockgen -source internal/data/groups.go -destination internal/data/mock/groups.go -package mock
+	mockgen -source internal/data/tenants.go -destination internal/data/mock/tenants.go -package mock
+	mockgen -source internal/data/iam_interface.go -destination internal/data/mock/iam.go -package mock
+	mockgen -source internal/data/rbac_interface.go -destination internal/data/mock/rbac.go -package mock
+	mockgen -destination internal/data/mock/config.go -package mock "github.com/go-kratos/kratos/v2/config" Config
+
+
+interfaces:
+	ifacemaker -f internal/data/iam.go -s  IamRemote -i IIamRemote -p data -o internal/data/iam_interface.go
+	ifacemaker -f internal/data/rbac.go -s  RbacRemote -i IRbacRemote -p data -o internal/data/rbac_interface.go
 
 # show help
 help:

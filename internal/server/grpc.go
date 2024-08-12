@@ -4,8 +4,8 @@ import (
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
 	"gitlab.calendaria.team/services/tenants/internal/service"
-	u_jwt "gitlab.calendaria.team/services/utils/v1/jwt"
 	u_metrics "gitlab.calendaria.team/services/utils/v1/middlewares/metrics"
+	u_jwt "gitlab.calendaria.team/services/utils/v2/jwt"
 	u_auth "gitlab.calendaria.team/services/utils/v2/middlewares/auth"
 	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
 
@@ -19,7 +19,7 @@ import (
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(
 	c *conf.Bootstrap,
-	jwtp *u_jwt.JwtProcessor,
+	jwtp u_jwt.IJwtProcessor,
 	tracer *u_tracing.Tracer,
 	tenantsService *service.TenantsService,
 	membersService *service.MembersService,
@@ -44,14 +44,14 @@ func NewGRPCServer(
 			),
 		),
 	}
-	if c.Server.Grpc.Network != "" {
-		opts = append(opts, grpc.Network(c.Server.Grpc.Network))
+	if c.GetServer().GetGrpc().GetNetwork() != "" {
+		opts = append(opts, grpc.Network(c.GetServer().GetGrpc().GetNetwork()))
 	}
-	if c.Server.Grpc.Addr != "" {
-		opts = append(opts, grpc.Address(c.Server.Grpc.Addr))
+	if c.GetServer().GetGrpc().GetAddr() != "" {
+		opts = append(opts, grpc.Address(c.GetServer().GetGrpc().GetAddr()))
 	}
-	if c.Server.Grpc.Timeout != nil {
-		opts = append(opts, grpc.Timeout(c.Server.Grpc.Timeout.AsDuration()))
+	if c.GetServer().GetGrpc().GetTimeout() != nil {
+		opts = append(opts, grpc.Timeout(c.GetServer().GetGrpc().GetTimeout().AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
 

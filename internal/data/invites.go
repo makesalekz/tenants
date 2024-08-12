@@ -13,24 +13,15 @@ import (
 	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
 )
 
-type InviteDto struct {
-	Email  string
-	UserID *int64
-}
-
-type InvitesListFilter struct {
-	TenantID int64
-	Search   string
-	Status   *enum.InviteStatus
-}
-
 // InvitesRepo.
 type InvitesRepo interface {
 	CreateInvites(ctx context.Context, tenantID int64, dtos []InviteDto) ([]*ent.Invite, error)
 	GetInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error)
 	GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (*ent.Invite, error)
 	UpdateInviteStatus(ctx context.Context, invite *ent.Invite, status enum.InviteStatus) (*ent.Invite, error)
-	AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (*ent.Invite, error)
+	AcceptInvite(ctx context.Context, actorID int64, invite *ent.Invite) (
+		*ent.Invite, *ent.Member, error,
+	)
 	DeleteInvite(ctx context.Context, tenantID, inviteID int64) error
 	ListInvites(
 		ctx context.Context, filter InvitesListFilter, sort *utils_v1.SortRequest, paginate *utils_v1.PaginateRequest,
@@ -62,31 +53,34 @@ func (r *invitesRepo) CreateInvites(ctx context.Context, tenantID int64, dtos []
 		if dto.UserID != nil {
 			invitesCreate[i].SetUserID(*dto.UserID)
 		}
+
+		if dto.RoleID != 0 {
+			invitesCreate[i].SetRoleID(dto.RoleID)
+		}
+
+		if dto.Resource != "" {
+			invitesCreate[i].SetResource(dto.Resource)
+		}
+
+		if dto.ResourceID != 0 {
+			invitesCreate[i].SetResourceID(dto.ResourceID)
+		}
 	}
 
-	err := r.db.Invite.CreateBulk(invitesCreate...).
-		OnConflictColumns(invite.FieldTenantID, invite.FieldEmail).
-		UpdateStatus().
-		UpdateUpdatedAt().
-		Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	emails := make([]string, len(dtos))
-	for i, dto := range dtos {
-		emails[i] = dto.Email
-	}
-
-	return r.db.Invite.Query().Where(invite.TenantID(tenantID), invite.EmailIn(emails...)).All(ctx)
+	return r.db.Invite.CreateBulk(invitesCreate...).Save(ctx)
 }
 
 func (r *invitesRepo) GetInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error) {
 	return r.db.Invite.Query().Where(invite.TenantID(tenantID), invite.ID(inviteID)).First(ctx)
 }
 
-func (r *invitesRepo) GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (*ent.Invite, error) {
-	return r.db.Invite.Query().Where(invite.ID(inviteID), invite.Code(code)).First(ctx)
+func (r *invitesRepo) GetInviteByCode(ctx context.Context, inviteID int64, code uuid.UUID) (
+	*ent.Invite, error,
+) {
+	return r.db.Invite.Query().Where(
+		invite.ID(inviteID),
+		invite.Code(code),
+	).First(ctx)
 }
 
 func (r *invitesRepo) UpdateInviteStatus(
@@ -95,10 +89,12 @@ func (r *invitesRepo) UpdateInviteStatus(
 	return invite.Update().SetStatus(status).SetUpdatedAt(time.Now()).Save(ctx)
 }
 
-func (r *invitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (*ent.Invite, error) {
+func (r *invitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *ent.Invite) (
+	*ent.Invite, *ent.Member, error,
+) {
 	tx, err := r.db.Tx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer func() {
 		if err != nil {
@@ -106,30 +102,32 @@ func (r *invitesRepo) AcceptInvite(ctx context.Context, userID int64, invite *en
 		}
 	}()
 
+	var tenantMember *ent.Member
+
 	updated, err := tx.Invite.UpdateOneID(invite.ID).
 		SetUserID(userID).
 		SetStatus(enum.Accepted).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	_, err = tx.Member.Create().
+	tenantMember, err = tx.Member.Create().
 		SetTenantID(invite.TenantID).
 		SetUserID(userID).
 		SetIdentityID(u_uuid.NewFromActorID(userID)).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return updated, nil
+	return updated, tenantMember, nil
 }
 
 func (r *invitesRepo) DeleteInvite(ctx context.Context, tenantID, inviteID int64) error {

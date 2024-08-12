@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -26,6 +27,9 @@ func (Invite) Fields() []ent.Field {
 		field.Enum("status").GoType(enum.InviteStatus("")).Default(enum.New.Value()),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
+		field.Int64("role_id").Optional(),
+		field.String("resource").Optional(),
+		field.Int64("resource_id").Optional(),
 	}
 }
 
@@ -43,6 +47,11 @@ func (Invite) Edges() []ent.Edge {
 
 func (Invite) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("tenant_id", "email").Unique(),
+		index.Fields(
+			"tenant_id", "user_id", "status",
+		).Annotations(entsql.IndexWhere("status = 'accepted' AND user_id IS NOT NULL")).Unique(),
+		index.Fields(
+			"tenant_id", "email", "status",
+		).Annotations(entsql.IndexWhere("status = 'accepted' AND email IS NOT NULL")).Unique(),
 	}
 }

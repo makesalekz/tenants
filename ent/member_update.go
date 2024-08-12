@@ -120,7 +120,7 @@ func (mu *MemberUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (mu *MemberUpdate) check() error {
-	if _, ok := mu.mutation.TenantID(); mu.mutation.TenantCleared() && !ok {
+	if mu.mutation.TenantCleared() && len(mu.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Member.tenant"`)
 	}
 	return nil
@@ -320,7 +320,7 @@ func (muo *MemberUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (muo *MemberUpdateOne) check() error {
-	if _, ok := muo.mutation.TenantID(); muo.mutation.TenantCleared() && !ok {
+	if muo.mutation.TenantCleared() && len(muo.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Member.tenant"`)
 	}
 	return nil
