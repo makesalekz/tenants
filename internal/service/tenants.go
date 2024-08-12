@@ -74,6 +74,18 @@ func (s *TenantsService) DeleteTenant(ctx context.Context, req *v1.TenantRequest
 	return &utils_v1.EmptyReply{}, nil
 }
 
+func (s *TenantsService) DeleteUsersTenants(
+	ctx context.Context,
+	req *v1.DeleteUsersTenantsRequest,
+) (*utils_v1.EmptyReply, error) {
+	err := s.tu.DeleteUsersTenants(ctx, req.GetUsersIds())
+	if err != nil {
+		return nil, err
+	}
+
+	return &utils_v1.EmptyReply{}, nil
+}
+
 func (s *TenantsService) GetTenant(ctx context.Context, req *v1.TenantRequest) (*v1.TenantReply, error) {
 	tenant, err := s.tu.GetTenant(ctx, req.GetTenantId())
 	if err != nil {
