@@ -94,7 +94,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	}
 	invitesService := service.NewInvitesService(tenantsUsecase, invitesUsecase)
 	groupsRepo := data.NewGroupsRepo(dataData)
-	groupsUsecase, err := biz.NewGroupsUsecase(tenantsRepo, groupsRepo)
+	groupsUsecase, err := biz.NewGroupsUsecase(logger, tenantsRepo, groupsRepo, membersRepo)
 	if err != nil {
 		cleanup4()
 		cleanup3()

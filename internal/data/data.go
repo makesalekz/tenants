@@ -11,6 +11,7 @@ import (
 	u_dialer "gitlab.calendaria.team/services/utils/v2/dialer"
 	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 
@@ -19,6 +20,8 @@ import (
 )
 
 // ProviderSet is data providers.
+//
+//nolint:gochecknoglobals // this global variable is required for wire
 var ProviderSet = wire.NewSet(
 	NewData,
 	u_config.NewConfig,
@@ -40,11 +43,13 @@ type Data struct {
 	db  *ent.Client
 }
 
+const CodeInvalid = 500
+
 // NewData .
 func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, func(), error) {
 	l := log.NewHelper(logger)
 
-	dbDsn := bc.Db // read from local config
+	dbDsn := bc.GetDb() // read from local config
 	if dbDsn == "" {
 		// read from vault
 		secret, err := c.ReadSecretsFor(context.Background(), "db-dsn")
@@ -52,7 +57,13 @@ func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, 
 			l.Fatalf("db dsn not found: %v", err)
 			return nil, nil, err
 		}
-		dbDsn = secret["data"].(string)
+
+		secretData, ok := secret["data"].(string)
+		if !ok {
+			return nil, nil, errors.New(CodeInvalid, "internal error", "db dsn data not found")
+		}
+
+		dbDsn = secretData
 	}
 
 	autoMigrate := os.Getenv("AUTOMIGRATE")
@@ -69,17 +80,17 @@ func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, 
 	}
 
 	if autoMigrate != "" {
-		if err := client.Schema.Create(context.Background()); err != nil {
-			l.Errorf("failed creating schema resources: %v", err)
-			return nil, nil, err
+		if err2 := client.Schema.Create(context.Background()); err2 != nil {
+			l.Errorf("failed creating schema resources: %v", err2)
+			return nil, nil, err2
 		}
 	}
 
 	l.Info("Connected to postgres")
 
 	cleanup := func() {
-		if err := client.Close(); err != nil {
-			l.Error(err)
+		if err2 := client.Close(); err2 != nil {
+			l.Error(err2)
 		}
 	}
 

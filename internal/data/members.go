@@ -24,6 +24,7 @@ type MembersRepo interface {
 	CreateMembers(ctx context.Context, tenantID int64, usersIDs []int64) ([]*ent.Member, error)
 	DeleteMember(ctx context.Context, tenantID, memberID int64) error
 	GetMembers(ctx context.Context, tenantID int64, identityIDs []uuid.UUID, withGroups bool) ([]*ent.Member, error)
+	GetTenantMembersIDs(ctx context.Context, tenantID int64, membersIDs ...int64) ([]int64, error)
 	GetMember(ctx context.Context, tenantID, memberID int64) (*ent.Member, error)
 	GetMemberByUserID(ctx context.Context, tenantID, userID int64) (*ent.Member, error)
 	ListMembers(ctx context.Context, filter MembersListFilter) ([]*ent.Member, error)
@@ -77,6 +78,14 @@ func (r *membersRepo) GetMembers(
 	}
 
 	return query.Where(predicate).WithGroups().All(ctx)
+}
+
+func (r *membersRepo) GetTenantMembersIDs(ctx context.Context, tenantID int64, membersIDs ...int64) ([]int64, error) {
+	if len(membersIDs) == 0 {
+		return r.db.Member.Query().Where(member.TenantID(tenantID)).IDs(ctx)
+	}
+
+	return r.db.Member.Query().Where(member.TenantID(tenantID), member.IDIn(membersIDs...)).IDs(ctx)
 }
 
 func (r *membersRepo) GetMember(ctx context.Context, tenantID, memberID int64) (*ent.Member, error) {
