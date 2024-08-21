@@ -111,29 +111,36 @@ func (r *tenantsRepo) DeleteUsersTenants(ctx context.Context, usersIDs []int64) 
 		}
 	}()
 
+	tenantIDs, err := tx.Tenant.Query().
+		Where(
+			tenant.OwnerIDIn(usersIDs...),
+			tenant.Type(enum.Personal),
+		).
+		IDs(ctx)
+
 	_, err = tx.Invite.Delete().
-		Where(invite.HasTenantWith(tenant.OwnerIDIn(usersIDs...))).
+		Where(invite.TenantIDIn(tenantIDs...)).
 		Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
 
 	_, err = tx.Member.Delete().
-		Where(member.HasTenantWith(tenant.OwnerIDIn(usersIDs...))).
+		Where(member.TenantIDIn(tenantIDs...)).
 		Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
 
 	_, err = tx.Group.Delete().
-		Where(group.HasTenantWith(tenant.OwnerIDIn(usersIDs...))).
+		Where(group.TenantIDIn(tenantIDs...)).
 		Exec(ctx)
 	if err != nil {
 		return 0, err
 	}
 
 	deletedCount, err := r.db.Tenant.Update().
-		Where(tenant.OwnerIDIn(usersIDs...)).
+		Where(tenant.IDIn(tenantIDs...)).
 		SetName("").
 		SetDeletedAt(time.Now()).
 		Save(ctx)
