@@ -44,7 +44,9 @@ func (r *invitesRepo) CreateInvites(ctx context.Context, tenantID int64, dtos []
 	[]*ent.Invite, error,
 ) {
 	invitesCreate := make([]*ent.InviteCreate, len(dtos))
+	emails := make([]string, len(dtos))
 	for i, dto := range dtos {
+		emails[i] = dto.Email
 		invitesCreate[i] = r.db.Invite.Create().
 			SetTenantID(tenantID).
 			// we do not care about uniqueness, it's ok. There is probably no security issues
@@ -67,7 +69,23 @@ func (r *invitesRepo) CreateInvites(ctx context.Context, tenantID int64, dtos []
 		}
 	}
 
-	return r.db.Invite.CreateBulk(invitesCreate...).Save(ctx)
+	err := r.db.Invite.CreateBulk(invitesCreate...).
+		OnConflictColumns(
+			invite.FieldTenantID,
+			invite.FieldEmail,
+		).
+		UpdateStatus().
+		UpdateUpdatedAt().
+		Exec(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return r.db.Invite.Query().Where(
+		invite.TenantID(tenantID),
+		invite.EmailIn(emails...),
+	).All(ctx)
 }
 
 func (r *invitesRepo) GetInvite(ctx context.Context, tenantID, inviteID int64) (*ent.Invite, error) {
