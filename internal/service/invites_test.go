@@ -29,6 +29,8 @@ func beforeTest(t *testing.T) (
 	*gomock.Controller,
 	*mock.MockInvitesRepo,
 	*mock.MockIIamRemote,
+	int64,
+	int64,
 ) {
 	logger := zap.NewZapLogger(true)
 	ctrl := gomock.NewController(t)
@@ -51,15 +53,13 @@ func beforeTest(t *testing.T) (
 	var actorID int64 = 332
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
 
-	return ctx, invitesService, ctrl, invitesRepo, iamRemote
+	return ctx, invitesService, ctrl, invitesRepo, iamRemote, tenantID, actorID
 }
 
 func TestInvitesCreate(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, iamRemote := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, iamRemote, tenantID, actorID := beforeTest(t)
 	defer ctrl.Finish()
 
-	var tenantID int64 = 12
-	var actorID int64 = 332
 	appID := ""
 	emails := []string{"email1", "email2"}
 	inviteCode := u_uuid.NewFromActorID(actorID)
@@ -174,11 +174,9 @@ func TestInvitesCreate(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutResource(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, iamRemote := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, iamRemote, tenantID, actorID := beforeTest(t)
 	defer ctrl.Finish()
 
-	var tenantID int64 = 12
-	var actorID int64 = 332
 	appID := ""
 	emails := []string{"email1", "email2"}
 	inviteCode := u_uuid.NewFromActorID(actorID)
@@ -294,11 +292,9 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutRole(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, iamRemote := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, iamRemote, tenantID, actorID := beforeTest(t)
 	defer ctrl.Finish()
 
-	var tenantID int64 = 12
-	var actorID int64 = 332
 	appID := ""
 	emails := []string{"email1", "email2"}
 	inviteCode := u_uuid.NewFromActorID(actorID)
@@ -413,11 +409,10 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 }
 
 func TestFailVerify(t *testing.T) {
-	ctx, invitesService, ctrl, _, _ := beforeTest(t)
+	ctx, invitesService, ctrl, _, _, tenantID, actorID := beforeTest(t)
+
 	defer ctrl.Finish()
 
-	var tenantID int64 = 12
-	var actorID int64 = 332
 	appID := ""
 	emails := []string{"email1", "email2"}
 	invitesDto := &data.InvitesDTO{
