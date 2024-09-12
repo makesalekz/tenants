@@ -28,7 +28,6 @@ func beforeTest(t *testing.T) (
 	*service.InvitesService,
 	*gomock.Controller,
 	*mock.MockInvitesRepo,
-	*mock.MockTenantsRepo,
 	*mock.MockIIamRemote,
 ) {
 	logger := zap.NewZapLogger(true)
@@ -52,11 +51,11 @@ func beforeTest(t *testing.T) (
 	var actorID int64 = 332
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
 
-	return ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote
+	return ctx, invitesService, ctrl, invitesRepo, iamRemote
 }
 
 func TestInvitesCreate(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, iamRemote := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
@@ -156,9 +155,6 @@ func TestInvitesCreate(t *testing.T) {
 			return entInvites, nil
 		},
 	).Times(1)
-	tenantsRepo.EXPECT().GetTenant(gomock.Any(), tenantID).Return(
-		&ent.Tenant{}, nil,
-	).Do(func() { time.Sleep(time.Second) }).AnyTimes() // this method is used in goroutine, so we need to wait
 
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
 
@@ -178,7 +174,7 @@ func TestInvitesCreate(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutResource(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, iamRemote := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
@@ -280,10 +276,6 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 		},
 	).Times(1)
 
-	tenantsRepo.EXPECT().GetTenant(gomock.Any(), tenantID).Return(
-		&ent.Tenant{}, nil,
-	).Do(func() { time.Sleep(time.Second) }).AnyTimes() // this method is used in goroutine, so we need to wait
-
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
 
 	invites, err := invitesService.CreateInvites(
@@ -302,7 +294,7 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutRole(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, iamRemote := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
@@ -402,9 +394,6 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 			return entInvites, nil
 		},
 	).Times(1)
-	tenantsRepo.EXPECT().GetTenant(gomock.Any(), tenantID).Return(
-		&ent.Tenant{}, nil,
-	).Do(func() { time.Sleep(time.Second) }).AnyTimes() // this method is used in goroutine, so we need to wait
 
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
 
@@ -424,7 +413,7 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 }
 
 func TestFailVerify(t *testing.T) {
-	ctx, invitesService, ctrl, _, _, _ := beforeTest(t)
+	ctx, invitesService, ctrl, _, _ := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
