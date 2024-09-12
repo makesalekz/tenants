@@ -23,7 +23,14 @@ import (
 	"gitlab.calendaria.team/services/utils/v2/zap"
 )
 
-func beforeTest(t *testing.T) (context.Context, *service.InvitesService, *gomock.Controller, *mock.MockInvitesRepo, *mock.MockTenantsRepo, *mock.MockIIamRemote, *mock.MockConfig) {
+func beforeTest(t *testing.T) (
+	context.Context,
+	*service.InvitesService,
+	*gomock.Controller,
+	*mock.MockInvitesRepo,
+	*mock.MockTenantsRepo,
+	*mock.MockIIamRemote,
+) {
 	logger := zap.NewZapLogger(true)
 	ctrl := gomock.NewController(t)
 	queue := nats_mock.NewMockIQueueManager(ctrl)
@@ -45,12 +52,11 @@ func beforeTest(t *testing.T) (context.Context, *service.InvitesService, *gomock
 	var actorID int64 = 332
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
 
-	return ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, config
+	return ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote
 }
 
 func TestInvitesCreate(t *testing.T) {
-
-	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, _ := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
@@ -173,7 +179,7 @@ func TestInvitesCreate(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutResource(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, _ := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
@@ -297,7 +303,7 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutRole(t *testing.T) {
-	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, _ := beforeTest(t)
+	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
@@ -420,7 +426,7 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 }
 
 func TestFailVerify(t *testing.T) {
-	ctx, invitesService, ctrl, _, _, _, _ := beforeTest(t)
+	ctx, invitesService, ctrl, _, _, _ := beforeTest(t)
 	defer ctrl.Finish()
 
 	var tenantID int64 = 12
