@@ -2,6 +2,8 @@ package service_test
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -21,12 +23,9 @@ import (
 	"gitlab.calendaria.team/services/utils/v2/zap"
 )
 
-func TestInvitesCreate(t *testing.T) {
+func beforeTest(t *testing.T) (context.Context, *service.InvitesService, *gomock.Controller, *mock.MockInvitesRepo, *mock.MockTenantsRepo, *mock.MockIIamRemote, *mock.MockConfig) {
 	logger := zap.NewZapLogger(true)
 	ctrl := gomock.NewController(t)
-
-	defer ctrl.Finish()
-
 	queue := nats_mock.NewMockIQueueManager(ctrl)
 	invitesRepo := mock.NewMockInvitesRepo(ctrl)
 	tenantsRepo := mock.NewMockTenantsRepo(ctrl)
@@ -40,12 +39,23 @@ func TestInvitesCreate(t *testing.T) {
 	require.NoError(t, err)
 
 	invitesService := service.NewInvitesService(nil, invitesUsecase)
-
+	iamRemote.EXPECT().GetUser(gomock.Any(), gomock.Any()).Return(&iam_v1.UserShort{}, nil).AnyTimes()
 	ctx := context.Background()
+	var tenantID int64 = 12
+	var actorID int64 = 332
+	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
+
+	return ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, config
+}
+
+func TestInvitesCreate(t *testing.T) {
+
+	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, _ := beforeTest(t)
+	defer ctrl.Finish()
 
 	var tenantID int64 = 12
 	var actorID int64 = 332
-	appID := "pms"
+	appID := ""
 	emails := []string{"email1", "email2"}
 	inviteCode := u_uuid.NewFromActorID(actorID)
 	invitesDto := &data.InvitesDTO{
@@ -132,7 +142,15 @@ func TestInvitesCreate(t *testing.T) {
 	iamRemote.EXPECT().GetUsers(
 		gomock.Any(), &iam_v1.GetUsersRequest{Emails: emails},
 	).Return(&iam_v1.UsersReply{Users: users}, nil)
-	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, inviteDtos).Return(entInvites, nil)
+	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, gomock.Any()).DoAndReturn(
+		func(_ context.Context, _ int64, dtos []data.InviteDto) ([]*ent.Invite, error) {
+			// Проверяем, что все элементы присутствуют с использованием вспомогательной функции
+			if !containsAll(inviteDtos, dtos) {
+				return nil, errors.New("elements do not match")
+			}
+			return entInvites, nil
+		},
+	).Times(1)
 	tenantsRepo.EXPECT().GetTenant(gomock.Any(), tenantID).Return(
 		&ent.Tenant{}, nil,
 	).Do(func() { time.Sleep(time.Second) }).AnyTimes() // this method is used in goroutine, so we need to wait
@@ -155,30 +173,12 @@ func TestInvitesCreate(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutResource(t *testing.T) {
-	logger := zap.NewZapLogger(true)
-	ctrl := gomock.NewController(t)
-
+	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, _ := beforeTest(t)
 	defer ctrl.Finish()
-
-	queue := nats_mock.NewMockIQueueManager(ctrl)
-	invitesRepo := mock.NewMockInvitesRepo(ctrl)
-	tenantsRepo := mock.NewMockTenantsRepo(ctrl)
-	iamRemote := mock.NewMockIIamRemote(ctrl)
-	rbacRemote := mock.NewMockIRbacRemote(ctrl)
-	config := mock.NewMockConfig(ctrl)
-
-	invitesUsecase, err := biz.NewInvitesUsecase(
-		logger, tenantsRepo, invitesRepo, iamRemote, rbacRemote, queue, config,
-	)
-	require.NoError(t, err)
-
-	invitesService := service.NewInvitesService(nil, invitesUsecase)
-
-	ctx := context.Background()
 
 	var tenantID int64 = 12
 	var actorID int64 = 332
-	appID := "pms"
+	appID := ""
 	emails := []string{"email1", "email2"}
 	inviteCode := u_uuid.NewFromActorID(actorID)
 	invitesDto := &data.InvitesDTO{
@@ -265,7 +265,16 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 	iamRemote.EXPECT().GetUsers(
 		gomock.Any(), &iam_v1.GetUsersRequest{Emails: emails},
 	).Return(&iam_v1.UsersReply{Users: users}, nil)
-	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, inviteDtos).Return(entInvites, nil)
+	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, gomock.Any()).DoAndReturn(
+		func(_ context.Context, _ int64, dtos []data.InviteDto) ([]*ent.Invite, error) {
+			// Проверяем, что все элементы присутствуют с использованием вспомогательной функции
+			if !containsAll(inviteDtos, dtos) {
+				return nil, errors.New("elements do not match")
+			}
+			return entInvites, nil
+		},
+	).Times(1)
+
 	tenantsRepo.EXPECT().GetTenant(gomock.Any(), tenantID).Return(
 		&ent.Tenant{}, nil,
 	).Do(func() { time.Sleep(time.Second) }).AnyTimes() // this method is used in goroutine, so we need to wait
@@ -288,30 +297,12 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 }
 
 func TestInvitesCreateWithoutRole(t *testing.T) {
-	logger := zap.NewZapLogger(true)
-	ctrl := gomock.NewController(t)
-
+	ctx, invitesService, ctrl, invitesRepo, tenantsRepo, iamRemote, _ := beforeTest(t)
 	defer ctrl.Finish()
-
-	queue := nats_mock.NewMockIQueueManager(ctrl)
-	invitesRepo := mock.NewMockInvitesRepo(ctrl)
-	tenantsRepo := mock.NewMockTenantsRepo(ctrl)
-	iamRemote := mock.NewMockIIamRemote(ctrl)
-	rbacRemote := mock.NewMockIRbacRemote(ctrl)
-	config := mock.NewMockConfig(ctrl)
-
-	invitesUsecase, err := biz.NewInvitesUsecase(
-		logger, tenantsRepo, invitesRepo, iamRemote, rbacRemote, queue, config,
-	)
-	require.NoError(t, err)
-
-	invitesService := service.NewInvitesService(nil, invitesUsecase)
-
-	ctx := context.Background()
 
 	var tenantID int64 = 12
 	var actorID int64 = 332
-	appID := "pms"
+	appID := ""
 	emails := []string{"email1", "email2"}
 	inviteCode := u_uuid.NewFromActorID(actorID)
 	invitesDto := &data.InvitesDTO{
@@ -398,7 +389,15 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 	iamRemote.EXPECT().GetUsers(
 		gomock.Any(), &iam_v1.GetUsersRequest{Emails: emails},
 	).Return(&iam_v1.UsersReply{Users: users}, nil)
-	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, inviteDtos).Return(entInvites, nil)
+	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, gomock.Any()).DoAndReturn(
+		func(_ context.Context, _ int64, dtos []data.InviteDto) ([]*ent.Invite, error) {
+			// Проверяем, что все элементы присутствуют с использованием вспомогательной функции
+			if !containsAll(inviteDtos, dtos) {
+				return nil, errors.New("elements do not match")
+			}
+			return entInvites, nil
+		},
+	).Times(1)
 	tenantsRepo.EXPECT().GetTenant(gomock.Any(), tenantID).Return(
 		&ent.Tenant{}, nil,
 	).Do(func() { time.Sleep(time.Second) }).AnyTimes() // this method is used in goroutine, so we need to wait
@@ -421,30 +420,12 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 }
 
 func TestFailVerify(t *testing.T) {
-	logger := zap.NewZapLogger(true)
-	ctrl := gomock.NewController(t)
-
+	ctx, invitesService, ctrl, _, _, _, _ := beforeTest(t)
 	defer ctrl.Finish()
-
-	queue := nats_mock.NewMockIQueueManager(ctrl)
-	invitesRepo := mock.NewMockInvitesRepo(ctrl)
-	tenantsRepo := mock.NewMockTenantsRepo(ctrl)
-	iamRemote := mock.NewMockIIamRemote(ctrl)
-	rbacRemote := mock.NewMockIRbacRemote(ctrl)
-	config := mock.NewMockConfig(ctrl)
-
-	invitesUsecase, err := biz.NewInvitesUsecase(
-		logger, tenantsRepo, invitesRepo, iamRemote, rbacRemote, queue, config,
-	)
-	require.NoError(t, err)
-
-	invitesService := service.NewInvitesService(nil, invitesUsecase)
-
-	ctx := context.Background()
 
 	var tenantID int64 = 12
 	var actorID int64 = 332
-	appID := "pms"
+	appID := ""
 	emails := []string{"email1", "email2"}
 	invitesDto := &data.InvitesDTO{
 		Emails:     emails,
@@ -455,6 +436,7 @@ func TestFailVerify(t *testing.T) {
 	}
 
 	ctx = auth.NewTenantContext(auth.NewActorContext(ctx, actorID), tenantID)
+	var err error
 
 	_, err = invitesService.CreateInvites(
 		ctx, &v1.CreateInvitesRequest{
@@ -515,4 +497,33 @@ func TestFailVerify(t *testing.T) {
 		},
 	)
 	require.Error(t, err)
+}
+
+func containsAll(expected, actual []data.InviteDto) bool {
+	if len(expected) != len(actual) {
+		return false
+	}
+
+	expectedMap := make(map[string]int)
+	for _, item := range expected {
+		key := fmt.Sprintf("%s-%d-%s-%d", item.Email, item.RoleID, item.Resource, item.ResourceID)
+		expectedMap[key]++
+	}
+
+	for _, item := range actual {
+		key := fmt.Sprintf("%s-%d-%s-%d", item.Email, item.RoleID, item.Resource, item.ResourceID)
+		if count, ok := expectedMap[key]; !ok || count == 0 {
+			return false
+		}
+		expectedMap[key]--
+	}
+
+	// Проверяем, что все элементы были найдены в нужном количестве
+	for _, count := range expectedMap {
+		if count != 0 {
+			return false
+		}
+	}
+
+	return true
 }
