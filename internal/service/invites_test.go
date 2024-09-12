@@ -150,7 +150,6 @@ func TestInvitesCreate(t *testing.T) {
 	).Return(&iam_v1.UsersReply{Users: users}, nil)
 	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, gomock.Any()).DoAndReturn(
 		func(_ context.Context, _ int64, dtos []data.InviteDto) ([]*ent.Invite, error) {
-			// Проверяем, что все элементы присутствуют с использованием вспомогательной функции
 			if !containsAll(inviteDtos, dtos) {
 				return nil, errors.New("elements do not match")
 			}
@@ -397,7 +396,6 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 	).Return(&iam_v1.UsersReply{Users: users}, nil)
 	invitesRepo.EXPECT().CreateInvites(gomock.Any(), tenantID, gomock.Any()).DoAndReturn(
 		func(_ context.Context, _ int64, dtos []data.InviteDto) ([]*ent.Invite, error) {
-			// Проверяем, что все элементы присутствуют с использованием вспомогательной функции
 			if !containsAll(inviteDtos, dtos) {
 				return nil, errors.New("elements do not match")
 			}
@@ -524,7 +522,6 @@ func containsAll(expected, actual []data.InviteDto) bool {
 		expectedMap[key]--
 	}
 
-	// Проверяем, что все элементы были найдены в нужном количестве
 	for _, count := range expectedMap {
 		if count != 0 {
 			return false
