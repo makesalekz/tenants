@@ -85,6 +85,80 @@ func (iu *InviteUpdate) SetNillableUpdatedAt(t *time.Time) *InviteUpdate {
 	return iu
 }
 
+// SetRoleID sets the "role_id" field.
+func (iu *InviteUpdate) SetRoleID(i int64) *InviteUpdate {
+	iu.mutation.ResetRoleID()
+	iu.mutation.SetRoleID(i)
+	return iu
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (iu *InviteUpdate) SetNillableRoleID(i *int64) *InviteUpdate {
+	if i != nil {
+		iu.SetRoleID(*i)
+	}
+	return iu
+}
+
+// AddRoleID adds i to the "role_id" field.
+func (iu *InviteUpdate) AddRoleID(i int64) *InviteUpdate {
+	iu.mutation.AddRoleID(i)
+	return iu
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (iu *InviteUpdate) ClearRoleID() *InviteUpdate {
+	iu.mutation.ClearRoleID()
+	return iu
+}
+
+// SetResource sets the "resource" field.
+func (iu *InviteUpdate) SetResource(s string) *InviteUpdate {
+	iu.mutation.SetResource(s)
+	return iu
+}
+
+// SetNillableResource sets the "resource" field if the given value is not nil.
+func (iu *InviteUpdate) SetNillableResource(s *string) *InviteUpdate {
+	if s != nil {
+		iu.SetResource(*s)
+	}
+	return iu
+}
+
+// ClearResource clears the value of the "resource" field.
+func (iu *InviteUpdate) ClearResource() *InviteUpdate {
+	iu.mutation.ClearResource()
+	return iu
+}
+
+// SetResourceID sets the "resource_id" field.
+func (iu *InviteUpdate) SetResourceID(i int64) *InviteUpdate {
+	iu.mutation.ResetResourceID()
+	iu.mutation.SetResourceID(i)
+	return iu
+}
+
+// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
+func (iu *InviteUpdate) SetNillableResourceID(i *int64) *InviteUpdate {
+	if i != nil {
+		iu.SetResourceID(*i)
+	}
+	return iu
+}
+
+// AddResourceID adds i to the "resource_id" field.
+func (iu *InviteUpdate) AddResourceID(i int64) *InviteUpdate {
+	iu.mutation.AddResourceID(i)
+	return iu
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (iu *InviteUpdate) ClearResourceID() *InviteUpdate {
+	iu.mutation.ClearResourceID()
+	return iu
+}
+
 // Mutation returns the InviteMutation object of the builder.
 func (iu *InviteUpdate) Mutation() *InviteMutation {
 	return iu.mutation
@@ -124,7 +198,7 @@ func (iu *InviteUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Invite.status": %w`, err)}
 		}
 	}
-	if _, ok := iu.mutation.TenantID(); iu.mutation.TenantCleared() && !ok {
+	if iu.mutation.TenantCleared() && len(iu.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Invite.tenant"`)
 	}
 	return nil
@@ -162,6 +236,30 @@ func (iu *InviteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := iu.mutation.UpdatedAt(); ok {
 		_spec.SetField(invite.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := iu.mutation.RoleID(); ok {
+		_spec.SetField(invite.FieldRoleID, field.TypeInt64, value)
+	}
+	if value, ok := iu.mutation.AddedRoleID(); ok {
+		_spec.AddField(invite.FieldRoleID, field.TypeInt64, value)
+	}
+	if iu.mutation.RoleIDCleared() {
+		_spec.ClearField(invite.FieldRoleID, field.TypeInt64)
+	}
+	if value, ok := iu.mutation.Resource(); ok {
+		_spec.SetField(invite.FieldResource, field.TypeString, value)
+	}
+	if iu.mutation.ResourceCleared() {
+		_spec.ClearField(invite.FieldResource, field.TypeString)
+	}
+	if value, ok := iu.mutation.ResourceID(); ok {
+		_spec.SetField(invite.FieldResourceID, field.TypeInt64, value)
+	}
+	if value, ok := iu.mutation.AddedResourceID(); ok {
+		_spec.AddField(invite.FieldResourceID, field.TypeInt64, value)
+	}
+	if iu.mutation.ResourceIDCleared() {
+		_spec.ClearField(invite.FieldResourceID, field.TypeInt64)
 	}
 	_spec.AddModifiers(iu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
@@ -240,6 +338,80 @@ func (iuo *InviteUpdateOne) SetNillableUpdatedAt(t *time.Time) *InviteUpdateOne 
 	return iuo
 }
 
+// SetRoleID sets the "role_id" field.
+func (iuo *InviteUpdateOne) SetRoleID(i int64) *InviteUpdateOne {
+	iuo.mutation.ResetRoleID()
+	iuo.mutation.SetRoleID(i)
+	return iuo
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (iuo *InviteUpdateOne) SetNillableRoleID(i *int64) *InviteUpdateOne {
+	if i != nil {
+		iuo.SetRoleID(*i)
+	}
+	return iuo
+}
+
+// AddRoleID adds i to the "role_id" field.
+func (iuo *InviteUpdateOne) AddRoleID(i int64) *InviteUpdateOne {
+	iuo.mutation.AddRoleID(i)
+	return iuo
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (iuo *InviteUpdateOne) ClearRoleID() *InviteUpdateOne {
+	iuo.mutation.ClearRoleID()
+	return iuo
+}
+
+// SetResource sets the "resource" field.
+func (iuo *InviteUpdateOne) SetResource(s string) *InviteUpdateOne {
+	iuo.mutation.SetResource(s)
+	return iuo
+}
+
+// SetNillableResource sets the "resource" field if the given value is not nil.
+func (iuo *InviteUpdateOne) SetNillableResource(s *string) *InviteUpdateOne {
+	if s != nil {
+		iuo.SetResource(*s)
+	}
+	return iuo
+}
+
+// ClearResource clears the value of the "resource" field.
+func (iuo *InviteUpdateOne) ClearResource() *InviteUpdateOne {
+	iuo.mutation.ClearResource()
+	return iuo
+}
+
+// SetResourceID sets the "resource_id" field.
+func (iuo *InviteUpdateOne) SetResourceID(i int64) *InviteUpdateOne {
+	iuo.mutation.ResetResourceID()
+	iuo.mutation.SetResourceID(i)
+	return iuo
+}
+
+// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
+func (iuo *InviteUpdateOne) SetNillableResourceID(i *int64) *InviteUpdateOne {
+	if i != nil {
+		iuo.SetResourceID(*i)
+	}
+	return iuo
+}
+
+// AddResourceID adds i to the "resource_id" field.
+func (iuo *InviteUpdateOne) AddResourceID(i int64) *InviteUpdateOne {
+	iuo.mutation.AddResourceID(i)
+	return iuo
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (iuo *InviteUpdateOne) ClearResourceID() *InviteUpdateOne {
+	iuo.mutation.ClearResourceID()
+	return iuo
+}
+
 // Mutation returns the InviteMutation object of the builder.
 func (iuo *InviteUpdateOne) Mutation() *InviteMutation {
 	return iuo.mutation
@@ -292,7 +464,7 @@ func (iuo *InviteUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Invite.status": %w`, err)}
 		}
 	}
-	if _, ok := iuo.mutation.TenantID(); iuo.mutation.TenantCleared() && !ok {
+	if iuo.mutation.TenantCleared() && len(iuo.mutation.TenantIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Invite.tenant"`)
 	}
 	return nil
@@ -347,6 +519,30 @@ func (iuo *InviteUpdateOne) sqlSave(ctx context.Context) (_node *Invite, err err
 	}
 	if value, ok := iuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(invite.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := iuo.mutation.RoleID(); ok {
+		_spec.SetField(invite.FieldRoleID, field.TypeInt64, value)
+	}
+	if value, ok := iuo.mutation.AddedRoleID(); ok {
+		_spec.AddField(invite.FieldRoleID, field.TypeInt64, value)
+	}
+	if iuo.mutation.RoleIDCleared() {
+		_spec.ClearField(invite.FieldRoleID, field.TypeInt64)
+	}
+	if value, ok := iuo.mutation.Resource(); ok {
+		_spec.SetField(invite.FieldResource, field.TypeString, value)
+	}
+	if iuo.mutation.ResourceCleared() {
+		_spec.ClearField(invite.FieldResource, field.TypeString)
+	}
+	if value, ok := iuo.mutation.ResourceID(); ok {
+		_spec.SetField(invite.FieldResourceID, field.TypeInt64, value)
+	}
+	if value, ok := iuo.mutation.AddedResourceID(); ok {
+		_spec.AddField(invite.FieldResourceID, field.TypeInt64, value)
+	}
+	if iuo.mutation.ResourceIDCleared() {
+		_spec.ClearField(invite.FieldResourceID, field.TypeInt64)
 	}
 	_spec.AddModifiers(iuo.modifiers...)
 	_node = &Invite{config: iuo.config}

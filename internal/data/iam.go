@@ -20,8 +20,8 @@ func NewIamRemote(
 	logger log.Logger,
 	conf *conf.Bootstrap,
 	dm dialer.IDialerManager,
-) (*IamRemote, func(), error) {
-	dialer, err := dm.NewServiceDialer("iam", conf.Discovery.Iam)
+) (IIamRemote, func(), error) {
+	dialer, err := dm.NewServiceDialer("iam", conf.GetDiscovery().GetIam())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -46,13 +46,13 @@ func (r *IamRemote) getUsersClient(ctx context.Context) (iam_v1.UsersClient, err
 }
 
 // GetUser returns userShort from iam service by userId.
-func (r *IamRemote) GetUser(ctx context.Context, userId int64) (*iam_v1.UserShort, error) {
+func (r *IamRemote) GetUser(ctx context.Context, userID int64) (*iam_v1.UserShort, error) {
 	usersClient, err := r.getUsersClient(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	reply, err := usersClient.GetUser(ctx, &iam_v1.GetUserRequest{UserId: userId})
+	reply, err := usersClient.GetUser(ctx, &iam_v1.GetUserRequest{UserId: userID})
 	if err != nil {
 		if iam_v1.IsUserNotFound(err) {
 			return nil, v1.ErrorNotFound("user not found")
@@ -60,7 +60,7 @@ func (r *IamRemote) GetUser(ctx context.Context, userId int64) (*iam_v1.UserShor
 		return nil, v1.ErrorServiceFailed("iam: %s", err.Error())
 	}
 
-	return reply.User, nil
+	return reply.GetUser(), nil
 }
 
 // GetUsers returns userShorts map from iam service by mapUsersIds.

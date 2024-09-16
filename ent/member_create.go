@@ -152,7 +152,7 @@ func (mc *MemberCreate) check() error {
 	if _, ok := mc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Member.created_at"`)}
 	}
-	if _, ok := mc.mutation.TenantID(); !ok {
+	if len(mc.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Member.tenant"`)}
 	}
 	return nil

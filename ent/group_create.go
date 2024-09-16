@@ -190,7 +190,7 @@ func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Group.description"`)}
 	}
-	if _, ok := gc.mutation.TenantID(); !ok {
+	if len(gc.mutation.TenantIDs()) == 0 {
 		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Group.tenant"`)}
 	}
 	return nil

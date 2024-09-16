@@ -852,22 +852,27 @@ func (m *GroupMutation) ResetEdge(name string) error {
 // InviteMutation represents an operation that mutates the Invite nodes in the graph.
 type InviteMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int64
-	code          *uuid.UUID
-	email         *string
-	user_id       *int64
-	adduser_id    *int64
-	status        *enum.InviteStatus
-	created_at    *time.Time
-	updated_at    *time.Time
-	clearedFields map[string]struct{}
-	tenant        *int64
-	clearedtenant bool
-	done          bool
-	oldValue      func(context.Context) (*Invite, error)
-	predicates    []predicate.Invite
+	op             Op
+	typ            string
+	id             *int64
+	code           *uuid.UUID
+	email          *string
+	user_id        *int64
+	adduser_id     *int64
+	status         *enum.InviteStatus
+	created_at     *time.Time
+	updated_at     *time.Time
+	role_id        *int64
+	addrole_id     *int64
+	resource       *string
+	resource_id    *int64
+	addresource_id *int64
+	clearedFields  map[string]struct{}
+	tenant         *int64
+	clearedtenant  bool
+	done           bool
+	oldValue       func(context.Context) (*Invite, error)
+	predicates     []predicate.Invite
 }
 
 var _ ent.Mutation = (*InviteMutation)(nil)
@@ -1254,6 +1259,195 @@ func (m *InviteMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetRoleID sets the "role_id" field.
+func (m *InviteMutation) SetRoleID(i int64) {
+	m.role_id = &i
+	m.addrole_id = nil
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *InviteMutation) RoleID() (r int64, exists bool) {
+	v := m.role_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the Invite entity.
+// If the Invite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InviteMutation) OldRoleID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// AddRoleID adds i to the "role_id" field.
+func (m *InviteMutation) AddRoleID(i int64) {
+	if m.addrole_id != nil {
+		*m.addrole_id += i
+	} else {
+		m.addrole_id = &i
+	}
+}
+
+// AddedRoleID returns the value that was added to the "role_id" field in this mutation.
+func (m *InviteMutation) AddedRoleID() (r int64, exists bool) {
+	v := m.addrole_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRoleID clears the value of the "role_id" field.
+func (m *InviteMutation) ClearRoleID() {
+	m.role_id = nil
+	m.addrole_id = nil
+	m.clearedFields[invite.FieldRoleID] = struct{}{}
+}
+
+// RoleIDCleared returns if the "role_id" field was cleared in this mutation.
+func (m *InviteMutation) RoleIDCleared() bool {
+	_, ok := m.clearedFields[invite.FieldRoleID]
+	return ok
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *InviteMutation) ResetRoleID() {
+	m.role_id = nil
+	m.addrole_id = nil
+	delete(m.clearedFields, invite.FieldRoleID)
+}
+
+// SetResource sets the "resource" field.
+func (m *InviteMutation) SetResource(s string) {
+	m.resource = &s
+}
+
+// Resource returns the value of the "resource" field in the mutation.
+func (m *InviteMutation) Resource() (r string, exists bool) {
+	v := m.resource
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResource returns the old "resource" field's value of the Invite entity.
+// If the Invite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InviteMutation) OldResource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResource: %w", err)
+	}
+	return oldValue.Resource, nil
+}
+
+// ClearResource clears the value of the "resource" field.
+func (m *InviteMutation) ClearResource() {
+	m.resource = nil
+	m.clearedFields[invite.FieldResource] = struct{}{}
+}
+
+// ResourceCleared returns if the "resource" field was cleared in this mutation.
+func (m *InviteMutation) ResourceCleared() bool {
+	_, ok := m.clearedFields[invite.FieldResource]
+	return ok
+}
+
+// ResetResource resets all changes to the "resource" field.
+func (m *InviteMutation) ResetResource() {
+	m.resource = nil
+	delete(m.clearedFields, invite.FieldResource)
+}
+
+// SetResourceID sets the "resource_id" field.
+func (m *InviteMutation) SetResourceID(i int64) {
+	m.resource_id = &i
+	m.addresource_id = nil
+}
+
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *InviteMutation) ResourceID() (r int64, exists bool) {
+	v := m.resource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceID returns the old "resource_id" field's value of the Invite entity.
+// If the Invite object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InviteMutation) OldResourceID(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+	}
+	return oldValue.ResourceID, nil
+}
+
+// AddResourceID adds i to the "resource_id" field.
+func (m *InviteMutation) AddResourceID(i int64) {
+	if m.addresource_id != nil {
+		*m.addresource_id += i
+	} else {
+		m.addresource_id = &i
+	}
+}
+
+// AddedResourceID returns the value that was added to the "resource_id" field in this mutation.
+func (m *InviteMutation) AddedResourceID() (r int64, exists bool) {
+	v := m.addresource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearResourceID clears the value of the "resource_id" field.
+func (m *InviteMutation) ClearResourceID() {
+	m.resource_id = nil
+	m.addresource_id = nil
+	m.clearedFields[invite.FieldResourceID] = struct{}{}
+}
+
+// ResourceIDCleared returns if the "resource_id" field was cleared in this mutation.
+func (m *InviteMutation) ResourceIDCleared() bool {
+	_, ok := m.clearedFields[invite.FieldResourceID]
+	return ok
+}
+
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *InviteMutation) ResetResourceID() {
+	m.resource_id = nil
+	m.addresource_id = nil
+	delete(m.clearedFields, invite.FieldResourceID)
+}
+
 // ClearTenant clears the "tenant" edge to the Tenant entity.
 func (m *InviteMutation) ClearTenant() {
 	m.clearedtenant = true
@@ -1315,7 +1509,7 @@ func (m *InviteMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *InviteMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 10)
 	if m.tenant != nil {
 		fields = append(fields, invite.FieldTenantID)
 	}
@@ -1336,6 +1530,15 @@ func (m *InviteMutation) Fields() []string {
 	}
 	if m.updated_at != nil {
 		fields = append(fields, invite.FieldUpdatedAt)
+	}
+	if m.role_id != nil {
+		fields = append(fields, invite.FieldRoleID)
+	}
+	if m.resource != nil {
+		fields = append(fields, invite.FieldResource)
+	}
+	if m.resource_id != nil {
+		fields = append(fields, invite.FieldResourceID)
 	}
 	return fields
 }
@@ -1359,6 +1562,12 @@ func (m *InviteMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case invite.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case invite.FieldRoleID:
+		return m.RoleID()
+	case invite.FieldResource:
+		return m.Resource()
+	case invite.FieldResourceID:
+		return m.ResourceID()
 	}
 	return nil, false
 }
@@ -1382,6 +1591,12 @@ func (m *InviteMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCreatedAt(ctx)
 	case invite.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case invite.FieldRoleID:
+		return m.OldRoleID(ctx)
+	case invite.FieldResource:
+		return m.OldResource(ctx)
+	case invite.FieldResourceID:
+		return m.OldResourceID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Invite field %s", name)
 }
@@ -1440,6 +1655,27 @@ func (m *InviteMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
+	case invite.FieldRoleID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
+		return nil
+	case invite.FieldResource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResource(v)
+		return nil
+	case invite.FieldResourceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Invite field %s", name)
 }
@@ -1451,6 +1687,12 @@ func (m *InviteMutation) AddedFields() []string {
 	if m.adduser_id != nil {
 		fields = append(fields, invite.FieldUserID)
 	}
+	if m.addrole_id != nil {
+		fields = append(fields, invite.FieldRoleID)
+	}
+	if m.addresource_id != nil {
+		fields = append(fields, invite.FieldResourceID)
+	}
 	return fields
 }
 
@@ -1461,6 +1703,10 @@ func (m *InviteMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case invite.FieldUserID:
 		return m.AddedUserID()
+	case invite.FieldRoleID:
+		return m.AddedRoleID()
+	case invite.FieldResourceID:
+		return m.AddedResourceID()
 	}
 	return nil, false
 }
@@ -1477,6 +1723,20 @@ func (m *InviteMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddUserID(v)
 		return nil
+	case invite.FieldRoleID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRoleID(v)
+		return nil
+	case invite.FieldResourceID:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResourceID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Invite numeric field %s", name)
 }
@@ -1487,6 +1747,15 @@ func (m *InviteMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(invite.FieldUserID) {
 		fields = append(fields, invite.FieldUserID)
+	}
+	if m.FieldCleared(invite.FieldRoleID) {
+		fields = append(fields, invite.FieldRoleID)
+	}
+	if m.FieldCleared(invite.FieldResource) {
+		fields = append(fields, invite.FieldResource)
+	}
+	if m.FieldCleared(invite.FieldResourceID) {
+		fields = append(fields, invite.FieldResourceID)
 	}
 	return fields
 }
@@ -1504,6 +1773,15 @@ func (m *InviteMutation) ClearField(name string) error {
 	switch name {
 	case invite.FieldUserID:
 		m.ClearUserID()
+		return nil
+	case invite.FieldRoleID:
+		m.ClearRoleID()
+		return nil
+	case invite.FieldResource:
+		m.ClearResource()
+		return nil
+	case invite.FieldResourceID:
+		m.ClearResourceID()
 		return nil
 	}
 	return fmt.Errorf("unknown Invite nullable field %s", name)
@@ -1533,6 +1811,15 @@ func (m *InviteMutation) ResetField(name string) error {
 		return nil
 	case invite.FieldUpdatedAt:
 		m.ResetUpdatedAt()
+		return nil
+	case invite.FieldRoleID:
+		m.ResetRoleID()
+		return nil
+	case invite.FieldResource:
+		m.ResetResource()
+		return nil
+	case invite.FieldResourceID:
+		m.ResetResourceID()
 		return nil
 	}
 	return fmt.Errorf("unknown Invite field %s", name)
