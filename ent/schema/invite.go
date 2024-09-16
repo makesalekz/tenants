@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -48,10 +47,10 @@ func (Invite) Edges() []ent.Edge {
 func (Invite) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields(
-			"tenant_id", "user_id", "status",
-		).Annotations(entsql.IndexWhere("status = 'accepted' AND user_id IS NOT NULL")).Unique(),
+			"tenant_id", "user_id",
+		).Unique(),
 		index.Fields(
-			"tenant_id", "email", "status",
-		).Annotations(entsql.IndexWhere("status = 'accepted' AND email IS NOT NULL")).Unique(),
+			"tenant_id", "email",
+		).Unique(),
 	}
 }

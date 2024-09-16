@@ -39,7 +39,7 @@ func (uc *GroupsUsecase) CreateGroup(ctx context.Context, actorID int64, dto dat
 			return nil, v1.ErrorResourceAlreadyExists("group with the same name already exists")
 		}
 		if ent.IsValidationError(err) {
-			return nil, v1.ErrorInvalidRequest(err.Error())
+			return nil, v1.ErrorInvalidRequest("failed validation, err %s", err.Error())
 		}
 		return nil, err
 	}
