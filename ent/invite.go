@@ -34,6 +34,12 @@ type Invite struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// RoleID holds the value of the "role_id" field.
+	RoleID int64 `json:"role_id,omitempty"`
+	// Resource holds the value of the "resource" field.
+	Resource string `json:"resource,omitempty"`
+	// ResourceID holds the value of the "resource_id" field.
+	ResourceID int64 `json:"resource_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InviteQuery when eager-loading is set.
 	Edges        InviteEdges `json:"edges"`
@@ -65,9 +71,9 @@ func (*Invite) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case invite.FieldID, invite.FieldTenantID, invite.FieldUserID:
+		case invite.FieldID, invite.FieldTenantID, invite.FieldUserID, invite.FieldRoleID, invite.FieldResourceID:
 			values[i] = new(sql.NullInt64)
-		case invite.FieldEmail, invite.FieldStatus:
+		case invite.FieldEmail, invite.FieldStatus, invite.FieldResource:
 			values[i] = new(sql.NullString)
 		case invite.FieldCreatedAt, invite.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -137,6 +143,24 @@ func (i *Invite) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				i.UpdatedAt = value.Time
 			}
+		case invite.FieldRoleID:
+			if value, ok := values[j].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field role_id", values[j])
+			} else if value.Valid {
+				i.RoleID = value.Int64
+			}
+		case invite.FieldResource:
+			if value, ok := values[j].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field resource", values[j])
+			} else if value.Valid {
+				i.Resource = value.String
+			}
+		case invite.FieldResourceID:
+			if value, ok := values[j].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_id", values[j])
+			} else if value.Valid {
+				i.ResourceID = value.Int64
+			}
 		default:
 			i.selectValues.Set(columns[j], values[j])
 		}
@@ -200,6 +224,15 @@ func (i *Invite) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(i.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("role_id=")
+	builder.WriteString(fmt.Sprintf("%v", i.RoleID))
+	builder.WriteString(", ")
+	builder.WriteString("resource=")
+	builder.WriteString(i.Resource)
+	builder.WriteString(", ")
+	builder.WriteString("resource_id=")
+	builder.WriteString(fmt.Sprintf("%v", i.ResourceID))
 	builder.WriteByte(')')
 	return builder.String()
 }

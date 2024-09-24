@@ -44,13 +44,26 @@ func (s *InvitesService) CreateInvites(ctx context.Context, req *v1.CreateInvite
 		return nil, v1.ErrorInvalidRequest("emails are empty")
 	}
 
-	invites, err := s.iu.CreateInvites(ctx, tenantID, req.GetEmails(), req.GetAppId(), req.GetLanguage())
+	invite := &data.InvitesDTO{
+		Emails:     req.GetEmails(),
+		Lang:       req.GetLanguage(),
+		RoleID:     req.GetRoleId(),
+		Resource:   req.GetResource(),
+		ResourceID: req.GetResourceId(),
+	}
+
+	err := invite.Validate()
+	if err != nil {
+		return nil, v1.ErrorInvalidRequest("failed validation, err %s", err.Error())
+	}
+
+	invites, err := s.iu.CreateInvites(ctx, tenantID, req.GetAppId(), invite)
 	if err != nil {
 		return nil, err
 	}
 
 	return &v1.ListInvitesReply{
-		Invites: replyInvites(invites),
+		Invites: ReplyInvites(invites),
 	}, nil
 }
 
@@ -114,7 +127,7 @@ func (s *InvitesService) ListInvites(ctx context.Context, req *v1.ListInvitesReq
 		return nil, err
 	}
 	return &v1.ListInvitesReply{
-		Invites:  replyInvites(list.Invites),
+		Invites:  ReplyInvites(list.Invites),
 		Paginate: list.Paginate,
 	}, nil
 }
@@ -134,14 +147,8 @@ func (s *InvitesService) AcceptInvite(ctx context.Context, req *v1.InviteCodeReq
 		return nil, v1.ErrorInvalidRequest("invalid code")
 	}
 
-	invite, err := s.iu.AcceptInvite(ctx, req.GetInviteId(), actorID, code)
+	invite, err := s.iu.AcceptInvite(ctx, actorID, req.GetInviteId(), code)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, v1.ErrorNotFound("invite not found")
-		}
-		if ent.IsConstraintError(err) {
-			return nil, v1.ErrorInvalidRequest("member already exists")
-		}
 		return nil, err
 	}
 
@@ -227,7 +234,7 @@ func replyInvite(invite biz.InviteItem) *v1.Invite {
 	}
 }
 
-func replyInvites(invites []biz.InviteItem) []*v1.Invite {
+func ReplyInvites(invites []biz.InviteItem) []*v1.Invite {
 	reply := make([]*v1.Invite, len(invites))
 	for i, invite := range invites {
 		reply[i] = replyInvite(invite)
