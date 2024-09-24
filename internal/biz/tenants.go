@@ -29,14 +29,14 @@ type TenantsUsecase struct {
 	log *log.Helper
 
 	repo data.TenantsRepo
-	rbac *data.RbacRemote
+	rbac data.IRbacRemote
 }
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewTenantsUsecase(
 	logger log.Logger,
 	repo data.TenantsRepo,
-	rbac *data.RbacRemote,
+	rbac data.IRbacRemote,
 ) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
 		log:  log.NewHelper(logger),

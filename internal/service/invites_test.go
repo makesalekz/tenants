@@ -84,14 +84,14 @@ func TestInvitesCreate(t *testing.T) {
 	}
 
 	inviteDtos := []data.InviteDto{
-		data.InviteDto{
+		{
 			Email:      emails[0],
 			UserID:     &users[0].Id,
 			RoleID:     5,
 			Resource:   "project",
 			ResourceID: 223,
 		},
-		data.InviteDto{
+		{
 			Email:      emails[1],
 			UserID:     &users[1].Id,
 			RoleID:     5,
@@ -101,7 +101,7 @@ func TestInvitesCreate(t *testing.T) {
 	}
 
 	entInvites := []*ent.Invite{
-		&ent.Invite{
+		{
 			ID:         123,
 			TenantID:   tenantID,
 			Code:       inviteCode,
@@ -115,7 +115,7 @@ func TestInvitesCreate(t *testing.T) {
 			ResourceID: 123,
 			Edges:      ent.InviteEdges{},
 		},
-		&ent.Invite{
+		{
 			ID:         223,
 			TenantID:   tenantID,
 			Code:       inviteCode,
@@ -201,14 +201,14 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 	}
 
 	inviteDtos := []data.InviteDto{
-		data.InviteDto{
+		{
 			Email:      emails[0],
 			UserID:     &users[0].Id,
 			RoleID:     5,
 			Resource:   "",
 			ResourceID: 0,
 		},
-		data.InviteDto{
+		{
 			Email:      emails[1],
 			UserID:     &users[1].Id,
 			RoleID:     5,
@@ -218,7 +218,7 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 	}
 
 	entInvites := []*ent.Invite{
-		&ent.Invite{
+		{
 			ID:         123,
 			TenantID:   tenantID,
 			Code:       inviteCode,
@@ -232,7 +232,7 @@ func TestInvitesCreateWithoutResource(t *testing.T) {
 			ResourceID: 0,
 			Edges:      ent.InviteEdges{},
 		},
-		&ent.Invite{
+		{
 			ID:         223,
 			TenantID:   tenantID,
 			Code:       inviteCode,
@@ -319,14 +319,14 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 	}
 
 	inviteDtos := []data.InviteDto{
-		data.InviteDto{
+		{
 			Email:      emails[0],
 			UserID:     &users[0].Id,
 			RoleID:     0,
 			Resource:   "",
 			ResourceID: 0,
 		},
-		data.InviteDto{
+		{
 			Email:      emails[1],
 			UserID:     &users[1].Id,
 			RoleID:     0,
@@ -336,7 +336,7 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 	}
 
 	entInvites := []*ent.Invite{
-		&ent.Invite{
+		{
 			ID:         123,
 			TenantID:   tenantID,
 			Code:       inviteCode,
@@ -350,7 +350,7 @@ func TestInvitesCreateWithoutRole(t *testing.T) {
 			ResourceID: 0,
 			Edges:      ent.InviteEdges{},
 		},
-		&ent.Invite{
+		{
 			ID:         223,
 			TenantID:   tenantID,
 			Code:       inviteCode,

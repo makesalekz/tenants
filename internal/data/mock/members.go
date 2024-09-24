@@ -126,6 +126,26 @@ func (mr *MockMembersRepoMockRecorder) GetMembers(ctx, tenantID, identityIDs, wi
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMembers", reflect.TypeOf((*MockMembersRepo)(nil).GetMembers), ctx, tenantID, identityIDs, withGroups)
 }
 
+// GetTenantMembersIDs mocks base method.
+func (m *MockMembersRepo) GetTenantMembersIDs(ctx context.Context, tenantID int64, membersIDs ...int64) ([]int64, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, tenantID}
+	for _, a := range membersIDs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTenantMembersIDs", varargs...)
+	ret0, _ := ret[0].([]int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTenantMembersIDs indicates an expected call of GetTenantMembersIDs.
+func (mr *MockMembersRepoMockRecorder) GetTenantMembersIDs(ctx, tenantID interface{}, membersIDs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, tenantID}, membersIDs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenantMembersIDs", reflect.TypeOf((*MockMembersRepo)(nil).GetTenantMembersIDs), varargs...)
+}
+
 // ListMembers mocks base method.
 func (m *MockMembersRepo) ListMembers(ctx context.Context, filter data.MembersListFilter) ([]*ent.Member, error) {
 	m.ctrl.T.Helper()

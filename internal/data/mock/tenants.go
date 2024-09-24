@@ -82,6 +82,21 @@ func (mr *MockTenantsRepoMockRecorder) DeleteTenant(ctx, tenantID interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTenant", reflect.TypeOf((*MockTenantsRepo)(nil).DeleteTenant), ctx, tenantID)
 }
 
+// DeleteUsersTenants mocks base method.
+func (m *MockTenantsRepo) DeleteUsersTenants(ctx context.Context, usersIDs []int64) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUsersTenants", ctx, usersIDs)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteUsersTenants indicates an expected call of DeleteUsersTenants.
+func (mr *MockTenantsRepoMockRecorder) DeleteUsersTenants(ctx, usersIDs interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUsersTenants", reflect.TypeOf((*MockTenantsRepo)(nil).DeleteUsersTenants), ctx, usersIDs)
+}
+
 // GetTenant mocks base method.
 func (m *MockTenantsRepo) GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error) {
 	m.ctrl.T.Helper()
