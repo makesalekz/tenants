@@ -2,6 +2,10 @@ package data
 
 import (
 	"context"
+	"time"
+
+	"gitlab.calendaria.team/services/tenants/ent/group"
+	"gitlab.calendaria.team/services/tenants/ent/invite"
 
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/ent/enum"
@@ -30,6 +34,7 @@ type TenantsRepo interface {
 	CreateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, *ent.Member, error)
 	UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Tenant, error)
 	DeleteTenant(ctx context.Context, tenantID int64) error
+	DeleteUsersTenants(ctx context.Context, usersIDs []int64) (int, error)
 	GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error)
 	ListTenants(ctx context.Context, filter TenantsListFilter, paginate *utils_v1.PaginateRequest) (
 		[]*ent.Tenant, error,
@@ -93,6 +98,62 @@ func (r *tenantsRepo) UpdateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 
 func (r *tenantsRepo) DeleteTenant(ctx context.Context, tenantID int64) error {
 	return r.db.Tenant.DeleteOneID(tenantID).Exec(ctx)
+}
+
+func (r *tenantsRepo) DeleteUsersTenants(ctx context.Context, usersIDs []int64) (int, error) {
+	tx, err := r.db.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	tenantIDs, err := tx.Tenant.Query().
+		Where(
+			tenant.OwnerIDIn(usersIDs...),
+			tenant.Type(enum.Personal),
+		).
+		IDs(ctx)
+
+	_, err = tx.Invite.Delete().
+		Where(invite.TenantIDIn(tenantIDs...)).
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = tx.Member.Delete().
+		Where(member.TenantIDIn(tenantIDs...)).
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = tx.Group.Delete().
+		Where(group.TenantIDIn(tenantIDs...)).
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	deletedCount, err := r.db.Tenant.Update().
+		Where(tenant.IDIn(tenantIDs...)).
+		SetName("").
+		SetDeletedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedCount, nil
 }
 
 func (r *tenantsRepo) GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error) {

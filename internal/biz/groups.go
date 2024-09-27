@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 
+	log "github.com/go-kratos/kratos/v2/log"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/data"
@@ -17,18 +18,24 @@ type GroupsList struct {
 
 // GroupsUsecase is a Greeter usecase.
 type GroupsUsecase struct {
+	log         *log.Helper
 	tenantsRepo data.TenantsRepo
 	groupsRepo  data.GroupsRepo
+	membersRepo data.MembersRepo
 }
 
 // NewGreeterUsecase new a Greeter usecase.
 func NewGroupsUsecase(
+	logger log.Logger,
 	tenantsRepo data.TenantsRepo,
 	groupsRepo data.GroupsRepo,
+	membersRepo data.MembersRepo,
 ) (*GroupsUsecase, error) {
 	return &GroupsUsecase{
+		log:         log.NewHelper(log.With(logger, "module", "usecase/users")),
 		tenantsRepo: tenantsRepo,
 		groupsRepo:  groupsRepo,
+		membersRepo: membersRepo,
 	}, nil
 }
 
@@ -94,7 +101,16 @@ func (uc *GroupsUsecase) ListGroups(
 }
 
 func (uc *GroupsUsecase) AddMembersToGroup(ctx context.Context, group *ent.Group, membersIDs []int64) error {
-	return uc.groupsRepo.AddMembersToGroup(ctx, group, membersIDs)
+	targetMembersIDs, err := uc.membersRepo.GetTenantMembersIDs(ctx, group.TenantID, membersIDs...)
+	if err != nil {
+		return err
+	}
+
+	if len(membersIDs) != len(targetMembersIDs) {
+		uc.log.Warnf("some members were not found when adding to the group: %v", membersIDs)
+	}
+
+	return uc.groupsRepo.AddMembersToGroup(ctx, group, targetMembersIDs)
 }
 
 func (uc *GroupsUsecase) RemoveMembersFromGroup(ctx context.Context, group *ent.Group, membersIDs []int64) error {

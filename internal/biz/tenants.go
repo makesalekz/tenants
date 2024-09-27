@@ -14,8 +14,10 @@ import (
 	"github.com/go-kratos/kratos/v2/metadata"
 )
 
-const AdminRoleID = 1
-const BasicRoleID = 2
+const (
+	AdminRoleID = 1
+	BasicRoleID = 2
+)
 
 type TenantsList struct {
 	Tenants  []*ent.Tenant
@@ -89,6 +91,18 @@ func (uc *TenantsUsecase) DeleteTenant(ctx context.Context, tenantID int64) erro
 	return nil
 }
 
+func (uc *TenantsUsecase) DeleteUsersTenants(ctx context.Context, usersIDs []int64) error {
+	_, err := uc.repo.DeleteUsersTenants(ctx, usersIDs)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return tenants_v1.ErrorNotFound("tenant not found")
+		}
+		return err
+	}
+
+	return nil
+}
+
 func (uc *TenantsUsecase) GetTenant(ctx context.Context, tenantID int64) (*ent.Tenant, error) {
 	tenant, err := uc.repo.GetTenant(ctx, tenantID)
 	if err != nil {
@@ -101,7 +115,9 @@ func (uc *TenantsUsecase) GetTenant(ctx context.Context, tenantID int64) (*ent.T
 }
 
 func (uc *TenantsUsecase) ListTenants(
-	ctx context.Context, filter data.TenantsListFilter, paginate *utils_v1.PaginateRequest,
+	ctx context.Context,
+	filter data.TenantsListFilter,
+	paginate *utils_v1.PaginateRequest,
 ) (*TenantsList, error) {
 	if paginate == nil {
 		paginate = &utils_v1.PaginateRequest{}
