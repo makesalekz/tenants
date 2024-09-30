@@ -202,6 +202,19 @@ func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, actorID, inviteID in
 		return nil, v1.ErrorForbidden("invite is already accepted or declined")
 	}
 
+	currentUser, err := uc.iam.GetUser(ctx, actorID)
+	if err != nil {
+		return nil, err
+	}
+
+	if invite.Email != currentUser.GetEmail() {
+		return nil, v1.ErrorForbidden("invite is not for current user")
+	}
+
+	if invite.UserID != nil && *invite.UserID != currentUser.GetId() {
+		return nil, v1.ErrorForbidden("invite is not for current user")
+	}
+
 	invite, tenantMember, err := uc.invitesRepo.AcceptInvite(ctx, actorID, invite)
 	if err != nil {
 		if ent.IsNotFound(err) {
