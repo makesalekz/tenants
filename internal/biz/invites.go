@@ -207,11 +207,11 @@ func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, actorID, inviteID in
 		return nil, err
 	}
 
-	if invite.Email != currentUser.Email {
+	if invite.Email != currentUser.GetEmail() {
 		return nil, v1.ErrorForbidden("invite is not for current user")
 	}
 
-	if invite.UserID != nil && *invite.UserID != currentUser.Id {
+	if invite.UserID != nil && *invite.UserID != currentUser.GetId() {
 		return nil, v1.ErrorForbidden("invite is not for current user")
 	}
 
