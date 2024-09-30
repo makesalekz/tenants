@@ -6,6 +6,8 @@ import (
 	"time"
 
 	kconfig "github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	"gitlab.calendaria.team/services/notifications/messages"
 	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
@@ -15,9 +17,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 	u_nats "gitlab.calendaria.team/services/utils/v1/nats"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/uuid"
+	"gitlab.calendaria.team/services/utils/v2/auth"
 )
 
 type InviteItem struct {
@@ -215,6 +215,8 @@ func (uc *InvitesUsecase) AcceptInvite(ctx context.Context, actorID, inviteID in
 	}
 
 	if invite.RoleID != 0 {
+		ctx = auth.AppendAuthIds(ctx, tenantMember.UserID, tenantMember.TenantID)
+
 		err = uc.rbac.AssignRoles(
 			ctx, &rbac_v1.AssignRoleRequest{
 				IdentityId: tenantMember.IdentityID.String(),
