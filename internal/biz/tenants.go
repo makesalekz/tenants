@@ -15,10 +15,11 @@ import (
 )
 
 const (
-	AdminRoleID      = 1
-	BasicRoleID      = 2
-	QalaiBasicRoleID = 7
-	QalaiTrialRoleID = 8
+	AdminRoleID        = 1
+	BasicRoleID        = 2
+	QalaiBasicRoleID   = 7
+	QalaiTrialRoleID   = 8
+	BasQaruBasicRoleID = 9
 )
 
 type TenantsList struct {
@@ -70,6 +71,10 @@ func (uc *TenantsUsecase) CreateTenant(ctx context.Context, dto data.TenantDto) 
 		&rbac_v1.AssignRoleRequest{
 			IdentityId: "",
 			RoleId:     QalaiTrialRoleID,
+		},
+		&rbac_v1.AssignRoleRequest{
+			IdentityId: "",
+			RoleId:     BasQaruBasicRoleID,
 		},
 	)
 	if err != nil {
