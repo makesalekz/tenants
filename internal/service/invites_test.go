@@ -17,8 +17,8 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	"gitlab.calendaria.team/services/tenants/internal/data/mock"
 	"gitlab.calendaria.team/services/tenants/internal/service"
-	nats_mock "gitlab.calendaria.team/services/utils/v1/nats/mock"
 	"gitlab.calendaria.team/services/utils/v2/auth"
+	nats_mock "gitlab.calendaria.team/services/utils/v2/nats/mock"
 	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
 	"gitlab.calendaria.team/services/utils/v2/zap"
 )

@@ -16,7 +16,7 @@ require (
 	gitlab.calendaria.team/services/iam v1.8.3
 	gitlab.calendaria.team/services/notifications v1.4.2
 	gitlab.calendaria.team/services/rbac v1.0.1
-	gitlab.calendaria.team/services/utils v0.3.11
+	gitlab.calendaria.team/services/utils v0.3.14
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	google.golang.org/grpc v1.65.0

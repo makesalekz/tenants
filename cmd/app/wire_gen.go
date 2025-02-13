@@ -15,9 +15,9 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/server"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v1/nats"
 	"gitlab.calendaria.team/services/utils/v2/dialer"
 	"gitlab.calendaria.team/services/utils/v2/jwt"
+	"gitlab.calendaria.team/services/utils/v2/nats"
 	"gitlab.calendaria.team/services/utils/v2/tracing"
 )
 
@@ -76,14 +76,14 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 	tenantsService := service.NewTenantsService(tenantsUsecase, membersUsecase)
 	membersService := service.NewMembersService(tenantsUsecase, membersUsecase)
 	invitesRepo := data.NewInvitesRepo(dataData)
-	encodedConn, cleanup4, err := data.NewNatsClient(bootstrap)
+	conn, cleanup4, err := data.NewNatsClient(bootstrap)
 	if err != nil {
 		cleanup3()
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	iQueueManager := nats.NewQueueManager(configConfig, encodedConn, logger)
+	iQueueManager := nats.NewQueueManager(configConfig, conn, logger)
 	config2 := data.KConfig(configConfig)
 	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iIamRemote, iRbacRemote, iQueueManager, config2)
 	if err != nil {

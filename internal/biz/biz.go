@@ -2,11 +2,11 @@ package biz
 
 import (
 	"github.com/google/wire"
-	u_nats "gitlab.calendaria.team/services/utils/v1/nats"
+	u_nats "gitlab.calendaria.team/services/utils/v2/nats"
 )
 
 const (
-	QueueEmail = "notifications/email"
+	QueueEmail = "notifications.email"
 
 	DefaultTimeout = 30
 )
