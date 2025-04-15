@@ -5,10 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	kconfig "github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/google/uuid"
-
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
@@ -17,8 +13,12 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
 	"gitlab.calendaria.team/services/utils/v2/auth"
-	u_nats "gitlab.calendaria.team/services/utils/v2/nats"
 	u_struc "gitlab.calendaria.team/services/utils/v2/struc"
+	u_config "gitlab.calendaria.team/services/utils/v4/config"
+	u_nats "gitlab.calendaria.team/services/utils/v4/nats"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/uuid"
 )
 
 type InviteItem struct {
@@ -31,18 +31,18 @@ type InvitesList struct {
 	Paginate *utils_v1.PaginateReply
 }
 
-// InvitesUsecase is a Greeter usecase.
+// InvitesUsecase is invites usecase.
 type InvitesUsecase struct {
 	log         *log.Helper
 	tenantsRepo data.TenantsRepo
 	invitesRepo data.InvitesRepo
 	iam         data.IIamRemote
 	rbac        data.IRbacRemote
-	config      kconfig.Config
+	config      u_config.IConfig
 	qm          u_nats.IQueueManager
 }
 
-// NewGreeterUsecase new a Greeter usecase.
+// NewInvitesUsecase new invites usecase.
 func NewInvitesUsecase(
 	logger log.Logger,
 	tenantsRepo data.TenantsRepo,
@@ -50,7 +50,7 @@ func NewInvitesUsecase(
 	iam data.IIamRemote,
 	rbac data.IRbacRemote,
 	queueManager u_nats.IQueueManager,
-	config kconfig.Config,
+	c u_config.IConfig,
 ) (*InvitesUsecase, error) {
 	return &InvitesUsecase{
 		log:         log.NewHelper(logger),
@@ -59,7 +59,7 @@ func NewInvitesUsecase(
 		iam:         iam,
 		rbac:        rbac,
 		qm:          queueManager,
-		config:      config,
+		config:      c,
 	}, nil
 }
 
@@ -286,7 +286,7 @@ func (uc *InvitesUsecase) processInvitations(
 		return
 	}
 
-	baseURL, err := uc.config.Value("INVITE_BASE_URL").String()
+	baseURL, err := uc.config.GetValue("INVITE_BASE_URL")
 	if err != nil {
 		uc.log.Errorf("[processInvitations] INVITE_BASE_URL is not provided: %v", err)
 		return

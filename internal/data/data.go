@@ -4,19 +4,19 @@ import (
 	"context"
 	"os"
 
-	kconfig "github.com/go-kratos/kratos/v2/config"
 	"gitlab.calendaria.team/services/tenants/ent"
 	"gitlab.calendaria.team/services/tenants/internal/conf"
-	u_config "gitlab.calendaria.team/services/utils/v1/config"
-	u_dialer "gitlab.calendaria.team/services/utils/v2/dialer"
-	u_jwt "gitlab.calendaria.team/services/utils/v2/jwt"
-	u_tracing "gitlab.calendaria.team/services/utils/v2/tracing"
+	u_config "gitlab.calendaria.team/services/utils/v4/config"
+	u_dialer "gitlab.calendaria.team/services/utils/v4/dialer"
+	u_jwt "gitlab.calendaria.team/services/utils/v4/jwt"
+	u_tracing "gitlab.calendaria.team/services/utils/v4/tracing"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 
 	_ "github.com/lib/pq"
+
 	_ "gitlab.calendaria.team/services/tenants/ent/runtime"
 )
 
@@ -24,12 +24,11 @@ import (
 //
 //nolint:gochecknoglobals // this global variable is required for wire
 var ProviderSet = wire.NewSet(
-	NewData,
 	u_config.NewConfig,
 	u_jwt.NewJwtProcessor,
 	u_dialer.NewServiceDialerManager,
 	u_tracing.NewTracer,
-	KConfig,
+	NewData,
 	NewNatsClient,
 	NewTenantsRepo,
 	NewMembersRepo,
@@ -47,7 +46,7 @@ type Data struct {
 const CodeInvalid = 500
 
 // NewData .
-func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, func(), error) {
+func NewData(bc *conf.Bootstrap, c u_config.IConfig, logger log.Logger) (*Data, func(), error) {
 	l := log.NewHelper(logger)
 
 	dbDsn := bc.GetDb() // read from local config
@@ -98,10 +97,6 @@ func NewData(bc *conf.Bootstrap, c *u_config.Config, logger log.Logger) (*Data, 
 	return &Data{
 		db: client,
 	}, cleanup, nil
-}
-
-func KConfig(c *u_config.Config) kconfig.Config {
-	return c
 }
 
 func btoi(b bool) int64 {
