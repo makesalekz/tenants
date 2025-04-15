@@ -374,6 +374,7 @@ gitlab.calendaria.team/services/rbac v1.0.1 h1:T++i6JOER7UE8ZBeJ5vse7G/pN26h7a0J
 gitlab.calendaria.team/services/rbac v1.0.1/go.mod h1:117PwviblaMuAjcQ0RiHoKefHW/xIcib2WOA+e1EGUk=
 gitlab.calendaria.team/services/utils v0.3.14 h1:8MeXuE/9kXbzeLEdHXq4KMsJ2Pl3oNU58ZKSzun9al4=
 gitlab.calendaria.team/services/utils v0.3.14/go.mod h1:0s9bWQ+nNc+Pt6stwUSJI9IuG10/fJ97diAGBPYQre0=
+gitlab.calendaria.team/services/utils v0.3.19-pre.2/go.mod h1:eMOuPqrqRilsaEP/ZQk3m98ksINLsOAGulw3VM5xinU=
 go.opentelemetry.io/otel v1.0.0-RC1/go.mod h1:x9tRa9HK4hSSq7jf2TKbqFbtt58/TGk0f9XiEYISI1I=
 go.opentelemetry.io/otel v1.24.0 h1:0LAOdjNmQeSTzGBzduGe/rU4tZhMwL5rWgtp9Ku5Jfo=
 go.opentelemetry.io/otel v1.24.0/go.mod h1:W7b9Ozg4nkF5tWI5zsXkaKKDjdVjpD4oAt9Qi/MArHo=
