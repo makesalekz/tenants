@@ -14,11 +14,11 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/data"
 	"gitlab.calendaria.team/services/tenants/internal/server"
 	"gitlab.calendaria.team/services/tenants/internal/service"
-	"gitlab.calendaria.team/services/utils/v1/config"
-	"gitlab.calendaria.team/services/utils/v2/dialer"
-	"gitlab.calendaria.team/services/utils/v2/jwt"
-	"gitlab.calendaria.team/services/utils/v2/nats"
-	"gitlab.calendaria.team/services/utils/v2/tracing"
+	"gitlab.calendaria.team/services/utils/v4/config"
+	"gitlab.calendaria.team/services/utils/v4/dialer"
+	"gitlab.calendaria.team/services/utils/v4/jwt"
+	"gitlab.calendaria.team/services/utils/v4/nats"
+	"gitlab.calendaria.team/services/utils/v4/tracing"
 )
 
 import (
@@ -29,21 +29,21 @@ import (
 
 // wireApp init kratos application.
 func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
-	configConfig, err := config.NewConfig()
+	iConfig, err := config.NewConfig()
 	if err != nil {
 		return nil, nil, err
 	}
-	iJwtProcessor, err := jwt.NewJwtProcessor(configConfig)
+	iJwtProcessor, err := jwt.NewJwtProcessor(iConfig)
 	if err != nil {
 		return nil, nil, err
 	}
-	tracer := tracing.NewTracer(configConfig)
-	dataData, cleanup, err := data.NewData(bootstrap, configConfig, logger)
+	iTracer := tracing.NewTracer(iConfig)
+	dataData, cleanup, err := data.NewData(bootstrap, iConfig, logger)
 	if err != nil {
 		return nil, nil, err
 	}
 	tenantsRepo := data.NewTenantsRepo(dataData)
-	iDialerManager, err := dialer.NewServiceDialerManager(configConfig, tracer, iJwtProcessor)
+	iDialerManager, err := dialer.NewServiceDialerManager(iConfig, iTracer, iJwtProcessor)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -83,9 +83,8 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	iQueueManager := nats.NewQueueManager(configConfig, conn, logger)
-	config2 := data.KConfig(configConfig)
-	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iIamRemote, iRbacRemote, iQueueManager, config2)
+	iQueueManager := nats.NewQueueManager(iConfig, conn, logger)
+	invitesUsecase, err := biz.NewInvitesUsecase(logger, tenantsRepo, invitesRepo, iIamRemote, iRbacRemote, iQueueManager, iConfig)
 	if err != nil {
 		cleanup4()
 		cleanup3()
@@ -104,9 +103,9 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	groupsService := service.NewGroupsService(tenantsUsecase, groupsUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, tracer, tenantsService, membersService, invitesService, groupsService)
+	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, iTracer, tenantsService, membersService, invitesService, groupsService)
 	httpServer := server.NewHTTPServer(bootstrap)
-	app := newApp(logger, configConfig, grpcServer, httpServer)
+	app := newApp(logger, iConfig, grpcServer, httpServer)
 	return app, func() {
 		cleanup4()
 		cleanup3()

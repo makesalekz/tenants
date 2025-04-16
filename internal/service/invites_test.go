@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+
 	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
 	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
 	"gitlab.calendaria.team/services/tenants/ent"
@@ -18,9 +19,10 @@ import (
 	"gitlab.calendaria.team/services/tenants/internal/data/mock"
 	"gitlab.calendaria.team/services/tenants/internal/service"
 	"gitlab.calendaria.team/services/utils/v2/auth"
-	nats_mock "gitlab.calendaria.team/services/utils/v2/nats/mock"
 	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
 	"gitlab.calendaria.team/services/utils/v2/zap"
+	mock_conf "gitlab.calendaria.team/services/utils/v4/config/mock"
+	nats_mock "gitlab.calendaria.team/services/utils/v4/nats/mock"
 )
 
 func beforeTest(t *testing.T) (
@@ -39,7 +41,7 @@ func beforeTest(t *testing.T) (
 	tenantsRepo := mock.NewMockTenantsRepo(ctrl)
 	iamRemote := mock.NewMockIIamRemote(ctrl)
 	rbacRemote := mock.NewMockIRbacRemote(ctrl)
-	config := mock.NewMockConfig(ctrl)
+	config := mock_conf.NewMockIConfig(ctrl)
 
 	invitesUsecase, err := biz.NewInvitesUsecase(
 		logger, tenantsRepo, invitesRepo, iamRemote, rbacRemote, queue, config,
