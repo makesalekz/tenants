@@ -43,9 +43,17 @@ run:
 	GOFLAGS='-mod=readonly' kratos run -w ./configs
 
 .PHONY: db
-# run docker db container
+# create db
 db:
-	docker compose up -d db
+	docker exec -it postgres_db psql -U $(DB_USER) -d postgres -c 'CREATE DATABASE $(DB_NAME);'
+
+.PHONY: db-restore
+# restore db after migration to new dev-environment
+db-restore:
+	docker exec -i $(SERVICE_NAME)_db pg_dump -U me -d api > ./dump.sql
+	docker exec -i postgres_db psql $(DB_NAME) $(DB_USER) < ./dump.sql
+	rm ./dump.sql
+	docker compose down db
 
 .PHONY: start
 # start docker container locally

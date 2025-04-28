@@ -1,7 +1,7 @@
 version: '3.5'
 
 services:
-  db:
+  db: # deprecated
     container_name: ${SERVICE_NAME}_db
     restart: always
     image: postgres:latest
