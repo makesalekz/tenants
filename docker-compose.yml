@@ -1,21 +1,4 @@
-version: '3.5'
-
 services:
-  db: # deprecated
-    container_name: ${SERVICE_NAME}_db
-    restart: always
-    image: postgres:latest
-    volumes:
-      - ${DB_VOLUME}:/var/lib/postgresql/data
-    ports:
-      - '${DB_PORT}:5432'
-    environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
-    networks:
-      - backend
   service:
     image: ${REGISTRY_IMAGE}
     container_name: ${SERVICE_NAME}_service
