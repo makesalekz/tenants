@@ -5,8 +5,6 @@ services:
     networks:
       - backend
     restart: unless-stopped
-    depends_on:
-      - db
     environment:
       - SERVICE_NAME=${SERVICE_NAME}
       - CONSUL_ADDRESS=${CONSUL_ADDRESS}
