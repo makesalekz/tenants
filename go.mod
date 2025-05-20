@@ -14,9 +14,8 @@ require (
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
 	gitlab.calendaria.team/services/iam v1.8.3
-	gitlab.calendaria.team/services/notifications v1.4.2
 	gitlab.calendaria.team/services/rbac v1.0.1
-	gitlab.calendaria.team/services/utils v0.3.14
+	gitlab.calendaria.team/services/utils v0.3.19-pre.2
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	google.golang.org/grpc v1.65.0
