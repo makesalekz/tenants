@@ -225,12 +225,15 @@ func (s *InvitesService) DeclineInvite(ctx context.Context, req *v1.InviteCodeRe
 
 func replyInvite(invite biz.InviteItem) *v1.Invite {
 	return &v1.Invite{
-		Id:        invite.ID,
-		Email:     invite.Email,
-		Status:    v1.Status(v1.Status_value[invite.Status.Value()]),
-		CreatedAt: invite.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: invite.UpdatedAt.Format(time.RFC3339),
-		User:      invite.User,
+		Id:         invite.ID,
+		Email:      invite.Email,
+		Status:     v1.Status(v1.Status_value[invite.Status.Value()]),
+		RoleId:     invite.RoleID,
+		Resource:   invite.Resource,
+		ResourceId: invite.ResourceID,
+		CreatedAt:  invite.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:  invite.UpdatedAt.Format(time.RFC3339),
+		User:       invite.User,
 	}
 }
 

@@ -69,6 +69,9 @@ message Invite {
   int64 id = 1;
   string email = 2;
   Status status = 3;
+  int64 roleId = 7;
+  string resource = 8;
+  int64 resourceId = 9;
   string createdAt = 4;
   string updatedAt = 5;
 
