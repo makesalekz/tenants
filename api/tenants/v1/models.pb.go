@@ -159,138 +159,6 @@ func (x *Tenant) GetReferredBy() int64 {
 	return 0
 }
 
-type Store struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	TenantId      int64                  `protobuf:"varint,2,opt,name=tenantId,proto3" json:"tenantId,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Address       string                 `protobuf:"bytes,4,opt,name=address,proto3" json:"address,omitempty"`
-	Lat           *float64               `protobuf:"fixed64,5,opt,name=lat,proto3,oneof" json:"lat,omitempty"`
-	Lon           *float64               `protobuf:"fixed64,6,opt,name=lon,proto3,oneof" json:"lon,omitempty"`
-	Phone         string                 `protobuf:"bytes,7,opt,name=phone,proto3" json:"phone,omitempty"`
-	WorkHours     string                 `protobuf:"bytes,8,opt,name=workHours,proto3" json:"workHours,omitempty"`
-	IsActive      bool                   `protobuf:"varint,9,opt,name=isActive,proto3" json:"isActive,omitempty"`
-	ResponsibleId *int64                 `protobuf:"varint,10,opt,name=responsibleId,proto3,oneof" json:"responsibleId,omitempty"`
-	CreatedAt     string                 `protobuf:"bytes,11,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
-	UpdatedAt     string                 `protobuf:"bytes,12,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Store) Reset() {
-	*x = Store{}
-	mi := &file_api_tenants_v1_models_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Store) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Store) ProtoMessage() {}
-
-func (x *Store) ProtoReflect() protoreflect.Message {
-	mi := &file_api_tenants_v1_models_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Store.ProtoReflect.Descriptor instead.
-func (*Store) Descriptor() ([]byte, []int) {
-	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *Store) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *Store) GetTenantId() int64 {
-	if x != nil {
-		return x.TenantId
-	}
-	return 0
-}
-
-func (x *Store) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *Store) GetAddress() string {
-	if x != nil {
-		return x.Address
-	}
-	return ""
-}
-
-func (x *Store) GetLat() float64 {
-	if x != nil && x.Lat != nil {
-		return *x.Lat
-	}
-	return 0
-}
-
-func (x *Store) GetLon() float64 {
-	if x != nil && x.Lon != nil {
-		return *x.Lon
-	}
-	return 0
-}
-
-func (x *Store) GetPhone() string {
-	if x != nil {
-		return x.Phone
-	}
-	return ""
-}
-
-func (x *Store) GetWorkHours() string {
-	if x != nil {
-		return x.WorkHours
-	}
-	return ""
-}
-
-func (x *Store) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *Store) GetResponsibleId() int64 {
-	if x != nil && x.ResponsibleId != nil {
-		return *x.ResponsibleId
-	}
-	return 0
-}
-
-func (x *Store) GetCreatedAt() string {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return ""
-}
-
-func (x *Store) GetUpdatedAt() string {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return ""
-}
-
 type TenantReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tenant        *Tenant                `protobuf:"bytes,1,opt,name=tenant,proto3" json:"tenant,omitempty"`
@@ -300,7 +168,7 @@ type TenantReply struct {
 
 func (x *TenantReply) Reset() {
 	*x = TenantReply{}
-	mi := &file_api_tenants_v1_models_proto_msgTypes[3]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -312,7 +180,7 @@ func (x *TenantReply) String() string {
 func (*TenantReply) ProtoMessage() {}
 
 func (x *TenantReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_tenants_v1_models_proto_msgTypes[3]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -325,7 +193,7 @@ func (x *TenantReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantReply.ProtoReflect.Descriptor instead.
 func (*TenantReply) Descriptor() ([]byte, []int) {
-	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{3}
+	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TenantReply) GetTenant() *Tenant {
@@ -349,7 +217,7 @@ type Group struct {
 
 func (x *Group) Reset() {
 	*x = Group{}
-	mi := &file_api_tenants_v1_models_proto_msgTypes[4]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -361,7 +229,7 @@ func (x *Group) String() string {
 func (*Group) ProtoMessage() {}
 
 func (x *Group) ProtoReflect() protoreflect.Message {
-	mi := &file_api_tenants_v1_models_proto_msgTypes[4]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -374,7 +242,7 @@ func (x *Group) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Group.ProtoReflect.Descriptor instead.
 func (*Group) Descriptor() ([]byte, []int) {
-	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{4}
+	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Group) GetId() int64 {
@@ -432,7 +300,7 @@ type TenantMember struct {
 
 func (x *TenantMember) Reset() {
 	*x = TenantMember{}
-	mi := &file_api_tenants_v1_models_proto_msgTypes[5]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -444,7 +312,7 @@ func (x *TenantMember) String() string {
 func (*TenantMember) ProtoMessage() {}
 
 func (x *TenantMember) ProtoReflect() protoreflect.Message {
-	mi := &file_api_tenants_v1_models_proto_msgTypes[5]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -457,7 +325,7 @@ func (x *TenantMember) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TenantMember.ProtoReflect.Descriptor instead.
 func (*TenantMember) Descriptor() ([]byte, []int) {
-	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{5}
+	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *TenantMember) GetId() int64 {
@@ -506,7 +374,7 @@ type ListMembersReply struct {
 
 func (x *ListMembersReply) Reset() {
 	*x = ListMembersReply{}
-	mi := &file_api_tenants_v1_models_proto_msgTypes[6]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +386,7 @@ func (x *ListMembersReply) String() string {
 func (*ListMembersReply) ProtoMessage() {}
 
 func (x *ListMembersReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_tenants_v1_models_proto_msgTypes[6]
+	mi := &file_api_tenants_v1_models_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +399,7 @@ func (x *ListMembersReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMembersReply.ProtoReflect.Descriptor instead.
 func (*ListMembersReply) Descriptor() ([]byte, []int) {
-	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{6}
+	return file_api_tenants_v1_models_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ListMembersReply) GetMembers() []*TenantMember {
@@ -573,24 +441,7 @@ const file_api_tenants_v1_models_proto_rawDesc = "" +
 	"\n" +
 	"referredBy\x18\x06 \x01(\x03H\x00R\n" +
 	"referredBy\x88\x01\x01B\r\n" +
-	"\v_referredBy\"\xe8\x02\n" +
-	"\x05Store\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
-	"\btenantId\x18\x02 \x01(\x03R\btenantId\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x18\n" +
-	"\aaddress\x18\x04 \x01(\tR\aaddress\x12\x15\n" +
-	"\x03lat\x18\x05 \x01(\x01H\x00R\x03lat\x88\x01\x01\x12\x15\n" +
-	"\x03lon\x18\x06 \x01(\x01H\x01R\x03lon\x88\x01\x01\x12\x14\n" +
-	"\x05phone\x18\a \x01(\tR\x05phone\x12\x1c\n" +
-	"\tworkHours\x18\b \x01(\tR\tworkHours\x12\x1a\n" +
-	"\bisActive\x18\t \x01(\bR\bisActive\x12)\n" +
-	"\rresponsibleId\x18\n" +
-	" \x01(\x03H\x02R\rresponsibleId\x88\x01\x01\x12\x1c\n" +
-	"\tcreatedAt\x18\v \x01(\tR\tcreatedAt\x12\x1c\n" +
-	"\tupdatedAt\x18\f \x01(\tR\tupdatedAtB\x06\n" +
-	"\x04_latB\x06\n" +
-	"\x04_lonB\x10\n" +
-	"\x0e_responsibleId\"9\n" +
+	"\v_referredBy\"9\n" +
 	"\vTenantReply\x12*\n" +
 	"\x06tenant\x18\x01 \x01(\v2\x12.tenants.v1.TenantR\x06tenant\"\xa9\x01\n" +
 	"\x05Group\x12\x0e\n" +
@@ -630,24 +481,23 @@ func file_api_tenants_v1_models_proto_rawDescGZIP() []byte {
 	return file_api_tenants_v1_models_proto_rawDescData
 }
 
-var file_api_tenants_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_api_tenants_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_api_tenants_v1_models_proto_goTypes = []any{
 	(*MemberShort)(nil),       // 0: tenants.v1.MemberShort
 	(*Tenant)(nil),            // 1: tenants.v1.Tenant
-	(*Store)(nil),             // 2: tenants.v1.Store
-	(*TenantReply)(nil),       // 3: tenants.v1.TenantReply
-	(*Group)(nil),             // 4: tenants.v1.Group
-	(*TenantMember)(nil),      // 5: tenants.v1.TenantMember
-	(*ListMembersReply)(nil),  // 6: tenants.v1.ListMembersReply
-	(*v1.UserShort)(nil),      // 7: iam.v1.UserShort
-	(*v11.PaginateReply)(nil), // 8: utils.v1.PaginateReply
+	(*TenantReply)(nil),       // 2: tenants.v1.TenantReply
+	(*Group)(nil),             // 3: tenants.v1.Group
+	(*TenantMember)(nil),      // 4: tenants.v1.TenantMember
+	(*ListMembersReply)(nil),  // 5: tenants.v1.ListMembersReply
+	(*v1.UserShort)(nil),      // 6: iam.v1.UserShort
+	(*v11.PaginateReply)(nil), // 7: utils.v1.PaginateReply
 }
 var file_api_tenants_v1_models_proto_depIdxs = []int32{
 	1, // 0: tenants.v1.TenantReply.tenant:type_name -> tenants.v1.Tenant
-	7, // 1: tenants.v1.TenantMember.user:type_name -> iam.v1.UserShort
-	5, // 2: tenants.v1.ListMembersReply.members:type_name -> tenants.v1.TenantMember
-	4, // 3: tenants.v1.ListMembersReply.groups:type_name -> tenants.v1.Group
-	8, // 4: tenants.v1.ListMembersReply.paginate:type_name -> utils.v1.PaginateReply
+	6, // 1: tenants.v1.TenantMember.user:type_name -> iam.v1.UserShort
+	4, // 2: tenants.v1.ListMembersReply.members:type_name -> tenants.v1.TenantMember
+	3, // 3: tenants.v1.ListMembersReply.groups:type_name -> tenants.v1.Group
+	7, // 4: tenants.v1.ListMembersReply.paginate:type_name -> utils.v1.PaginateReply
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -661,15 +511,14 @@ func file_api_tenants_v1_models_proto_init() {
 		return
 	}
 	file_api_tenants_v1_models_proto_msgTypes[1].OneofWrappers = []any{}
-	file_api_tenants_v1_models_proto_msgTypes[2].OneofWrappers = []any{}
-	file_api_tenants_v1_models_proto_msgTypes[5].OneofWrappers = []any{}
+	file_api_tenants_v1_models_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_tenants_v1_models_proto_rawDesc), len(file_api_tenants_v1_models_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

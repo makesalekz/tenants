@@ -39,7 +39,6 @@ func (Tenant) Edges() []ent.Edge {
 		edge.To("members", Member.Type),
 		edge.To("groups", Group.Type),
 		edge.To("invites", Invite.Type),
-		edge.To("stores", Store.Type),
 	}
 }
 

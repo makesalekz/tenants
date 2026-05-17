@@ -15,8 +15,5 @@ type Invite func(*sql.Selector)
 // Member is the predicate function for member builders.
 type Member func(*sql.Selector)
 
-// Store is the predicate function for store builders.
-type Store func(*sql.Selector)
-
 // Tenant is the predicate function for tenant builders.
 type Tenant func(*sql.Selector)

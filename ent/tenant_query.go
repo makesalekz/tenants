@@ -16,7 +16,6 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
-	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -30,7 +29,6 @@ type TenantQuery struct {
 	withMembers *MemberQuery
 	withGroups  *GroupQuery
 	withInvites *InviteQuery
-	withStores  *StoreQuery
 	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -127,28 +125,6 @@ func (tq *TenantQuery) QueryInvites() *InviteQuery {
 			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
 			sqlgraph.To(invite.Table, invite.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, tenant.InvitesTable, tenant.InvitesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryStores chains the current query on the "stores" edge.
-func (tq *TenantQuery) QueryStores() *StoreQuery {
-	query := (&StoreClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
-			sqlgraph.To(store.Table, store.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, tenant.StoresTable, tenant.StoresColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -351,7 +327,6 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 		withMembers: tq.withMembers.Clone(),
 		withGroups:  tq.withGroups.Clone(),
 		withInvites: tq.withInvites.Clone(),
-		withStores:  tq.withStores.Clone(),
 		// clone intermediate query.
 		sql:       tq.sql.Clone(),
 		path:      tq.path,
@@ -389,17 +364,6 @@ func (tq *TenantQuery) WithInvites(opts ...func(*InviteQuery)) *TenantQuery {
 		opt(query)
 	}
 	tq.withInvites = query
-	return tq
-}
-
-// WithStores tells the query-builder to eager-load the nodes that are connected to
-// the "stores" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TenantQuery) WithStores(opts ...func(*StoreQuery)) *TenantQuery {
-	query := (&StoreClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withStores = query
 	return tq
 }
 
@@ -481,11 +445,10 @@ func (tq *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 	var (
 		nodes       = []*Tenant{}
 		_spec       = tq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [3]bool{
 			tq.withMembers != nil,
 			tq.withGroups != nil,
 			tq.withInvites != nil,
-			tq.withStores != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -527,13 +490,6 @@ func (tq *TenantQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tenan
 		if err := tq.loadInvites(ctx, query, nodes,
 			func(n *Tenant) { n.Edges.Invites = []*Invite{} },
 			func(n *Tenant, e *Invite) { n.Edges.Invites = append(n.Edges.Invites, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := tq.withStores; query != nil {
-		if err := tq.loadStores(ctx, query, nodes,
-			func(n *Tenant) { n.Edges.Stores = []*Store{} },
-			func(n *Tenant, e *Store) { n.Edges.Stores = append(n.Edges.Stores, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -615,36 +571,6 @@ func (tq *TenantQuery) loadInvites(ctx context.Context, query *InviteQuery, node
 	}
 	query.Where(predicate.Invite(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(tenant.InvitesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.TenantID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "tenant_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (tq *TenantQuery) loadStores(ctx context.Context, query *StoreQuery, nodes []*Tenant, init func(*Tenant), assign func(*Tenant, *Store)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int64]*Tenant)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(store.FieldTenantID)
-	}
-	query.Where(predicate.Store(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(tenant.StoresColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

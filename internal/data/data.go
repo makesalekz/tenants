@@ -34,7 +34,6 @@ var ProviderSet = wire.NewSet(
 	NewMembersRepo,
 	NewInvitesRepo,
 	NewGroupsRepo,
-	NewStoresRepo,
 	NewIamRemote,
 	NewRbacRemote,
 )

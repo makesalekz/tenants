@@ -46,11 +46,9 @@ type TenantEdges struct {
 	Groups []*Group `json:"groups,omitempty"`
 	// Invites holds the value of the invites edge.
 	Invites []*Invite `json:"invites,omitempty"`
-	// Stores holds the value of the stores edge.
-	Stores []*Store `json:"stores,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // MembersOrErr returns the Members value or an error if the edge
@@ -78,15 +76,6 @@ func (e TenantEdges) InvitesOrErr() ([]*Invite, error) {
 		return e.Invites, nil
 	}
 	return nil, &NotLoadedError{edge: "invites"}
-}
-
-// StoresOrErr returns the Stores value or an error if the edge
-// was not loaded in eager-loading.
-func (e TenantEdges) StoresOrErr() ([]*Store, error) {
-	if e.loadedTypes[3] {
-		return e.Stores, nil
-	}
-	return nil, &NotLoadedError{edge: "stores"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -191,11 +180,6 @@ func (t *Tenant) QueryGroups() *GroupQuery {
 // QueryInvites queries the "invites" edge of the Tenant entity.
 func (t *Tenant) QueryInvites() *InviteQuery {
 	return NewTenantClient(t.config).QueryInvites(t)
-}
-
-// QueryStores queries the "stores" edge of the Tenant entity.
-func (t *Tenant) QueryStores() *StoreQuery {
-	return NewTenantClient(t.config).QueryStores(t)
 }
 
 // Update returns a builder for updating this Tenant.

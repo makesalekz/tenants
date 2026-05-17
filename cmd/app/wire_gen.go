@@ -104,17 +104,7 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	groupsService := service.NewGroupsService(tenantsUsecase, groupsUsecase)
-	storesRepo := data.NewStoresRepo(dataData)
-	storesUsecase, err := biz.NewStoresUsecase(logger, storesRepo)
-	if err != nil {
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	storesService := service.NewStoresService(storesUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, iTracer, tenantsService, membersService, invitesService, groupsService, storesService)
+	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, iTracer, tenantsService, membersService, invitesService, groupsService)
 	httpServer := server.NewHTTPServer(bootstrap)
 	app := newApp(logger, iConfig, grpcServer, httpServer)
 	return app, func() {

@@ -20,6 +20,5 @@ var ProviderSet = wire.NewSet(
 	NewMembersUsecase,
 	NewInvitesUsecase,
 	NewGroupsUsecase,
-	NewStoresUsecase,
 	u_nats.NewQueueManager,
 )

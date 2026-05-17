@@ -15,7 +15,6 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
-	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -80,7 +79,6 @@ func checkColumn(table, column string) error {
 			group.Table:  group.ValidColumn,
 			invite.Table: invite.ValidColumn,
 			member.Table: member.ValidColumn,
-			store.Table:  store.ValidColumn,
 			tenant.Table: tenant.ValidColumn,
 		})
 	})
