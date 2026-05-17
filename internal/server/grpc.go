@@ -25,6 +25,7 @@ func NewGRPCServer(
 	membersService *service.MembersService,
 	invitesService *service.InvitesService,
 	groupsService *service.GroupsService,
+	storesService *service.StoresService,
 ) *grpc.Server {
 	err := tracer.Initialize()
 	if err != nil {
@@ -59,6 +60,7 @@ func NewGRPCServer(
 	v1.RegisterMembersServer(srv, membersService)
 	v1.RegisterInvitesServer(srv, invitesService)
 	v1.RegisterGroupsServer(srv, groupsService)
+	v1.RegisterStoresServer(srv, storesService)
 
 	return srv
 }

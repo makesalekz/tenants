@@ -15,6 +15,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -146,6 +147,21 @@ func (tu *TenantUpdate) AddInvites(i ...*Invite) *TenantUpdate {
 	return tu.AddInviteIDs(ids...)
 }
 
+// AddStoreIDs adds the "stores" edge to the Store entity by IDs.
+func (tu *TenantUpdate) AddStoreIDs(ids ...int64) *TenantUpdate {
+	tu.mutation.AddStoreIDs(ids...)
+	return tu
+}
+
+// AddStores adds the "stores" edges to the Store entity.
+func (tu *TenantUpdate) AddStores(s ...*Store) *TenantUpdate {
+	ids := make([]int64, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tu.AddStoreIDs(ids...)
+}
+
 // Mutation returns the TenantMutation object of the builder.
 func (tu *TenantUpdate) Mutation() *TenantMutation {
 	return tu.mutation
@@ -214,6 +230,27 @@ func (tu *TenantUpdate) RemoveInvites(i ...*Invite) *TenantUpdate {
 	return tu.RemoveInviteIDs(ids...)
 }
 
+// ClearStores clears all "stores" edges to the Store entity.
+func (tu *TenantUpdate) ClearStores() *TenantUpdate {
+	tu.mutation.ClearStores()
+	return tu
+}
+
+// RemoveStoreIDs removes the "stores" edge to Store entities by IDs.
+func (tu *TenantUpdate) RemoveStoreIDs(ids ...int64) *TenantUpdate {
+	tu.mutation.RemoveStoreIDs(ids...)
+	return tu
+}
+
+// RemoveStores removes "stores" edges to Store entities.
+func (tu *TenantUpdate) RemoveStores(s ...*Store) *TenantUpdate {
+	ids := make([]int64, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tu.RemoveStoreIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TenantUpdate) Save(ctx context.Context) (int, error) {
 	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
@@ -270,6 +307,9 @@ func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
+	}
+	if tu.mutation.ReferredByCleared() {
+		_spec.ClearField(tenant.FieldReferredBy, field.TypeInt64)
 	}
 	if value, ok := tu.mutation.UpdatedAt(); ok {
 		_spec.SetField(tenant.FieldUpdatedAt, field.TypeTime, value)
@@ -402,6 +442,51 @@ func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.StoresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedStoresIDs(); len(nodes) > 0 && !tu.mutation.StoresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.StoresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -545,6 +630,21 @@ func (tuo *TenantUpdateOne) AddInvites(i ...*Invite) *TenantUpdateOne {
 	return tuo.AddInviteIDs(ids...)
 }
 
+// AddStoreIDs adds the "stores" edge to the Store entity by IDs.
+func (tuo *TenantUpdateOne) AddStoreIDs(ids ...int64) *TenantUpdateOne {
+	tuo.mutation.AddStoreIDs(ids...)
+	return tuo
+}
+
+// AddStores adds the "stores" edges to the Store entity.
+func (tuo *TenantUpdateOne) AddStores(s ...*Store) *TenantUpdateOne {
+	ids := make([]int64, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tuo.AddStoreIDs(ids...)
+}
+
 // Mutation returns the TenantMutation object of the builder.
 func (tuo *TenantUpdateOne) Mutation() *TenantMutation {
 	return tuo.mutation
@@ -611,6 +711,27 @@ func (tuo *TenantUpdateOne) RemoveInvites(i ...*Invite) *TenantUpdateOne {
 		ids[j] = i[j].ID
 	}
 	return tuo.RemoveInviteIDs(ids...)
+}
+
+// ClearStores clears all "stores" edges to the Store entity.
+func (tuo *TenantUpdateOne) ClearStores() *TenantUpdateOne {
+	tuo.mutation.ClearStores()
+	return tuo
+}
+
+// RemoveStoreIDs removes the "stores" edge to Store entities by IDs.
+func (tuo *TenantUpdateOne) RemoveStoreIDs(ids ...int64) *TenantUpdateOne {
+	tuo.mutation.RemoveStoreIDs(ids...)
+	return tuo
+}
+
+// RemoveStores removes "stores" edges to Store entities.
+func (tuo *TenantUpdateOne) RemoveStores(s ...*Store) *TenantUpdateOne {
+	ids := make([]int64, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tuo.RemoveStoreIDs(ids...)
 }
 
 // Where appends a list predicates to the TenantUpdate builder.
@@ -699,6 +820,9 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 	}
 	if value, ok := tuo.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
+	}
+	if tuo.mutation.ReferredByCleared() {
+		_spec.ClearField(tenant.FieldReferredBy, field.TypeInt64)
 	}
 	if value, ok := tuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(tenant.FieldUpdatedAt, field.TypeTime, value)
@@ -831,6 +955,51 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.StoresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedStoresIDs(); len(nodes) > 0 && !tuo.mutation.StoresCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.StoresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {

@@ -18,6 +18,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -32,6 +33,8 @@ type Client struct {
 	Invite *InviteClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
+	// Store is the client for interacting with the Store builders.
+	Store *StoreClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
 }
@@ -48,6 +51,7 @@ func (c *Client) init() {
 	c.Group = NewGroupClient(c.config)
 	c.Invite = NewInviteClient(c.config)
 	c.Member = NewMemberClient(c.config)
+	c.Store = NewStoreClient(c.config)
 	c.Tenant = NewTenantClient(c.config)
 }
 
@@ -144,6 +148,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Group:  NewGroupClient(cfg),
 		Invite: NewInviteClient(cfg),
 		Member: NewMemberClient(cfg),
+		Store:  NewStoreClient(cfg),
 		Tenant: NewTenantClient(cfg),
 	}, nil
 }
@@ -167,6 +172,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Group:  NewGroupClient(cfg),
 		Invite: NewInviteClient(cfg),
 		Member: NewMemberClient(cfg),
+		Store:  NewStoreClient(cfg),
 		Tenant: NewTenantClient(cfg),
 	}, nil
 }
@@ -199,6 +205,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Group.Use(hooks...)
 	c.Invite.Use(hooks...)
 	c.Member.Use(hooks...)
+	c.Store.Use(hooks...)
 	c.Tenant.Use(hooks...)
 }
 
@@ -208,6 +215,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Group.Intercept(interceptors...)
 	c.Invite.Intercept(interceptors...)
 	c.Member.Intercept(interceptors...)
+	c.Store.Intercept(interceptors...)
 	c.Tenant.Intercept(interceptors...)
 }
 
@@ -220,6 +228,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Invite.mutate(ctx, m)
 	case *MemberMutation:
 		return c.Member.mutate(ctx, m)
+	case *StoreMutation:
+		return c.Store.mutate(ctx, m)
 	case *TenantMutation:
 		return c.Tenant.mutate(ctx, m)
 	default:
@@ -710,6 +720,157 @@ func (c *MemberClient) mutate(ctx context.Context, m *MemberMutation) (Value, er
 	}
 }
 
+// StoreClient is a client for the Store schema.
+type StoreClient struct {
+	config
+}
+
+// NewStoreClient returns a client for the Store from the given config.
+func NewStoreClient(c config) *StoreClient {
+	return &StoreClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `store.Hooks(f(g(h())))`.
+func (c *StoreClient) Use(hooks ...Hook) {
+	c.hooks.Store = append(c.hooks.Store, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `store.Intercept(f(g(h())))`.
+func (c *StoreClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Store = append(c.inters.Store, interceptors...)
+}
+
+// Create returns a builder for creating a Store entity.
+func (c *StoreClient) Create() *StoreCreate {
+	mutation := newStoreMutation(c.config, OpCreate)
+	return &StoreCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Store entities.
+func (c *StoreClient) CreateBulk(builders ...*StoreCreate) *StoreCreateBulk {
+	return &StoreCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StoreClient) MapCreateBulk(slice any, setFunc func(*StoreCreate, int)) *StoreCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StoreCreateBulk{err: fmt.Errorf("calling to StoreClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StoreCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StoreCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Store.
+func (c *StoreClient) Update() *StoreUpdate {
+	mutation := newStoreMutation(c.config, OpUpdate)
+	return &StoreUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StoreClient) UpdateOne(s *Store) *StoreUpdateOne {
+	mutation := newStoreMutation(c.config, OpUpdateOne, withStore(s))
+	return &StoreUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StoreClient) UpdateOneID(id int64) *StoreUpdateOne {
+	mutation := newStoreMutation(c.config, OpUpdateOne, withStoreID(id))
+	return &StoreUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Store.
+func (c *StoreClient) Delete() *StoreDelete {
+	mutation := newStoreMutation(c.config, OpDelete)
+	return &StoreDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StoreClient) DeleteOne(s *Store) *StoreDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StoreClient) DeleteOneID(id int64) *StoreDeleteOne {
+	builder := c.Delete().Where(store.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StoreDeleteOne{builder}
+}
+
+// Query returns a query builder for Store.
+func (c *StoreClient) Query() *StoreQuery {
+	return &StoreQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStore},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Store entity by its id.
+func (c *StoreClient) Get(ctx context.Context, id int64) (*Store, error) {
+	return c.Query().Where(store.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StoreClient) GetX(ctx context.Context, id int64) *Store {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTenant queries the tenant edge of a Store.
+func (c *StoreClient) QueryTenant(s *Store) *TenantQuery {
+	query := (&TenantClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(store.Table, store.FieldID, id),
+			sqlgraph.To(tenant.Table, tenant.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, store.TenantTable, store.TenantColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StoreClient) Hooks() []Hook {
+	hooks := c.hooks.Store
+	return append(hooks[:len(hooks):len(hooks)], store.Hooks[:]...)
+}
+
+// Interceptors returns the client interceptors.
+func (c *StoreClient) Interceptors() []Interceptor {
+	inters := c.inters.Store
+	return append(inters[:len(inters):len(inters)], store.Interceptors[:]...)
+}
+
+func (c *StoreClient) mutate(ctx context.Context, m *StoreMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StoreCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StoreUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StoreUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StoreDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Store mutation op: %q", m.Op())
+	}
+}
+
 // TenantClient is a client for the Tenant schema.
 type TenantClient struct {
 	config
@@ -866,6 +1027,22 @@ func (c *TenantClient) QueryInvites(t *Tenant) *InviteQuery {
 	return query
 }
 
+// QueryStores queries the stores edge of a Tenant.
+func (c *TenantClient) QueryStores(t *Tenant) *StoreQuery {
+	query := (&StoreClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, id),
+			sqlgraph.To(store.Table, store.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, tenant.StoresTable, tenant.StoresColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TenantClient) Hooks() []Hook {
 	hooks := c.hooks.Tenant
@@ -896,9 +1073,9 @@ func (c *TenantClient) mutate(ctx context.Context, m *TenantMutation) (Value, er
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Group, Invite, Member, Tenant []ent.Hook
+		Group, Invite, Member, Store, Tenant []ent.Hook
 	}
 	inters struct {
-		Group, Invite, Member, Tenant []ent.Interceptor
+		Group, Invite, Member, Store, Tenant []ent.Interceptor
 	}
 )

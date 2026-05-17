@@ -24,6 +24,7 @@ func (Tenant) Fields() []ent.Field {
 		field.Int64("id").Immutable(),
 		field.Int64("owner_id"),
 		field.String("name"),
+		field.Int64("referred_by").Optional().Nillable().Immutable(),
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now),
 		field.String("type").GoType(enum.TenantType("")).Immutable().Default(enum.Business.Value()).Annotations(
@@ -38,6 +39,7 @@ func (Tenant) Edges() []ent.Edge {
 		edge.To("members", Member.Type),
 		edge.To("groups", Group.Type),
 		edge.To("invites", Invite.Type),
+		edge.To("stores", Store.Type),
 	}
 }
 

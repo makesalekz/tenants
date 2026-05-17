@@ -71,6 +71,11 @@ func Name(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldEQ(FieldName, v))
 }
 
+// ReferredBy applies equality check predicate on the "referred_by" field. It's identical to ReferredByEQ.
+func ReferredBy(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldEQ(FieldReferredBy, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Tenant {
 	return predicate.Tenant(sql.FieldEQ(FieldCreatedAt, v))
@@ -240,6 +245,56 @@ func NameEqualFold(v string) predicate.Tenant {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Tenant {
 	return predicate.Tenant(sql.FieldContainsFold(FieldName, v))
+}
+
+// ReferredByEQ applies the EQ predicate on the "referred_by" field.
+func ReferredByEQ(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldEQ(FieldReferredBy, v))
+}
+
+// ReferredByNEQ applies the NEQ predicate on the "referred_by" field.
+func ReferredByNEQ(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldNEQ(FieldReferredBy, v))
+}
+
+// ReferredByIn applies the In predicate on the "referred_by" field.
+func ReferredByIn(vs ...int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldIn(FieldReferredBy, vs...))
+}
+
+// ReferredByNotIn applies the NotIn predicate on the "referred_by" field.
+func ReferredByNotIn(vs ...int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldNotIn(FieldReferredBy, vs...))
+}
+
+// ReferredByGT applies the GT predicate on the "referred_by" field.
+func ReferredByGT(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldGT(FieldReferredBy, v))
+}
+
+// ReferredByGTE applies the GTE predicate on the "referred_by" field.
+func ReferredByGTE(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldGTE(FieldReferredBy, v))
+}
+
+// ReferredByLT applies the LT predicate on the "referred_by" field.
+func ReferredByLT(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldLT(FieldReferredBy, v))
+}
+
+// ReferredByLTE applies the LTE predicate on the "referred_by" field.
+func ReferredByLTE(v int64) predicate.Tenant {
+	return predicate.Tenant(sql.FieldLTE(FieldReferredBy, v))
+}
+
+// ReferredByIsNil applies the IsNil predicate on the "referred_by" field.
+func ReferredByIsNil() predicate.Tenant {
+	return predicate.Tenant(sql.FieldIsNull(FieldReferredBy))
+}
+
+// ReferredByNotNil applies the NotNil predicate on the "referred_by" field.
+func ReferredByNotNil() predicate.Tenant {
+	return predicate.Tenant(sql.FieldNotNull(FieldReferredBy))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -467,6 +522,29 @@ func HasInvites() predicate.Tenant {
 func HasInvitesWith(preds ...predicate.Invite) predicate.Tenant {
 	return predicate.Tenant(func(s *sql.Selector) {
 		step := newInvitesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStores applies the HasEdge predicate on the "stores" edge.
+func HasStores() predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StoresTable, StoresColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStoresWith applies the HasEdge predicate on the "stores" edge with a given conditions (other predicates).
+func HasStoresWith(preds ...predicate.Store) predicate.Tenant {
+	return predicate.Tenant(func(s *sql.Selector) {
+		step := newStoresStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

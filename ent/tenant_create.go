@@ -15,6 +15,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/group"
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
+	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -49,6 +50,20 @@ func (tc *TenantCreate) SetOwnerID(i int64) *TenantCreate {
 // SetName sets the "name" field.
 func (tc *TenantCreate) SetName(s string) *TenantCreate {
 	tc.mutation.SetName(s)
+	return tc
+}
+
+// SetReferredBy sets the "referred_by" field.
+func (tc *TenantCreate) SetReferredBy(i int64) *TenantCreate {
+	tc.mutation.SetReferredBy(i)
+	return tc
+}
+
+// SetNillableReferredBy sets the "referred_by" field if the given value is not nil.
+func (tc *TenantCreate) SetNillableReferredBy(i *int64) *TenantCreate {
+	if i != nil {
+		tc.SetReferredBy(*i)
+	}
 	return tc
 }
 
@@ -143,6 +158,21 @@ func (tc *TenantCreate) AddInvites(i ...*Invite) *TenantCreate {
 		ids[j] = i[j].ID
 	}
 	return tc.AddInviteIDs(ids...)
+}
+
+// AddStoreIDs adds the "stores" edge to the Store entity by IDs.
+func (tc *TenantCreate) AddStoreIDs(ids ...int64) *TenantCreate {
+	tc.mutation.AddStoreIDs(ids...)
+	return tc
+}
+
+// AddStores adds the "stores" edges to the Store entity.
+func (tc *TenantCreate) AddStores(s ...*Store) *TenantCreate {
+	ids := make([]int64, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tc.AddStoreIDs(ids...)
 }
 
 // Mutation returns the TenantMutation object of the builder.
@@ -262,6 +292,10 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := tc.mutation.ReferredBy(); ok {
+		_spec.SetField(tenant.FieldReferredBy, field.TypeInt64, value)
+		_node.ReferredBy = &value
+	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.SetField(tenant.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -315,6 +349,22 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(invite.FieldID, field.TypeInt64),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.StoresIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(store.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -450,6 +500,9 @@ func (u *TenantUpsertOne) UpdateNewValues() *TenantUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(tenant.FieldID)
+		}
+		if _, exists := u.create.mutation.ReferredBy(); exists {
+			s.SetIgnore(tenant.FieldReferredBy)
 		}
 		if _, exists := u.create.mutation.CreatedAt(); exists {
 			s.SetIgnore(tenant.FieldCreatedAt)
@@ -739,6 +792,9 @@ func (u *TenantUpsertBulk) UpdateNewValues() *TenantUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(tenant.FieldID)
+			}
+			if _, exists := b.mutation.ReferredBy(); exists {
+				s.SetIgnore(tenant.FieldReferredBy)
 			}
 			if _, exists := b.mutation.CreatedAt(); exists {
 				s.SetIgnore(tenant.FieldCreatedAt)

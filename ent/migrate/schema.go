@@ -110,12 +110,55 @@ var (
 			},
 		},
 	}
+	// StoresColumns holds the columns for the "stores" table.
+	StoresColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "lat", Type: field.TypeFloat64, Nullable: true},
+		{Name: "lon", Type: field.TypeFloat64, Nullable: true},
+		{Name: "phone", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "work_hours", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "responsible_id", Type: field.TypeInt64, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "tenant_id", Type: field.TypeInt64},
+	}
+	// StoresTable holds the schema information for the "stores" table.
+	StoresTable = &schema.Table{
+		Name:       "stores",
+		Columns:    StoresColumns,
+		PrimaryKey: []*schema.Column{StoresColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stores_tenants_stores",
+				Columns:    []*schema.Column{StoresColumns[12]},
+				RefColumns: []*schema.Column{TenantsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "store_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{StoresColumns[12]},
+			},
+			{
+				Name:    "store_tenant_id_is_active",
+				Unique:  false,
+				Columns: []*schema.Column{StoresColumns[12], StoresColumns[8]},
+			},
+		},
+	}
 	// TenantsColumns holds the columns for the "tenants" table.
 	TenantsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt64},
 		{Name: "name", Type: field.TypeString},
+		{Name: "referred_by", Type: field.TypeInt64, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeString, Default: schema.Expr("'PERSONAL'")},
@@ -129,7 +172,7 @@ var (
 			{
 				Name:    "tenant_owner_id_type",
 				Unique:  false,
-				Columns: []*schema.Column{TenantsColumns[2], TenantsColumns[6]},
+				Columns: []*schema.Column{TenantsColumns[2], TenantsColumns[7]},
 			},
 		},
 	}
@@ -163,6 +206,7 @@ var (
 		GroupsTable,
 		InvitesTable,
 		MembersTable,
+		StoresTable,
 		TenantsTable,
 		GroupMembersTable,
 	}
@@ -172,6 +216,7 @@ func init() {
 	GroupsTable.ForeignKeys[0].RefTable = TenantsTable
 	InvitesTable.ForeignKeys[0].RefTable = TenantsTable
 	MembersTable.ForeignKeys[0].RefTable = TenantsTable
+	StoresTable.ForeignKeys[0].RefTable = TenantsTable
 	GroupMembersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupMembersTable.ForeignKeys[1].RefTable = MembersTable
 }

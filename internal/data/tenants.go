@@ -18,15 +18,17 @@ import (
 )
 
 type TenantDto struct {
-	TenantID int64
-	OwnerID  int64
-	Name     string
-	Type     enum.TenantType
+	TenantID   int64
+	OwnerID    int64
+	Name       string
+	Type       enum.TenantType
+	ReferredBy *int64
 }
 
 type TenantsListFilter struct {
-	OwnerID int64
-	UserID  int64
+	OwnerID    int64
+	UserID     int64
+	ReferredBy int64
 }
 
 // TenantsRepo.
@@ -40,6 +42,7 @@ type TenantsRepo interface {
 		[]*ent.Tenant, error,
 	)
 	CountListTenants(ctx context.Context, filter TenantsListFilter) (int32, error)
+	TransferOwnership(ctx context.Context, tenantID int64, newOwnerID int64) (*ent.Tenant, error)
 }
 
 type tenantsRepo struct {
@@ -64,11 +67,14 @@ func (r *tenantsRepo) CreateTenant(ctx context.Context, dto TenantDto) (*ent.Ten
 		}
 	}()
 
-	tenant, err := tx.Tenant.Create().
+	create := tx.Tenant.Create().
 		SetOwnerID(dto.OwnerID).
 		SetName(dto.Name).
-		SetType(dto.Type).
-		Save(ctx)
+		SetType(dto.Type)
+	if dto.ReferredBy != nil {
+		create.SetReferredBy(*dto.ReferredBy)
+	}
+	tenant, err := create.Save(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -173,6 +179,10 @@ func (r *tenantsRepo) ListTenants(
 		query.Where(tenant.OwnerID(filter.OwnerID))
 	}
 
+	if filter.ReferredBy != 0 {
+		query.Where(tenant.ReferredBy(filter.ReferredBy))
+	}
+
 	if paginate.GetFromId() != 0 {
 		query.Where(tenant.IDGT(paginate.GetFromId()))
 	}
@@ -195,7 +205,17 @@ func (r *tenantsRepo) CountListTenants(ctx context.Context, filter TenantsListFi
 		query.Where(tenant.OwnerID(filter.OwnerID))
 	}
 
+	if filter.ReferredBy != 0 {
+		query.Where(tenant.ReferredBy(filter.ReferredBy))
+	}
+
 	count, err := query.Count(ctx)
 
 	return int32(count), err
+}
+
+func (r *tenantsRepo) TransferOwnership(ctx context.Context, tenantID int64, newOwnerID int64) (*ent.Tenant, error) {
+	return r.db.Tenant.UpdateOneID(tenantID).
+		SetOwnerID(newOwnerID).
+		Save(ctx)
 }

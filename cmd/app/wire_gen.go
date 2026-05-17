@@ -53,19 +53,20 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		cleanup()
 		return nil, nil, err
 	}
-	tenantsUsecase, err := biz.NewTenantsUsecase(logger, tenantsRepo, iRbacRemote)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	membersRepo := data.NewMembersRepo(dataData)
 	iIamRemote, cleanup3, err := data.NewIamRemote(logger, bootstrap, iDialerManager)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
+	tenantsUsecase, err := biz.NewTenantsUsecase(logger, tenantsRepo, iRbacRemote, iIamRemote)
+	if err != nil {
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	membersRepo := data.NewMembersRepo(dataData)
 	membersUsecase, err := biz.NewMembersUsecase(tenantsRepo, membersRepo, iIamRemote)
 	if err != nil {
 		cleanup3()
@@ -103,7 +104,17 @@ func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(),
 		return nil, nil, err
 	}
 	groupsService := service.NewGroupsService(tenantsUsecase, groupsUsecase)
-	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, iTracer, tenantsService, membersService, invitesService, groupsService)
+	storesRepo := data.NewStoresRepo(dataData)
+	storesUsecase, err := biz.NewStoresUsecase(logger, storesRepo)
+	if err != nil {
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	storesService := service.NewStoresService(storesUsecase)
+	grpcServer := server.NewGRPCServer(bootstrap, iJwtProcessor, iTracer, tenantsService, membersService, invitesService, groupsService, storesService)
 	httpServer := server.NewHTTPServer(bootstrap)
 	app := newApp(logger, iConfig, grpcServer, httpServer)
 	return app, func() {

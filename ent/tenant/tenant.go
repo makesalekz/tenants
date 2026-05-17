@@ -22,6 +22,8 @@ const (
 	FieldOwnerID = "owner_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldReferredBy holds the string denoting the referred_by field in the database.
+	FieldReferredBy = "referred_by"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -34,6 +36,8 @@ const (
 	EdgeGroups = "groups"
 	// EdgeInvites holds the string denoting the invites edge name in mutations.
 	EdgeInvites = "invites"
+	// EdgeStores holds the string denoting the stores edge name in mutations.
+	EdgeStores = "stores"
 	// Table holds the table name of the tenant in the database.
 	Table = "tenants"
 	// MembersTable is the table that holds the members relation/edge.
@@ -57,6 +61,13 @@ const (
 	InvitesInverseTable = "invites"
 	// InvitesColumn is the table column denoting the invites relation/edge.
 	InvitesColumn = "tenant_id"
+	// StoresTable is the table that holds the stores relation/edge.
+	StoresTable = "stores"
+	// StoresInverseTable is the table name for the Store entity.
+	// It exists in this package in order to avoid circular dependency with the "store" package.
+	StoresInverseTable = "stores"
+	// StoresColumn is the table column denoting the stores relation/edge.
+	StoresColumn = "tenant_id"
 )
 
 // Columns holds all SQL columns for tenant fields.
@@ -65,6 +76,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldOwnerID,
 	FieldName,
+	FieldReferredBy,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldType,
@@ -117,6 +129,11 @@ func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByReferredBy orders the results by the referred_by field.
+func ByReferredBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldReferredBy, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
@@ -175,6 +192,20 @@ func ByInvites(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newInvitesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByStoresCount orders the results by stores count.
+func ByStoresCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStoresStep(), opts...)
+	}
+}
+
+// ByStores orders the results by stores terms.
+func ByStores(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStoresStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newMembersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -194,5 +225,12 @@ func newInvitesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(InvitesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, InvitesTable, InvitesColumn),
+	)
+}
+func newStoresStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StoresInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StoresTable, StoresColumn),
 	)
 }

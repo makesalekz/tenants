@@ -127,6 +127,21 @@ func (mr *MockTenantsRepoMockRecorder) ListTenants(ctx, filter, paginate interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTenants", reflect.TypeOf((*MockTenantsRepo)(nil).ListTenants), ctx, filter, paginate)
 }
 
+// TransferOwnership mocks base method.
+func (m *MockTenantsRepo) TransferOwnership(ctx context.Context, tenantID, newOwnerID int64) (*ent.Tenant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TransferOwnership", ctx, tenantID, newOwnerID)
+	ret0, _ := ret[0].(*ent.Tenant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TransferOwnership indicates an expected call of TransferOwnership.
+func (mr *MockTenantsRepoMockRecorder) TransferOwnership(ctx, tenantID, newOwnerID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransferOwnership", reflect.TypeOf((*MockTenantsRepo)(nil).TransferOwnership), ctx, tenantID, newOwnerID)
+}
+
 // UpdateTenant mocks base method.
 func (m *MockTenantsRepo) UpdateTenant(ctx context.Context, dto data.TenantDto) (*ent.Tenant, error) {
 	m.ctrl.T.Helper()

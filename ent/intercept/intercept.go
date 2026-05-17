@@ -12,6 +12,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -152,6 +153,33 @@ func (f TraverseMember) Traverse(ctx context.Context, q ent.Query) error {
 	return fmt.Errorf("unexpected query type %T. expect *ent.MemberQuery", q)
 }
 
+// The StoreFunc type is an adapter to allow the use of ordinary function as a Querier.
+type StoreFunc func(context.Context, *ent.StoreQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f StoreFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.StoreQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.StoreQuery", q)
+}
+
+// The TraverseStore type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseStore func(context.Context, *ent.StoreQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseStore) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseStore) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.StoreQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.StoreQuery", q)
+}
+
 // The TenantFunc type is an adapter to allow the use of ordinary function as a Querier.
 type TenantFunc func(context.Context, *ent.TenantQuery) (ent.Value, error)
 
@@ -188,6 +216,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.InviteQuery, predicate.Invite, invite.OrderOption]{typ: ent.TypeInvite, tq: q}, nil
 	case *ent.MemberQuery:
 		return &query[*ent.MemberQuery, predicate.Member, member.OrderOption]{typ: ent.TypeMember, tq: q}, nil
+	case *ent.StoreQuery:
+		return &query[*ent.StoreQuery, predicate.Store, store.OrderOption]{typ: ent.TypeStore, tq: q}, nil
 	case *ent.TenantQuery:
 		return &query[*ent.TenantQuery, predicate.Tenant, tenant.OrderOption]{typ: ent.TypeTenant, tq: q}, nil
 	default:

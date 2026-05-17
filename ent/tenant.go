@@ -24,6 +24,8 @@ type Tenant struct {
 	OwnerID int64 `json:"owner_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// ReferredBy holds the value of the "referred_by" field.
+	ReferredBy *int64 `json:"referred_by,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -44,9 +46,11 @@ type TenantEdges struct {
 	Groups []*Group `json:"groups,omitempty"`
 	// Invites holds the value of the invites edge.
 	Invites []*Invite `json:"invites,omitempty"`
+	// Stores holds the value of the stores edge.
+	Stores []*Store `json:"stores,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // MembersOrErr returns the Members value or an error if the edge
@@ -76,12 +80,21 @@ func (e TenantEdges) InvitesOrErr() ([]*Invite, error) {
 	return nil, &NotLoadedError{edge: "invites"}
 }
 
+// StoresOrErr returns the Stores value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) StoresOrErr() ([]*Store, error) {
+	if e.loadedTypes[3] {
+		return e.Stores, nil
+	}
+	return nil, &NotLoadedError{edge: "stores"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Tenant) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tenant.FieldID, tenant.FieldOwnerID:
+		case tenant.FieldID, tenant.FieldOwnerID, tenant.FieldReferredBy:
 			values[i] = new(sql.NullInt64)
 		case tenant.FieldName, tenant.FieldType:
 			values[i] = new(sql.NullString)
@@ -126,6 +139,13 @@ func (t *Tenant) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				t.Name = value.String
+			}
+		case tenant.FieldReferredBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field referred_by", values[i])
+			} else if value.Valid {
+				t.ReferredBy = new(int64)
+				*t.ReferredBy = value.Int64
 			}
 		case tenant.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -173,6 +193,11 @@ func (t *Tenant) QueryInvites() *InviteQuery {
 	return NewTenantClient(t.config).QueryInvites(t)
 }
 
+// QueryStores queries the "stores" edge of the Tenant entity.
+func (t *Tenant) QueryStores() *StoreQuery {
+	return NewTenantClient(t.config).QueryStores(t)
+}
+
 // Update returns a builder for updating this Tenant.
 // Note that you need to call Tenant.Unwrap() before calling this method if this Tenant
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -206,6 +231,11 @@ func (t *Tenant) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(t.Name)
+	builder.WriteString(", ")
+	if v := t.ReferredBy; v != nil {
+		builder.WriteString("referred_by=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(t.CreatedAt.Format(time.ANSIC))

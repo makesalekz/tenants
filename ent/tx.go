@@ -18,6 +18,8 @@ type Tx struct {
 	Invite *InviteClient
 	// Member is the client for interacting with the Member builders.
 	Member *MemberClient
+	// Store is the client for interacting with the Store builders.
+	Store *StoreClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
 
@@ -154,6 +156,7 @@ func (tx *Tx) init() {
 	tx.Group = NewGroupClient(tx.config)
 	tx.Invite = NewInviteClient(tx.config)
 	tx.Member = NewMemberClient(tx.config)
+	tx.Store = NewStoreClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)
 }
 

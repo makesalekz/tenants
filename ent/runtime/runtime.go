@@ -10,6 +10,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/schema"
+	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 )
 
@@ -61,6 +62,43 @@ func init() {
 	memberDescCreatedAt := memberFields[3].Descriptor()
 	// member.DefaultCreatedAt holds the default value on creation for the created_at field.
 	member.DefaultCreatedAt = memberDescCreatedAt.Default.(func() time.Time)
+	storeMixin := schema.Store{}.Mixin()
+	storeMixinHooks0 := storeMixin[0].Hooks()
+	store.Hooks[0] = storeMixinHooks0[0]
+	storeMixinInters0 := storeMixin[0].Interceptors()
+	store.Interceptors[0] = storeMixinInters0[0]
+	storeFields := schema.Store{}.Fields()
+	_ = storeFields
+	// storeDescName is the schema descriptor for name field.
+	storeDescName := storeFields[2].Descriptor()
+	// store.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	store.NameValidator = storeDescName.Validators[0].(func(string) error)
+	// storeDescAddress is the schema descriptor for address field.
+	storeDescAddress := storeFields[3].Descriptor()
+	// store.DefaultAddress holds the default value on creation for the address field.
+	store.DefaultAddress = storeDescAddress.Default.(string)
+	// storeDescPhone is the schema descriptor for phone field.
+	storeDescPhone := storeFields[6].Descriptor()
+	// store.DefaultPhone holds the default value on creation for the phone field.
+	store.DefaultPhone = storeDescPhone.Default.(string)
+	// storeDescWorkHours is the schema descriptor for work_hours field.
+	storeDescWorkHours := storeFields[7].Descriptor()
+	// store.DefaultWorkHours holds the default value on creation for the work_hours field.
+	store.DefaultWorkHours = storeDescWorkHours.Default.(string)
+	// storeDescIsActive is the schema descriptor for is_active field.
+	storeDescIsActive := storeFields[8].Descriptor()
+	// store.DefaultIsActive holds the default value on creation for the is_active field.
+	store.DefaultIsActive = storeDescIsActive.Default.(bool)
+	// storeDescCreatedAt is the schema descriptor for created_at field.
+	storeDescCreatedAt := storeFields[10].Descriptor()
+	// store.DefaultCreatedAt holds the default value on creation for the created_at field.
+	store.DefaultCreatedAt = storeDescCreatedAt.Default.(func() time.Time)
+	// storeDescUpdatedAt is the schema descriptor for updated_at field.
+	storeDescUpdatedAt := storeFields[11].Descriptor()
+	// store.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	store.DefaultUpdatedAt = storeDescUpdatedAt.Default.(func() time.Time)
+	// store.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	store.UpdateDefaultUpdatedAt = storeDescUpdatedAt.UpdateDefault.(func() time.Time)
 	tenantMixin := schema.Tenant{}.Mixin()
 	tenantMixinHooks0 := tenantMixin[0].Hooks()
 	tenant.Hooks[0] = tenantMixinHooks0[0]
@@ -69,20 +107,20 @@ func init() {
 	tenantFields := schema.Tenant{}.Fields()
 	_ = tenantFields
 	// tenantDescCreatedAt is the schema descriptor for created_at field.
-	tenantDescCreatedAt := tenantFields[3].Descriptor()
+	tenantDescCreatedAt := tenantFields[4].Descriptor()
 	// tenant.DefaultCreatedAt holds the default value on creation for the created_at field.
 	tenant.DefaultCreatedAt = tenantDescCreatedAt.Default.(func() time.Time)
 	// tenantDescUpdatedAt is the schema descriptor for updated_at field.
-	tenantDescUpdatedAt := tenantFields[4].Descriptor()
+	tenantDescUpdatedAt := tenantFields[5].Descriptor()
 	// tenant.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	tenant.DefaultUpdatedAt = tenantDescUpdatedAt.Default.(func() time.Time)
 	// tenantDescType is the schema descriptor for type field.
-	tenantDescType := tenantFields[5].Descriptor()
+	tenantDescType := tenantFields[6].Descriptor()
 	// tenant.DefaultType holds the default value on creation for the type field.
 	tenant.DefaultType = enum.TenantType(tenantDescType.Default.(string))
 }
 
 const (
-	Version = "v0.14.0"                                         // Version of ent codegen.
-	Sum     = "h1:EO3Z9aZ5bXJatJeGqu/EVdnNr6K4mRq3rWe5owt0MC4=" // Sum of ent codegen.
+	Version = "v0.14.2"                                         // Version of ent codegen.
+	Sum     = "h1:ywld/j2Rx4EmnIKs8eZ29cbFA1zpB+DA9TLL5l3rlq0=" // Sum of ent codegen.
 )

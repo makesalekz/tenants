@@ -45,6 +45,18 @@ func (f MemberFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MemberMutation", m)
 }
 
+// The StoreFunc type is an adapter to allow the use of ordinary
+// function as Store mutator.
+type StoreFunc func(context.Context, *ent.StoreMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StoreFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StoreMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StoreMutation", m)
+}
+
 // The TenantFunc type is an adapter to allow the use of ordinary
 // function as Tenant mutator.
 type TenantFunc func(context.Context, *ent.TenantMutation) (ent.Value, error)

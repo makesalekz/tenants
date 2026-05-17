@@ -33,6 +33,7 @@ type TenantsUsecase struct {
 
 	repo data.TenantsRepo
 	rbac data.IRbacRemote
+	iam  data.IIamRemote
 }
 
 // NewGreeterUsecase new a Greeter usecase.
@@ -40,11 +41,13 @@ func NewTenantsUsecase(
 	logger log.Logger,
 	repo data.TenantsRepo,
 	rbac data.IRbacRemote,
+	iam data.IIamRemote,
 ) (*TenantsUsecase, error) {
 	return &TenantsUsecase{
 		log:  log.NewHelper(logger),
 		repo: repo,
 		rbac: rbac,
+		iam:  iam,
 	}, nil
 }
 
@@ -160,4 +163,32 @@ func (uc *TenantsUsecase) ListTenants(
 		Tenants:  tenants,
 		Paginate: &paginateReply,
 	}, nil
+}
+
+func (uc *TenantsUsecase) TransferOwnership(ctx context.Context, tenantID int64, newOwnerID int64) (*ent.Tenant, error) {
+	// Validate new owner exists in IAM
+	_, err := uc.iam.GetUser(ctx, newOwnerID)
+	if err != nil {
+		return nil, tenants_v1.ErrorNotFound("new owner not found")
+	}
+
+	t, err := uc.repo.TransferOwnership(ctx, tenantID, newOwnerID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, tenants_v1.ErrorNotFound("tenant not found")
+		}
+		return nil, err
+	}
+	return t, nil
+}
+
+func (uc *TenantsUsecase) GetReferredTenants(
+	ctx context.Context,
+	managerID int64,
+	paginate *utils_v1.PaginateRequest,
+) (*TenantsList, error) {
+	filter := data.TenantsListFilter{
+		ReferredBy: managerID,
+	}
+	return uc.ListTenants(ctx, filter, paginate)
 }

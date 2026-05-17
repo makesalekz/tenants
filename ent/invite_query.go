@@ -277,8 +277,9 @@ func (iq *InviteQuery) Clone() *InviteQuery {
 		predicates: append([]predicate.Invite{}, iq.predicates...),
 		withTenant: iq.withTenant.Clone(),
 		// clone intermediate query.
-		sql:  iq.sql.Clone(),
-		path: iq.path,
+		sql:       iq.sql.Clone(),
+		path:      iq.path,
+		modifiers: append([]func(*sql.Selector){}, iq.modifiers...),
 	}
 }
 

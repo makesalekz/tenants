@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package tenants.v1;
+
+import "api/utils/v1/models.proto";
+import "api/tenants/v1/models.proto";
+
+option go_package = "gitlab.calendaria.team/services/tenants/api/tenants/v1;tenants_v1";
+option java_multiple_files = true;
+option java_package = "tenants.v1";
+
+service Stores {
+  rpc CreateStore(CreateStoreRequest) returns (StoreReply);
+  rpc UpdateStore(UpdateStoreRequest) returns (StoreReply);
+  rpc DeleteStore(StoreRequest) returns (utils.v1.EmptyReply);
+  rpc GetStore(StoreRequest) returns (StoreReply);
+  rpc ListStores(ListStoresRequest) returns (ListStoresReply);
+  rpc SetStoreResponsible(SetStoreResponsibleRequest) returns (StoreReply);
+}
+
+message CreateStoreRequest {
+  string name = 1;
+  string address = 2;
+  optional double lat = 3;
+  optional double lon = 4;
+  string phone = 5;
+  string work_hours = 6;
+}
+
+message UpdateStoreRequest {
+  int64 store_id = 1;
+  string name = 2;
+  string address = 3;
+  optional double lat = 4;
+  optional double lon = 5;
+  string phone = 6;
+  string work_hours = 7;
+  bool is_active = 8;
+}
+
+message StoreRequest {
+  int64 store_id = 1;
+}
+
+message ListStoresRequest {
+  bool only_active = 1;
+  utils.v1.PaginateRequest paginate = 2;
+}
+
+message ListStoresReply {
+  repeated Store stores = 1;
+  utils.v1.PaginateReply paginate = 2;
+}
+
+message StoreReply {
+  Store store = 1;
+}
+
+message SetStoreResponsibleRequest {
+  int64 store_id = 1;
+  int64 member_id = 2;
+}

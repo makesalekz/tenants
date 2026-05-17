@@ -7,6 +7,7 @@ import (
 	"gitlab.calendaria.team/services/tenants/ent/invite"
 	"gitlab.calendaria.team/services/tenants/ent/member"
 	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"gitlab.calendaria.team/services/tenants/ent/store"
 	"gitlab.calendaria.team/services/tenants/ent/tenant"
 
 	"entgo.io/ent/dialect/sql"
@@ -17,7 +18,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 4)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 5)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   group.Table,
@@ -81,6 +82,31 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   store.Table,
+			Columns: store.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt64,
+				Column: store.FieldID,
+			},
+		},
+		Type: "Store",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			store.FieldDeletedAt:     {Type: field.TypeTime, Column: store.FieldDeletedAt},
+			store.FieldTenantID:      {Type: field.TypeInt64, Column: store.FieldTenantID},
+			store.FieldName:          {Type: field.TypeString, Column: store.FieldName},
+			store.FieldAddress:       {Type: field.TypeString, Column: store.FieldAddress},
+			store.FieldLat:           {Type: field.TypeFloat64, Column: store.FieldLat},
+			store.FieldLon:           {Type: field.TypeFloat64, Column: store.FieldLon},
+			store.FieldPhone:         {Type: field.TypeString, Column: store.FieldPhone},
+			store.FieldWorkHours:     {Type: field.TypeString, Column: store.FieldWorkHours},
+			store.FieldIsActive:      {Type: field.TypeBool, Column: store.FieldIsActive},
+			store.FieldResponsibleID: {Type: field.TypeInt64, Column: store.FieldResponsibleID},
+			store.FieldCreatedAt:     {Type: field.TypeTime, Column: store.FieldCreatedAt},
+			store.FieldUpdatedAt:     {Type: field.TypeTime, Column: store.FieldUpdatedAt},
+		},
+	}
+	graph.Nodes[4] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -90,12 +116,13 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Tenant",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			tenant.FieldDeletedAt: {Type: field.TypeTime, Column: tenant.FieldDeletedAt},
-			tenant.FieldOwnerID:   {Type: field.TypeInt64, Column: tenant.FieldOwnerID},
-			tenant.FieldName:      {Type: field.TypeString, Column: tenant.FieldName},
-			tenant.FieldCreatedAt: {Type: field.TypeTime, Column: tenant.FieldCreatedAt},
-			tenant.FieldUpdatedAt: {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
-			tenant.FieldType:      {Type: field.TypeString, Column: tenant.FieldType},
+			tenant.FieldDeletedAt:  {Type: field.TypeTime, Column: tenant.FieldDeletedAt},
+			tenant.FieldOwnerID:    {Type: field.TypeInt64, Column: tenant.FieldOwnerID},
+			tenant.FieldName:       {Type: field.TypeString, Column: tenant.FieldName},
+			tenant.FieldReferredBy: {Type: field.TypeInt64, Column: tenant.FieldReferredBy},
+			tenant.FieldCreatedAt:  {Type: field.TypeTime, Column: tenant.FieldCreatedAt},
+			tenant.FieldUpdatedAt:  {Type: field.TypeTime, Column: tenant.FieldUpdatedAt},
+			tenant.FieldType:       {Type: field.TypeString, Column: tenant.FieldType},
 		},
 	}
 	graph.MustAddE(
@@ -159,6 +186,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"Group",
 	)
 	graph.MustAddE(
+		"tenant",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   store.TenantTable,
+			Columns: []string{store.TenantColumn},
+			Bidi:    false,
+		},
+		"Store",
+		"Tenant",
+	)
+	graph.MustAddE(
 		"members",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -193,6 +232,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"Tenant",
 		"Invite",
+	)
+	graph.MustAddE(
+		"stores",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   tenant.StoresTable,
+			Columns: []string{tenant.StoresColumn},
+			Bidi:    false,
+		},
+		"Tenant",
+		"Store",
 	)
 	return graph
 }()
@@ -504,6 +555,120 @@ func (f *MemberFilter) WhereHasGroupsWith(preds ...predicate.Group) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (sq *StoreQuery) addPredicate(pred func(s *sql.Selector)) {
+	sq.predicates = append(sq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the StoreQuery builder.
+func (sq *StoreQuery) Filter() *StoreFilter {
+	return &StoreFilter{config: sq.config, predicateAdder: sq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *StoreMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the StoreMutation builder.
+func (m *StoreMutation) Filter() *StoreFilter {
+	return &StoreFilter{config: m.config, predicateAdder: m}
+}
+
+// StoreFilter provides a generic filtering capability at runtime for StoreQuery.
+type StoreFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *StoreFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int64 predicate on the id field.
+func (f *StoreFilter) WhereID(p entql.Int64P) {
+	f.Where(p.Field(store.FieldID))
+}
+
+// WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
+func (f *StoreFilter) WhereDeletedAt(p entql.TimeP) {
+	f.Where(p.Field(store.FieldDeletedAt))
+}
+
+// WhereTenantID applies the entql int64 predicate on the tenant_id field.
+func (f *StoreFilter) WhereTenantID(p entql.Int64P) {
+	f.Where(p.Field(store.FieldTenantID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *StoreFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(store.FieldName))
+}
+
+// WhereAddress applies the entql string predicate on the address field.
+func (f *StoreFilter) WhereAddress(p entql.StringP) {
+	f.Where(p.Field(store.FieldAddress))
+}
+
+// WhereLat applies the entql float64 predicate on the lat field.
+func (f *StoreFilter) WhereLat(p entql.Float64P) {
+	f.Where(p.Field(store.FieldLat))
+}
+
+// WhereLon applies the entql float64 predicate on the lon field.
+func (f *StoreFilter) WhereLon(p entql.Float64P) {
+	f.Where(p.Field(store.FieldLon))
+}
+
+// WherePhone applies the entql string predicate on the phone field.
+func (f *StoreFilter) WherePhone(p entql.StringP) {
+	f.Where(p.Field(store.FieldPhone))
+}
+
+// WhereWorkHours applies the entql string predicate on the work_hours field.
+func (f *StoreFilter) WhereWorkHours(p entql.StringP) {
+	f.Where(p.Field(store.FieldWorkHours))
+}
+
+// WhereIsActive applies the entql bool predicate on the is_active field.
+func (f *StoreFilter) WhereIsActive(p entql.BoolP) {
+	f.Where(p.Field(store.FieldIsActive))
+}
+
+// WhereResponsibleID applies the entql int64 predicate on the responsible_id field.
+func (f *StoreFilter) WhereResponsibleID(p entql.Int64P) {
+	f.Where(p.Field(store.FieldResponsibleID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *StoreFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(store.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *StoreFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(store.FieldUpdatedAt))
+}
+
+// WhereHasTenant applies a predicate to check if query has an edge tenant.
+func (f *StoreFilter) WhereHasTenant() {
+	f.Where(entql.HasEdge("tenant"))
+}
+
+// WhereHasTenantWith applies a predicate to check if query has an edge tenant with a given conditions (other predicates).
+func (f *StoreFilter) WhereHasTenantWith(preds ...predicate.Tenant) {
+	f.Where(entql.HasEdgeWith("tenant", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (tq *TenantQuery) addPredicate(pred func(s *sql.Selector)) {
 	tq.predicates = append(tq.predicates, pred)
 }
@@ -532,7 +697,7 @@ type TenantFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TenantFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -556,6 +721,11 @@ func (f *TenantFilter) WhereOwnerID(p entql.Int64P) {
 // WhereName applies the entql string predicate on the name field.
 func (f *TenantFilter) WhereName(p entql.StringP) {
 	f.Where(p.Field(tenant.FieldName))
+}
+
+// WhereReferredBy applies the entql int64 predicate on the referred_by field.
+func (f *TenantFilter) WhereReferredBy(p entql.Int64P) {
+	f.Where(p.Field(tenant.FieldReferredBy))
 }
 
 // WhereCreatedAt applies the entql time.Time predicate on the created_at field.
@@ -609,6 +779,20 @@ func (f *TenantFilter) WhereHasInvites() {
 // WhereHasInvitesWith applies a predicate to check if query has an edge invites with a given conditions (other predicates).
 func (f *TenantFilter) WhereHasInvitesWith(preds ...predicate.Invite) {
 	f.Where(entql.HasEdgeWith("invites", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasStores applies a predicate to check if query has an edge stores.
+func (f *TenantFilter) WhereHasStores() {
+	f.Where(entql.HasEdge("stores"))
+}
+
+// WhereHasStoresWith applies a predicate to check if query has an edge stores with a given conditions (other predicates).
+func (f *TenantFilter) WhereHasStoresWith(preds ...predicate.Store) {
+	f.Where(entql.HasEdgeWith("stores", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

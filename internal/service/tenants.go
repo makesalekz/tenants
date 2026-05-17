@@ -36,13 +36,17 @@ func (s *TenantsService) CreateTenant(ctx context.Context, req *v1.CreateTenantR
 		return nil, v1.ErrorEmptyActorId("empty actor id")
 	}
 
-	tenant, err := s.tu.CreateTenant(
-		ctx, data.TenantDto{
-			OwnerID: actorID,
-			Name:    req.GetName(),
-			Type:    enum.TenantType(req.GetType()).DefaultIfInvalid(),
-		},
-	)
+	dto := data.TenantDto{
+		OwnerID: actorID,
+		Name:    req.GetName(),
+		Type:    enum.TenantType(req.GetType()).DefaultIfInvalid(),
+	}
+	if req.ReferredBy != nil {
+		rb := *req.ReferredBy
+		dto.ReferredBy = &rb
+	}
+
+	tenant, err := s.tu.CreateTenant(ctx, dto)
 	if err != nil {
 		return nil, err
 	}
@@ -114,6 +118,32 @@ func (s *TenantsService) ListTenants(ctx context.Context, req *v1.ListTenantsReq
 	}, nil
 }
 
+func (s *TenantsService) TransferOwnership(ctx context.Context, req *v1.TransferOwnershipRequest) (*v1.TenantReply, error) {
+	tenant, err := s.tu.TransferOwnership(ctx, req.GetTenantId(), req.GetNewOwnerId())
+	if err != nil {
+		return nil, err
+	}
+	return &v1.TenantReply{
+		Tenant: replyTenant(tenant),
+	}, nil
+}
+
+func (s *TenantsService) GetReferredTenants(ctx context.Context, req *v1.GetReferredTenantsRequest) (*v1.ListTenantsReply, error) {
+	actorID := auth.GetActorIdFromContext(ctx)
+	if actorID == 0 {
+		return nil, v1.ErrorEmptyActorId("empty actor id")
+	}
+
+	list, err := s.tu.GetReferredTenants(ctx, actorID, req.GetPaginate())
+	if err != nil {
+		return nil, err
+	}
+	return &v1.ListTenantsReply{
+		Tenants:  replyTenants(list.Tenants),
+		Paginate: list.Paginate,
+	}, nil
+}
+
 func replyTenant(tenant *ent.Tenant) *v1.Tenant {
 	result := v1.Tenant{
 		Id:        tenant.ID,
@@ -121,6 +151,9 @@ func replyTenant(tenant *ent.Tenant) *v1.Tenant {
 		Name:      tenant.Name,
 		CreatedAt: tenant.CreatedAt.Format(time.RFC3339),
 		Type:      tenant.Type.Value(),
+	}
+	if tenant.ReferredBy != nil {
+		result.ReferredBy = tenant.ReferredBy
 	}
 
 	return &result

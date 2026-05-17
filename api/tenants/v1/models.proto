@@ -20,6 +20,22 @@ message Tenant {
   string name = 3;
   string createdAt = 4;
   string type = 5;
+  optional int64 referredBy = 6;
+}
+
+message Store {
+  int64 id = 1;
+  int64 tenantId = 2;
+  string name = 3;
+  string address = 4;
+  optional double lat = 5;
+  optional double lon = 6;
+  string phone = 7;
+  string workHours = 8;
+  bool isActive = 9;
+  optional int64 responsibleId = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
 }
 
 message TenantReply {

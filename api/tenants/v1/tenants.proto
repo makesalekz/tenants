@@ -17,11 +17,14 @@ service Tenants {
   rpc DeleteUsersTenants(DeleteUsersTenantsRequest) returns (utils.v1.EmptyReply);
   rpc GetTenant(TenantRequest) returns (TenantReply);
   rpc ListTenants(ListTenantsRequest) returns (ListTenantsReply);
+  rpc TransferOwnership(TransferOwnershipRequest) returns (TenantReply);
+  rpc GetReferredTenants(GetReferredTenantsRequest) returns (ListTenantsReply);
 }
 
 message CreateTenantRequest {
   string name = 1;
   string type = 2;  // default = PERSONAL
+  optional int64 referred_by = 3;
 }
 
 message UpdateTenantRequest {
@@ -46,4 +49,13 @@ message ListTenantsRequest {
 message ListTenantsReply {
   repeated Tenant tenants = 1;
   utils.v1.PaginateReply paginate = 2;
+}
+
+message TransferOwnershipRequest {
+  int64 tenantId = 1;
+  int64 newOwnerId = 2;
+}
+
+message GetReferredTenantsRequest {
+  utils.v1.PaginateRequest paginate = 1;
 }
