@@ -3,7 +3,7 @@ package biz
 import (
 	"github.com/google/wire"
 
-	u_nats "gitlab.calendaria.team/services/utils/v4/nats"
+	u_nats "github.com/makesalekz/utils/v4/nats"
 )
 
 const (

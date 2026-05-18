@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.calendaria.team/services/tenants/ent"
+	"github.com/makesalekz/tenants/ent"
 )
 
 // The GroupFunc type is an adapter to allow the use of ordinary

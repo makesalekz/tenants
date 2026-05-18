@@ -12,9 +12,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
 
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-	u_log "gitlab.calendaria.team/services/utils/v1/log"
-	"gitlab.calendaria.team/services/utils/v4/config"
+	"github.com/makesalekz/tenants/internal/conf"
+	u_log "github.com/makesalekz/utils/v1/log"
+	"github.com/makesalekz/utils/v4/config"
 
 	_ "go.uber.org/automaxprocs"
 )

@@ -5,7 +5,7 @@ package data
 import (
 	"context"
 
-	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
+	rbac_v1 "github.com/makesalekz/rbac/api/rbac/v1"
 )
 
 // IRbacRemote ...

@@ -8,17 +8,17 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
-	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
-	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
-	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/ent/enum"
-	"gitlab.calendaria.team/services/tenants/internal/biz"
-	"gitlab.calendaria.team/services/tenants/internal/data"
-	"gitlab.calendaria.team/services/tenants/internal/data/mock"
-	"gitlab.calendaria.team/services/tenants/internal/service"
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	"gitlab.calendaria.team/services/utils/v2/auth"
-	"gitlab.calendaria.team/services/utils/v2/zap"
+	iam_v1 "github.com/makesalekz/iam/api/iam/v1"
+	v1 "github.com/makesalekz/tenants/api/tenants/v1"
+	"github.com/makesalekz/tenants/ent"
+	"github.com/makesalekz/tenants/ent/enum"
+	"github.com/makesalekz/tenants/internal/biz"
+	"github.com/makesalekz/tenants/internal/data"
+	"github.com/makesalekz/tenants/internal/data/mock"
+	"github.com/makesalekz/tenants/internal/service"
+	utils_v1 "github.com/makesalekz/utils/api/utils/v1"
+	"github.com/makesalekz/utils/v2/auth"
+	"github.com/makesalekz/utils/v2/zap"
 )
 
 func beforeTenantsTest(t *testing.T) (

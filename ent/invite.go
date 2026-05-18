@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"gitlab.calendaria.team/services/tenants/ent/enum"
-	"gitlab.calendaria.team/services/tenants/ent/invite"
-	"gitlab.calendaria.team/services/tenants/ent/tenant"
+	"github.com/makesalekz/tenants/ent/enum"
+	"github.com/makesalekz/tenants/ent/invite"
+	"github.com/makesalekz/tenants/ent/tenant"
 )
 
 // Invite is the model entity for the Invite schema.

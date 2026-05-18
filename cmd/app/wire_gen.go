@@ -9,16 +9,16 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"gitlab.calendaria.team/services/tenants/internal/biz"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/tenants/internal/data"
-	"gitlab.calendaria.team/services/tenants/internal/server"
-	"gitlab.calendaria.team/services/tenants/internal/service"
-	"gitlab.calendaria.team/services/utils/v4/config"
-	"gitlab.calendaria.team/services/utils/v4/dialer"
-	"gitlab.calendaria.team/services/utils/v4/jwt"
-	"gitlab.calendaria.team/services/utils/v4/nats"
-	"gitlab.calendaria.team/services/utils/v4/tracing"
+	"github.com/makesalekz/tenants/internal/biz"
+	"github.com/makesalekz/tenants/internal/conf"
+	"github.com/makesalekz/tenants/internal/data"
+	"github.com/makesalekz/tenants/internal/server"
+	"github.com/makesalekz/tenants/internal/service"
+	"github.com/makesalekz/utils/v4/config"
+	"github.com/makesalekz/utils/v4/dialer"
+	"github.com/makesalekz/utils/v4/jwt"
+	"github.com/makesalekz/utils/v4/nats"
+	"github.com/makesalekz/utils/v4/tracing"
 )
 
 import (

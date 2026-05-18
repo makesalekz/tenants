@@ -7,8 +7,8 @@
 package tenants_v1
 
 import (
-	v11 "gitlab.calendaria.team/services/iam/api/iam/v1"
-	v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	v11 "github.com/makesalekz/iam/api/iam/v1"
+	v1 "github.com/makesalekz/utils/api/utils/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

@@ -5,10 +5,10 @@ import (
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/ent/group"
-	"gitlab.calendaria.team/services/tenants/ent/member"
-	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
+	"github.com/makesalekz/tenants/ent"
+	"github.com/makesalekz/tenants/ent/group"
+	"github.com/makesalekz/tenants/ent/member"
+	u_uuid "github.com/makesalekz/utils/v2/uuid"
 )
 
 type MembersListFilter struct {

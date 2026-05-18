@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"gitlab.calendaria.team/services/tenants/ent/group"
-	"gitlab.calendaria.team/services/tenants/ent/tenant"
+	"github.com/makesalekz/tenants/ent/group"
+	"github.com/makesalekz/tenants/ent/tenant"
 )
 
 // Group is the model entity for the Group schema.

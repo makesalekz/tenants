@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.calendaria.team/services/tenants/ent/invite"
-	"gitlab.calendaria.team/services/tenants/ent/predicate"
-	"gitlab.calendaria.team/services/tenants/ent/tenant"
+	"github.com/makesalekz/tenants/ent/invite"
+	"github.com/makesalekz/tenants/ent/predicate"
+	"github.com/makesalekz/tenants/ent/tenant"
 )
 
 // InviteQuery is the builder for querying Invite entities.

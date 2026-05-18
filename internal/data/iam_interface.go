@@ -5,7 +5,7 @@ package data
 import (
 	"context"
 
-	iam_v1 "gitlab.calendaria.team/services/iam/api/iam/v1"
+	iam_v1 "github.com/makesalekz/iam/api/iam/v1"
 )
 
 // IIamRemote ...

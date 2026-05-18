@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"gitlab.calendaria.team/services/tenants/ent/enum"
-	"gitlab.calendaria.team/services/tenants/ent/tenant"
+	"github.com/makesalekz/tenants/ent/enum"
+	"github.com/makesalekz/tenants/ent/tenant"
 )
 
 // Tenant is the model entity for the Tenant schema.

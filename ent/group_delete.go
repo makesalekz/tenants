@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"gitlab.calendaria.team/services/tenants/ent/group"
-	"gitlab.calendaria.team/services/tenants/ent/predicate"
+	"github.com/makesalekz/tenants/ent/group"
+	"github.com/makesalekz/tenants/ent/predicate"
 )
 
 // GroupDelete is the builder for deleting a Group entity.

@@ -9,9 +9,9 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	ent "gitlab.calendaria.team/services/tenants/ent"
-	data "gitlab.calendaria.team/services/tenants/internal/data"
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	ent "github.com/makesalekz/tenants/ent"
+	data "github.com/makesalekz/tenants/internal/data"
+	utils_v1 "github.com/makesalekz/utils/api/utils/v1"
 )
 
 // MockTenantsRepo is a mock of TenantsRepo interface.

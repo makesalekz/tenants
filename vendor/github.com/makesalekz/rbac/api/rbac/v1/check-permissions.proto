@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package rbac.v1;
+
+import "api/rbac/v1/models.proto";
+
+option go_package = "gitlab.calendaria.team/services/rbac/api/rbac/v1;rbac_v1";
+option java_multiple_files = true;
+option java_package = "rbac.v1";
+
+service CheckPermissions {
+  rpc CheckPermissions(CheckPermissionsRequest) returns (CheckPermissionsReply);
+}
+
+message CheckPermissionsRequest {
+  int64 tenantId = 1;
+  repeated string permissions = 3;
+  repeated string identities = 4;
+  repeated Resource resources = 5;
+  int64 value = 6;
+}
+
+message CheckPermissionsReply {
+  map<string, ListOfFields> permissions = 1;
+}
+
+message ListOfFields {
+  repeated string fields = 1;
+  repeated Resource resources = 2;
+}

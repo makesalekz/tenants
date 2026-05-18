@@ -5,12 +5,12 @@ package runtime
 import (
 	"time"
 
-	"gitlab.calendaria.team/services/tenants/ent/enum"
-	"gitlab.calendaria.team/services/tenants/ent/group"
-	"gitlab.calendaria.team/services/tenants/ent/invite"
-	"gitlab.calendaria.team/services/tenants/ent/member"
-	"gitlab.calendaria.team/services/tenants/ent/schema"
-	"gitlab.calendaria.team/services/tenants/ent/tenant"
+	"github.com/makesalekz/tenants/ent/enum"
+	"github.com/makesalekz/tenants/ent/group"
+	"github.com/makesalekz/tenants/ent/invite"
+	"github.com/makesalekz/tenants/ent/member"
+	"github.com/makesalekz/tenants/ent/schema"
+	"github.com/makesalekz/tenants/ent/tenant"
 )
 
 // The init function reads all schema descriptors with runtime code

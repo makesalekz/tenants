@@ -3,7 +3,7 @@ package data
 import (
 	"errors"
 
-	"gitlab.calendaria.team/services/tenants/ent/enum"
+	"github.com/makesalekz/tenants/ent/enum"
 )
 
 const (

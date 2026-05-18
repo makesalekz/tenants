@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 
-	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-	u_config "gitlab.calendaria.team/services/utils/v4/config"
-	u_dialer "gitlab.calendaria.team/services/utils/v4/dialer"
-	u_jwt "gitlab.calendaria.team/services/utils/v4/jwt"
-	u_tracing "gitlab.calendaria.team/services/utils/v4/tracing"
+	"github.com/makesalekz/tenants/ent"
+	"github.com/makesalekz/tenants/internal/conf"
+	u_config "github.com/makesalekz/utils/v4/config"
+	u_dialer "github.com/makesalekz/utils/v4/dialer"
+	u_jwt "github.com/makesalekz/utils/v4/jwt"
+	u_tracing "github.com/makesalekz/utils/v4/tracing"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -17,7 +17,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	_ "gitlab.calendaria.team/services/tenants/ent/runtime"
+	_ "github.com/makesalekz/tenants/ent/runtime"
 )
 
 // ProviderSet is data providers.

@@ -4,11 +4,11 @@ import (
 	"context"
 
 	log "github.com/go-kratos/kratos/v2/log"
-	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
-	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/internal/data"
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	u_error "gitlab.calendaria.team/services/utils/v1/error"
+	v1 "github.com/makesalekz/tenants/api/tenants/v1"
+	"github.com/makesalekz/tenants/ent"
+	"github.com/makesalekz/tenants/internal/data"
+	utils_v1 "github.com/makesalekz/utils/api/utils/v1"
+	u_error "github.com/makesalekz/utils/v1/error"
 )
 
 type GroupsList struct {

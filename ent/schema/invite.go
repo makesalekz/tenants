@@ -8,7 +8,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
-	"gitlab.calendaria.team/services/tenants/ent/enum"
+	"github.com/makesalekz/tenants/ent/enum"
 )
 
 // Invite holds the schema definition for the Invite entity.

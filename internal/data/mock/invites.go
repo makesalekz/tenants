@@ -10,10 +10,10 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	ent "gitlab.calendaria.team/services/tenants/ent"
-	enum "gitlab.calendaria.team/services/tenants/ent/enum"
-	data "gitlab.calendaria.team/services/tenants/internal/data"
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
+	ent "github.com/makesalekz/tenants/ent"
+	enum "github.com/makesalekz/tenants/ent/enum"
+	data "github.com/makesalekz/tenants/internal/data"
+	utils_v1 "github.com/makesalekz/utils/api/utils/v1"
 )
 
 // MockInvitesRepo is a mock of InvitesRepo interface.

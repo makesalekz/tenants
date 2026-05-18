@@ -1,7 +1,7 @@
 package server
 
 import (
-	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"github.com/makesalekz/tenants/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	khttp "github.com/go-kratos/kratos/v2/transport/http"

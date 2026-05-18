@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package rbac.v1;
+
+import "api/utils/v1/models.proto";
+import "api/rbac/v1/models.proto";
+
+option go_package = "gitlab.calendaria.team/services/rbac/api/rbac/v1;rbac_v1";
+option java_multiple_files = true;
+option java_package = "rbac.v1";
+
+service Permissions {
+  rpc CreatePermission(CreatePermissionRequest) returns (PermissionReply);
+  rpc UpdatePermission(UpdatePermissionRequest) returns (PermissionReply);
+  rpc DeletePermission(PermissionRequest) returns (utils.v1.EmptyReply);
+  rpc GetPermission(PermissionRequest) returns (PermissionReply);
+  rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsReply);
+}
+
+message CreatePermissionRequest {
+  string id = 1;
+  string groupId = 2;
+  string appId = 3;
+  string name = 4;
+  string description = 5;
+  repeated string fields = 6;
+}
+
+message PermissionReply {
+  Permission permission = 1;
+}
+
+message UpdatePermissionRequest {
+  string permissionId = 1;
+  string name = 2;
+  string description = 3;
+  repeated string fields = 4;
+}
+
+message PermissionRequest {
+  string permissionId = 1;
+}
+
+message ListPermissionsRequest {
+  repeated string appsIds = 1;
+}
+
+message ListPermissionsReply {
+  repeated Group groups = 1;
+}

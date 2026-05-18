@@ -2,7 +2,7 @@ package data
 
 import (
 	"github.com/nats-io/nats.go"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
+	"github.com/makesalekz/tenants/internal/conf"
 )
 
 type NatsClient struct {

@@ -10,8 +10,8 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	ent "gitlab.calendaria.team/services/tenants/ent"
-	data "gitlab.calendaria.team/services/tenants/internal/data"
+	ent "github.com/makesalekz/tenants/ent"
+	data "github.com/makesalekz/tenants/internal/data"
 )
 
 // MockMembersRepo is a mock of MembersRepo interface.

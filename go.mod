@@ -1,21 +1,21 @@
-module gitlab.calendaria.team/services/tenants
+module github.com/makesalekz/tenants
 
-go 1.23.1
+go 1.26.0
 
 require (
-	entgo.io/ent v0.14.2
+	entgo.io/ent v0.14.4
 	github.com/go-kratos/kratos/contrib/metrics/prometheus/v2 v2.0.0-20240322155018-41971ffa647a
 	github.com/go-kratos/kratos/v2 v2.7.3
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0
 	github.com/lib/pq v1.10.9
+	github.com/makesalekz/iam v1.8.3
+	github.com/makesalekz/rbac v1.0.1
+	github.com/makesalekz/utils v0.3.23-upd
 	github.com/nats-io/nats.go v1.36.0
 	github.com/prometheus/client_golang v1.18.0
-	github.com/stretchr/testify v1.9.0
-	gitlab.calendaria.team/services/iam v1.8.3
-	gitlab.calendaria.team/services/rbac v1.0.1
-	gitlab.calendaria.team/services/utils v0.3.21
+	github.com/stretchr/testify v1.10.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	google.golang.org/grpc v1.65.0
@@ -91,7 +91,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.26.0 // indirect
+	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
@@ -105,7 +105,7 @@ require (
 )
 
 replace (
-	gitlab.calendaria.team/services/iam => ../iam
-	gitlab.calendaria.team/services/rbac => ../rbac
-	gitlab.calendaria.team/services/utils => ../utils
+	github.com/makesalekz/iam => ../iam
+	github.com/makesalekz/rbac => ../rbac
+	github.com/makesalekz/utils => ../utils
 )

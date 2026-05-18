@@ -3,10 +3,10 @@ package data
 import (
 	"context"
 
-	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
-	v1 "gitlab.calendaria.team/services/tenants/api/tenants/v1"
-	"gitlab.calendaria.team/services/tenants/internal/conf"
-	"gitlab.calendaria.team/services/utils/v4/dialer"
+	rbac_v1 "github.com/makesalekz/rbac/api/rbac/v1"
+	v1 "github.com/makesalekz/tenants/api/tenants/v1"
+	"github.com/makesalekz/tenants/internal/conf"
+	"github.com/makesalekz/utils/v4/dialer"
 
 	"github.com/go-kratos/kratos/v2/log"
 )

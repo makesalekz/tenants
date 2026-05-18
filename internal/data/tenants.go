@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"gitlab.calendaria.team/services/tenants/ent/group"
-	"gitlab.calendaria.team/services/tenants/ent/invite"
+	"github.com/makesalekz/tenants/ent/group"
+	"github.com/makesalekz/tenants/ent/invite"
 
-	"gitlab.calendaria.team/services/tenants/ent"
-	"gitlab.calendaria.team/services/tenants/ent/enum"
-	"gitlab.calendaria.team/services/tenants/ent/member"
-	"gitlab.calendaria.team/services/tenants/ent/tenant"
-	utils_v1 "gitlab.calendaria.team/services/utils/api/utils/v1"
-	u_uuid "gitlab.calendaria.team/services/utils/v2/uuid"
+	"github.com/makesalekz/tenants/ent"
+	"github.com/makesalekz/tenants/ent/enum"
+	"github.com/makesalekz/tenants/ent/member"
+	"github.com/makesalekz/tenants/ent/tenant"
+	utils_v1 "github.com/makesalekz/utils/api/utils/v1"
+	u_uuid "github.com/makesalekz/utils/v2/uuid"
 
 	_ "github.com/lib/pq"
 )

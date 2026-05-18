@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	rbac_v1 "gitlab.calendaria.team/services/rbac/api/rbac/v1"
+	rbac_v1 "github.com/makesalekz/rbac/api/rbac/v1"
 )
 
 // MockIRbacRemote is a mock of IRbacRemote interface.
