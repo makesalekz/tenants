@@ -1,27 +1,16 @@
 services:
-  service:
-    image: ${REGISTRY_IMAGE}
-    container_name: ${SERVICE_NAME}_service
-    networks:
-      - backend
+  tenants:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: dev
+    container_name: tenants
     restart: unless-stopped
     environment:
-      - SERVICE_NAME=${SERVICE_NAME}
+      - SERVICE_NAME=tenants
       - CONSUL_ADDRESS=${CONSUL_ADDRESS}
       - VAULT_ADDRESS=${VAULT_ADDRESS}
-      - VAULT_ROLE_ID=${VAULT_ROLE_ID}
-      - VAULT_SECRET_ID_PATH=/run/secrets/vault_secret_id
-      - OTLP_GRPC_ADDRESS=${OTLP_GRPC_ADDRESS}
-    command: ["./app"]
-    secrets:
-      - vault_secret_id
-
-networks:
-  backend:
-    name: ${NETWORK}
-    driver: bridge
-    external: true
-
-secrets:
-  vault_secret_id:
-    environment: 'VAULT_SECRET_ID'
+      - VAULT_DEV_ROOT_TOKEN_ID=${VAULT_DEV_ROOT_TOKEN_ID}
+      - DEBUG=true
+      - AUTOMIGRATE=true
